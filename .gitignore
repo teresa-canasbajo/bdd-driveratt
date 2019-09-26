@@ -1,0 +1,12 @@
+/eye_tracking/analysis/resources/*
+/eye_tracking/analysis/pyedfread/*
+/eye_tracking/analysis/log_files/*
+/eye_tracking/analysis/local/*
+/eye_tracking/analysis/lib/*
+/eye_tracking/analysis/install/*
+/eye_tracking/analysis/glog/*
+/eye_tracking/analysis/generated_files/*
+/eye_tracking/analysis/experiment_ehinger2019/*
+/eye_tracking/analysis/experiment/*
+/eye_tracking/analysis/docs/*
+/eye_tracking/analysis/cache/*
