@@ -1,0 +1,12 @@
+2019-09-26 16:21:49,707:root:Logging initialised at <FileHandler /Users/richardliu/Documents/BDD/bdd-driveratt/eye_tracking/recording/pupil_mm/8_1569540109.707325.log (DEBUG)>.
+2019-09-26 16:21:49,707:mm_modules.pyudp:Creating UDP socket object
+2019-09-26 16:21:49,708:mm_modules.pyudp:Socket bound to 127.0.0.1:8008.
+2019-09-26 16:21:49,713:mm_modules.pupilsocket:Creating zeromq socket object
+2019-09-26 16:21:49,714:mm_modules.pupilsocket:ZMQ socket bound to 127.0.0.1 on port 50020
+2019-09-26 16:21:49,714:root:Pupil socket connected.
+2019-09-26 16:21:49,714:mm_modules.pupilsocket:Payload sent: b'\x83\xa7subject\xacstart_plugin\xa4name\xabLog_History\xa4args\x80'
+2019-09-26 16:21:49,718:mm_modules.pupilsocket:Payload sent: b'\x83\xa7subject\xacstart_plugin\xa4name\xb2Annotation_Capture\xa4args\x80'
+2019-09-26 16:21:49,720:root:Pupil-Recorder Annotations plugin prompted.
+2019-09-26 16:21:49,720:mm_modules.pupilsocket:Timesync successful.
+2019-09-26 16:21:49,720:root:Pupil-Recorder time set.
+2019-09-26 16:21:49,720:mm_modules.pupilsocket:Payload sent: b'\x86\xa7subject\xaaannotation\xa5label\xadDummy Trigger\xa9timestamp\xcbA\xd7cR\x03n\x1f\xf7\xa8duration\xcb\x00\x00\x00\x00\x00\x00\x00\x00\xa6source\xb2homelabs framework\xa6record\xc3'
