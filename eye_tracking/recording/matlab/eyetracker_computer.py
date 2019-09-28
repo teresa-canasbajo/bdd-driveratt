@@ -27,10 +27,10 @@ logger.info('Logging initialised at {}.'.format(fileHandler))
 
 ## Connect sockets
 # udp sock
-udpListeningSock = pyudp.UDPsocket('127.0.0.1', 8008)
+udpListeningSock = pyudp.UDPsocket('192.168.0.113', 8008)
 udpListeningSock.sock_bind()
 
-pupilLink = pupilsocket.ZMQsocket('127.0.0.1', 50020)
+pupilLink = pupilsocket.ZMQsocket('192.168.0.113', 8008)
 pupilLink.zmq_connect()
 logger.info('Pupil socket connected.')
 
