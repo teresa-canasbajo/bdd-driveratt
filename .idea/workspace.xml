@@ -2,27 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="baaf9236-61a6-4781-b6ad-a7c61fdeeae1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/display_computer.m" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/python/experiment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/python/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/python/zmq_socket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_surface_forTesting.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_surface_testFile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/matlab/MATLAB_Pupil_Commands.m" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/MATLAB_Pupil_Commands.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/8_1569540109.707325.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/MATLAB_Pupil_Commands_DisplayPC.m" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/MATLAB_Pupil_Commands_DisplayPC.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/pupilsocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/pupilsocket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/pytcp.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/pytcp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/pyudp.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/pyudp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/sample_mm.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/eyetracker_computer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/setup_mm.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_recalib.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_recalib.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_surface.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_surface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/main_tere.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/main_tere.ipynb" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -31,8 +29,13 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/eye_tracking/analysis/code/functions" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/eye_tracking/analysis/code/functions" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -46,6 +49,35 @@
       </list>
     </option>
   </component>
+  <component name="RunManager">
+    <configuration name="pl_surface_testFile" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="bdd-driveratt" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/eye_tracking/analysis/code/functions" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_surface_testFile.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.pl_surface_testFile" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -58,7 +90,7 @@
       <updated>1569442769312</updated>
       <workItem from="1569442774035" duration="1732000" />
       <workItem from="1569523445936" duration="6636000" />
-      <workItem from="1569868673640" duration="6201000" />
+      <workItem from="1569868673640" duration="16288000" />
     </task>
     <servers />
   </component>
@@ -77,5 +109,19 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/eye_tracking/analysis/code/functions/pl_surface_testFile.py</url>
+          <line>4</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/bdd_driveratt$pl_surface_testFile.coverage" NAME="pl_surface_testFile Coverage Results" MODIFIED="1569885821581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/eye_tracking/analysis/code/functions" />
   </component>
 </project>

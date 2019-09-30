@@ -14,7 +14,7 @@ import logging
 import av, os
 
 import ctypes
-# update library!!
+# not needed for now
 ctypes.cdll.LoadLibrary(
     '/net/store/nbp/users/behinger/projects/etcomp/local/build/build_ceres_working/lib/libceres.so.2')
 

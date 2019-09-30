@@ -97,7 +97,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         # has to be imported first
         import av
         import ctypes
-        # UPDATE LIBRARY!!!
+        # not needed for now
         ctypes.cdll.LoadLibrary(
             '/net/store/nbp/users/behinger/projects/etcomp/local/build/build_ceres_working/lib/libceres.so.2')
 

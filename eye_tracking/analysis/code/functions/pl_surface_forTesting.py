@@ -6,7 +6,7 @@ Created on Fri Apr 20 11:41:34 2018
 @author: behinger
 """
 
-import functions.add_path
+#import functions.add_path
 import numpy as np
 import time
 
@@ -18,11 +18,11 @@ from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules import offline_sur
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.offline_reference_surface import Offline_Reference_Surface
 from IPython.core.debugger import set_trace
 
-from functions.pl_recalib import gen_fakepool, global_container
+from functions.pl_recalib import gen_fakepool
+from functions.pl_recalib import global_container
 from queue import Empty as QueueEmptyException
 
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.camera_models import load_intrinsics
-
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.player_methods import correlate_data
 
 
@@ -51,7 +51,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     if loadSurface and len(tracker.surfaces) == 1 and tracker.surfaces[0].defined:
         print('Surface already defined, loadSurface=TRUE, thus returning tracker')
         tracker.cleanup()
-        return (tracker)
+        return tracker
     # Remove the cache if we do not need it
     if not loadCache:
         tracker.invalidate_marker_cache()
@@ -112,7 +112,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     surface.init_cache(tracker.cache, 0.3, 0.7)
 
     # Step 4
-    tracker.surfaces = [surface];
+    tracker.surfaces = [surface]
 
     print('Saving Surface')
     tracker.save_surface_definitions_to_file()
