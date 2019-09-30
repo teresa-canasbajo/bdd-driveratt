@@ -10,3 +10,6 @@
 /eye_tracking/analysis/experiment/*
 /eye_tracking/analysis/docs/*
 /eye_tracking/analysis/cache/*
+/eye_tracking/recording/matlab/*.log
+*.pyc
+*.pyo

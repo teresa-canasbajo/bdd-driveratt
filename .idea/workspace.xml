@@ -2,15 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="baaf9236-61a6-4781-b6ad-a7c61fdeeae1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/bdd-driveratt.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/bdd-driveratt.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/display_computer.m" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/python/experiment.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/python/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eye_tracking/recording/python/zmq_socket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/detect_bad_samples.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/detect_bad_samples.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_helper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_import.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_import.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_make_df.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_make_df.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/et_preprocess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/nbp_pupildetect.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/analysis/code/functions/nbp_pupildetect.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/MATLAB_Pupil_Commands.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/matlab/MATLAB_Pupil_Commands.m" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/MATLAB_Pupil_Commands.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/8_1569540109.707325.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/MATLAB_Pupil_Commands_DisplayPC.m" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/MATLAB_Pupil_Commands_DisplayPC.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/pupilsocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/pupilsocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/pytcp.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/pytcp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/mm_modules/pyudp.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/mm_modules/pyudp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/sample_mm.py" beforeDir="false" afterPath="$PROJECT_DIR$/eye_tracking/recording/matlab/eyetracker_computer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eye_tracking/recording/pupil_mm/setup_mm.m" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -52,7 +58,7 @@
       <updated>1569442769312</updated>
       <workItem from="1569442774035" duration="1732000" />
       <workItem from="1569523445936" duration="6636000" />
-      <workItem from="1569868673640" duration="5165000" />
+      <workItem from="1569868673640" duration="6201000" />
     </task>
     <servers />
   </component>
