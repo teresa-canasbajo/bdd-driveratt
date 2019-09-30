@@ -8,10 +8,10 @@ import pandas as pd
 import os
 import logging
 
-from eye_tracking.analysis.code.functions.et_helper import findFile, gaze_to_pandas
-import eye_tracking.analysis.code.functions.et_parse as parse
-import eye_tracking.analysis.code.functions.et_make_df as make_df
-import eye_tracking.analysis.code.functions.et_helper as helper
+from functions.et_helper import findFile, gaze_to_pandas
+import functions.et_parse as parse
+import functions.et_make_df as make_df
+import functions.et_helper as helper
 from IPython.core.debugger import set_trace
 
 import imp  # for edfread reload
@@ -55,7 +55,7 @@ def pl_fix_timelag(pl):
 def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
-    from lib.pupil.pupil_src.shared_modules import file_methods as pl_file_methods
+    from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules import file_methods as pl_file_methods
 
     if subject == '':
         filename = datapath
@@ -212,4 +212,4 @@ def fix_smallgrid_parser(etmsgs):
         ix = tmp.query('condition=="GRID"&msg_time>@t_after_start  & msg_time<=@t_after_end').index
         etmsgs.loc[ix, 'condition'] = 'SMALLGRID_AFTER'
 
-    return (etmsgs)
+    return etmsgs

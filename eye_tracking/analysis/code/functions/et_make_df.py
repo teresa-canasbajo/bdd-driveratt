@@ -15,7 +15,7 @@ import numpy as np
 from numpy import pi
 from scipy.spatial import distance
 
-import eye_tracking.analysis.code.functions.et_helper as helper
+import functions.et_helper as helper
 
 import logging
 
@@ -48,12 +48,12 @@ def make_events_df(etevents):
         ['blink_id', 'start_gx', 'start_gy', 'end_gx', 'end_gy', 'end_time', 'start_time', 'type', 'amplitude',
          'duration', 'end_point', 'peak_velocity', 'mean_gx', 'mean_gy', 'rms', 'sd'])
 
-    fields_to_fillin = fields_to_keep - set(etevents.columns)
-    fields_to_copy = fields_to_keep - fields_to_fillin
+    fields_to_fill_in = fields_to_keep - set(etevents.columns)
+    fields_to_copy = fields_to_keep - fields_to_fill_in
 
     etevents_reduced = etevents.loc[:, fields_to_copy]
 
-    for fieldname in fields_to_fillin:
+    for fieldname in fields_to_fill_in:
         etevents_reduced.loc[:, fieldname] = np.nan
 
     return etevents_reduced

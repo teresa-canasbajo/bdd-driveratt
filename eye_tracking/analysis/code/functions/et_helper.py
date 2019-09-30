@@ -130,7 +130,7 @@ def eventtime_to_sampletime(etsamples, eventstart, eventend):
     eventend.loc[eventend > maxtime] = maxtime
 
     if len(eventstart) != len(eventend):
-        raise error
+        raise ValueError
 
     startix = np.searchsorted(etsamples.smpl_time, eventstart)
     endix = np.searchsorted(etsamples.smpl_time, eventend)
