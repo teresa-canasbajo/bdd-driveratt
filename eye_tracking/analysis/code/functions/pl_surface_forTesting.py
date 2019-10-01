@@ -6,7 +6,7 @@ Created on Fri Apr 20 11:41:34 2018
 @author: behinger
 """
 
-#import functions.add_path
+import functions.add_path
 import numpy as np
 import time
 

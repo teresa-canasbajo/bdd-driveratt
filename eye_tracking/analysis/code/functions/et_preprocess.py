@@ -25,7 +25,7 @@ import logging
 
 # %%
 
-def preprocess_et(et, subject, datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', load=False, save=False,
+def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', load=False, save=False,
                   eventfunctions=(make_blinks, make_saccades, make_fixations), outputprefix='', **kwargs):
     # Output:     3 cleaned dfs: etsamples, etmsgs, etevents   
     # get a logger for the preprocess function    
@@ -54,7 +54,7 @@ def preprocess_et(et, subject, datapath='/media/whitney/New Volume/Teresa/bdd-dr
     logger.debug('Making event df')
     for evtfunc in eventfunctions:
         logger.debug('Events: calling %s', evtfunc.__name__)
-        etsamples, etevents = evtfunc(etsamples, etevents, et)
+        etsamples, etevents = evtfunc(etsamples, etevents)
 
     # Make a nice etevent df
     etevents = make_events_df(etevents)

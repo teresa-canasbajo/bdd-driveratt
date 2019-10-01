@@ -14,6 +14,7 @@ import logging
 import av, os
 
 import ctypes
+
 # not needed for now
 ctypes.cdll.LoadLibrary(
     '/net/store/nbp/users/behinger/projects/etcomp/local/build/build_ceres_working/lib/libceres.so.2')
@@ -22,6 +23,7 @@ ctypes.cdll.LoadLibrary(
 import builtins
 from types import ModuleType
 import eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.pupil_detectors as pupil_detectors
+
 
 class DummyModule(ModuleType):
     def __getattr__(self, key):

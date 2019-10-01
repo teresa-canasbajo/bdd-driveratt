@@ -347,7 +347,7 @@ def findFile(path, ftype):
     return (out)
 
 
-def get_subjectnames(datapath='/net/store/nbp/projects/etcomp/'):
+def get_subjectnames(datapath='/media/whitney/New Volume/Teresa/bdd-driveratt'):
     return os.listdir(datapath)
 
 
@@ -438,7 +438,7 @@ def plot_around_event(etsamples, etmsgs, etevents, single_eventormsg, plusminus=
 # define 20% winsorized means 
 
 def winmean(x, perc=0.2, axis=0):
-    return (np.mean(winsorize(x, perc, axis=axis), axis=axis))
+    return np.mean(winsorize(x, perc, axis=axis), axis=axis)
 
 
 def winmean_cl_boot(series, n_samples=10000, confidence_interval=0.95,

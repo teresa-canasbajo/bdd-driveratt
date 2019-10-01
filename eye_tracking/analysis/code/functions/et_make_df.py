@@ -123,8 +123,8 @@ def calc_3d_angle_onerow(row):
 
 
 def calc_3d_angle_points(x_0, y_0, x_1, y_1):
-    # calculate the spherical angle between 2 points
-    # We add pi/2 so that (0°,0°,1), and (0°,90°,1) have a distance of 90° instead of 0. (we take the "y" axis as the "0°,0°")
+    # calculate the spherical angle between 2 points We add pi/2 so that (0°,0°,1), and (0°,90°,1) have a distance of
+    # 90° instead of 0. (we take the "y" axis as the "0°,0°")
     #
     vec1 = helper.sph2cart(x_0 / 360 * 2 * pi + pi / 2, y_0 / 360 * 2 * pi + pi / 2)
     vec2 = helper.sph2cart(x_1 / 360 * 2 * pi + pi / 2, y_1 / 360 * 2 * pi + pi / 2)

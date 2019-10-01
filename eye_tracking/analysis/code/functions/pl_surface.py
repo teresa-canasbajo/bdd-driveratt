@@ -18,11 +18,11 @@ from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules import offline_sur
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.offline_reference_surface import Offline_Reference_Surface
 from IPython.core.debugger import set_trace
 
-from functions.pl_recalib import gen_fakepool, global_container
+from functions.pl_recalib import gen_fakepool
+from functions.pl_recalib import global_container
 from queue import Empty as QueueEmptyException
 
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.camera_models import load_intrinsics
-
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.player_methods import correlate_data
 
 
@@ -51,7 +51,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     if loadSurface and len(tracker.surfaces) == 1 and tracker.surfaces[0].defined:
         print('Surface already defined, loadSurface=TRUE, thus returning tracker')
         tracker.cleanup()
-        return (tracker)
+        return tracker
     # Remove the cache if we do not need it
     if not loadCache:
         tracker.invalidate_marker_cache()
@@ -59,7 +59,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     start = time.time()
 
     print('Finding Markers')
-    # This does what offline_surface_tracker.update_marker_cache() does (except the update surface, we dont need it), 
+    # This does what offline_surface_tracker.update_marker_cache() does (except the update surface, we dont need it),
     # but in addition gives us feedback & has a stopping criterion
     while True:
         if (time.time() - start) > 1:
@@ -71,7 +71,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
                 set_trace()
 
             if percent_visited == 1:
-                # save stuff and stop the process   
+                # save stuff and stop the process
                 tracker.cleanup()
                 break
         try:
@@ -87,7 +87,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         if tracker.cacher_run.value is False:
             tracker.recalculate()
 
-    # Step 2.    
+    # Step 2.
     # add a single surface
     print('Adding a surface')
     surface = Offline_Reference_Surface(tracker.g_pool)
@@ -112,7 +112,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     surface.init_cache(tracker.cache, 0.3, 0.7)
 
     # Step 4
-    tracker.surfaces = [surface];
+    tracker.surfaces = [surface]
 
     print('Saving Surface')
     tracker.save_surface_definitions_to_file()
@@ -185,7 +185,7 @@ def surface_map_data(tracker, data):
 
     if not (len(tracker.surfaces) == 1):
         raise ('expected only a single surface!')
-    # And finally calculate the positions 
+    # And finally calculate the positions
     gaze_on_srf = tracker.surfaces[0].gaze_on_srf_in_section()
 
     return gaze_on_srf

@@ -135,9 +135,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         if pupildetect is not None:
             original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, calibration_mode=pupildetect)
         original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata)
-    # Fix timing 
-    # Pupillabs cameras ,have their own timestamps & clock. The msgs are clocked via computertime. Sometimes computertime&cameratime show drift (~40% of cases).
-    # We fix this here
+    # Fix timing Pupillabs cameras ,have their own timestamps & clock. The msgs are clocked via computertime.
+    # Sometimes computertime&cameratime show drift (~40% of cases). We fix this here
     if fixTimeLag:
         original_pldata = pl_fix_timelag(original_pldata)
 
@@ -182,7 +181,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
 
 def fix_smallgrid_parser(etmsgs):
-    # This fixes the missing separation between smallgrid before and small grid after. During experimental sending both were named identical.
+    # This fixes the missing separation between smallgrid before and small grid after. During experimental sending
+    # both were named identical.
     replaceGrid = pd.Series([k for l in [13 * ['SMALLGRID_BEFORE'], 13 * ['SMALLGRID_AFTER']] * 6 for k in l])
     ix = etmsgs.query('grid_size==13').index
     if len(ix) is not 156:
