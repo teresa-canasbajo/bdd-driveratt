@@ -1,6 +1,7 @@
 import zmq
 import msgpack as serializer
 
+print('Opening ports')
 class ZMQsocket:
 
     def __init__(self, ip='127.0.0.1', port='50020'):
@@ -76,3 +77,5 @@ class ZMQsocket:
     #test notification, note that you need to listen on the IPC to receive notifications!
     #notify({'subject':"calibration.should_start"})
     #notify({'subject':"calibration.should_stop"})
+
+    print('Done!')
