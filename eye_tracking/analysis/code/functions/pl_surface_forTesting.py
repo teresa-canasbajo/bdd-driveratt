@@ -73,7 +73,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
                 tracker.cleanup()
                 break
         try:
-            idx, c_m = tracker.cache_queue.get(timeout=5) # TODO check this for object detection IDS?
+            idx, c_m = tracker.cache_queue.get(timeout=5)  # TODO check this for object detection IDS?
         except QueueEmptyException:
             print('inside except')
             time.sleep(1)
@@ -98,7 +98,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     # that changes
 
     numMarkers = 8
-    minConfidence = 0.00001 # just to be able to use the test video, cause I didn't calibrate so
+    minConfidence = 0.00001  # just to be able to use the test video, cause I didn't calibrate so
     # confidence is usually around 0
     # TODO change minConfidence
 
@@ -113,10 +113,8 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         # TODO: figure out how the markers verts are created and what they mean.
         # TODO: how to detect half screens? like A and C.
 
-        if len(tracker.cache[ix]) == numMarkers: # basically asking how many markers you've found
-            usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
-            if len(usable_markers) == numMarkers:
-                break
+        if screen_id(tracker, ix, numMarkers, minConfidence):
+            break
         ix += 1
 
     # Step 3 This dissables pupil-labs functionality. They ask for 90 frames with the markers. but because we know
@@ -206,3 +204,14 @@ def surface_map_data(tracker, data):
     gaze_on_srf = tracker.surfaces[0].gaze_on_srf_in_section()
 
     return gaze_on_srf
+
+
+# criterion function for defining markers as surfaces, needs to be flexible for multiple surfaces or only one
+def screen_id(tracker, ix, numMarkers, minConfidence):
+    # curr method
+    if len(tracker.cache[ix]) == numMarkers:  # basically asking how many markers you've found
+        usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
+        if len(usable_markers) == numMarkers:
+            return True
+    return False
+    # need to make flexible for 1+ screens
