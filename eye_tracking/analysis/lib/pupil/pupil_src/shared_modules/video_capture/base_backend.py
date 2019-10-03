@@ -10,9 +10,9 @@ See COPYING and COPYING.LESSER for license details.
 '''
 
 from time import monotonic, sleep
-from plugin import Plugin
+from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.plugin import Plugin
 
-import gl_utils
+import eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.gl_utils
 from pyglui import cygl
 import numpy as np
 

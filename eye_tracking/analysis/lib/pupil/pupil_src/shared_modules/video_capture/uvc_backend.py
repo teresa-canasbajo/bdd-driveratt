@@ -11,14 +11,14 @@ See COPYING and COPYING.LESSER for license details.
 
 import time
 import logging
-import uvc
-from version_utils import VersionFormat
+import functions.fake_pl_loading.uvc
+from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.version_utils import VersionFormat
 from .base_backend import InitialisationError, Base_Source, Base_Manager
-from camera_models import load_intrinsics
+from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.camera_models import load_intrinsics
 from .utils import Check_Frame_Stripes
 
 # check versions for our own depedencies as they are fast-changing
-assert VersionFormat(uvc.__version__) >= VersionFormat('0.13')
+assert VersionFormat(functions.fake_pl_loading.uvc.__version__) >= VersionFormat('0.13')
 
 # logging
 logger = logging.getLogger(__name__)

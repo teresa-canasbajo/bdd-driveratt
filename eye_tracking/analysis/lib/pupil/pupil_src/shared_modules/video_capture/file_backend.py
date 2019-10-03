@@ -14,7 +14,7 @@ import av
 from time import sleep
 
 from .base_backend import Base_Source, Playback_Source, Base_Manager, EndofVideoError
-from camera_models import load_intrinsics
+from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.camera_models import load_intrinsics
 
 import numpy as np
 from multiprocessing import cpu_count

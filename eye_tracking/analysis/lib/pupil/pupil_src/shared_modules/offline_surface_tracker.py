@@ -66,6 +66,7 @@ class Offline_Surface_Tracker(Surface_Tracker, Analysis_Plugin_Base):
         self.min_marker_perimeter_cacher = 20  # find even super small markers. The surface locater will filter using min_marker_perimeter
         self.timeline_line_height = 16
 
+        # I believe all of this happens only if you had already defined surfaces.
         self.load_marker_cache()
         self.init_marker_cacher()
         for s in self.surfaces:
@@ -310,7 +311,7 @@ class Offline_Surface_Tracker(Surface_Tracker, Analysis_Plugin_Base):
         self.cacher_seek_idx = mp.Value('i', 0)
         self.cacher_run = mp.Value(c_bool, True)
 
-        video_file_path = self.g_pool.capture.source_path
+        video_file_path = self.g_pool.capture.source_path # the 'world.mp4' path
         args = (visited_list, video_file_path, self.cache_queue,
                 self.cacher_seek_idx, self.cacher_run,
                 self.min_marker_perimeter_cacher, self.invert_image)

@@ -42,7 +42,6 @@ def map_surface(folder, loadCache=True, loadSurface=True):
 
     # Step 1.
     print('Starting Tracker - WARNING: ROBUST_DETECTION IS CURRENTLY FALSE')
-    #    set_trace()
     # TODO Decide robust detection (not really sure what it does)
     tracker = offline_surface_tracker.Offline_Surface_Tracker(fake_gpool, min_marker_perimeter=30,
                                                               robust_detection=False)
@@ -61,14 +60,13 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     print('Finding Markers')
     # This does what offline_surface_tracker.update_marker_cache() does (except the update surface, we dont need it), 
     # but in addition gives us feedback & has a stopping criterion
+    print(tracker.cache)
     while True:
         if (time.time() - start) > 1:
             start = time.time()
             visited_list = [False if x is False else True for x in tracker.cache]
             percent_visited = np.mean(np.asarray(visited_list))
             print(percent_visited)
-            if percent_visited == 0.7926012479259658:
-                set_trace()
 
             if percent_visited == 1:
                 # save stuff and stop the process   
@@ -92,13 +90,23 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     print('Adding a surface')
     surface = Offline_Reference_Surface(tracker.g_pool)
 
+    # Original text:
     # First define the markers that should be used for the surface
     # find a frame where there are 16 markers and all of them have high confidence
+
+    # Teresa: our surfaces are defined now by four markers, so we are going define that as a variable here, in case
+    # that changes
+
+    numMarkers = 8
+    minConfidence = 0.00001 # just to be able to use the test video, cause I didn't calibrate so
+    # confidence is usually around 0
+    # TODO change minConfidence
+
     ix = 0
     while True:
-        if len(tracker.cache[ix]) == 16:
-            usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= 0.8]
-            if len(usable_markers) == 16:
+        if len(tracker.cache[ix]) == numMarkers:
+            usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
+            if len(usable_markers) == numMarkers:
                 break
         ix += 1
 

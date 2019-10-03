@@ -23,8 +23,8 @@ def fill_cache(visited_list, video_file_path, q, seek_idx, run, min_marker_perim
     import logging
     logger = logging.getLogger(__name__+' with pid: '+str(os.getpid()))
     logger.debug('Started cacher process for Marker Detector')
-    from video_capture import init_playback_source, EndofVideoError, FileSeekError
-    from square_marker_detect import detect_markers_robust
+    from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.video_capture import init_playback_source, EndofVideoError, FileSeekError
+    from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.square_marker_detect import detect_markers_robust
     aperture = 9
     markers = []
     cap = init_playback_source(Global_Container(), source_path=video_file_path, timing=None)
