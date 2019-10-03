@@ -73,7 +73,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
                 tracker.cleanup()
                 break
         try:
-            idx, c_m = tracker.cache_queue.get(timeout=5)
+            idx, c_m = tracker.cache_queue.get(timeout=5) # TODO check this for object detection IDS?
         except QueueEmptyException:
             print('inside except')
             time.sleep(1)
@@ -104,7 +104,16 @@ def map_surface(folder, loadCache=True, loadSurface=True):
 
     ix = 0
     while True:
-        if len(tracker.cache[ix]) == numMarkers:
+        # have you found more than four markers? (four markers make 1 surface)
+        # then check if those four belong to one surface.
+        # if they do, then put them in the usable markers, then name them surface A, B or C.
+        # if not then move forward
+        # TODO: write criterion function for defining markers as surfaces, needs to be flexible for multiple surfaces or only one
+        # TODO: figure out how the markers are ID'd.
+        # TODO: figure out how the markers verts are created and what they mean.
+        # TODO: how to detect half screens? like A and C.
+
+        if len(tracker.cache[ix]) == numMarkers: # basically asking how many markers you've found
             usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
             if len(usable_markers) == numMarkers:
                 break

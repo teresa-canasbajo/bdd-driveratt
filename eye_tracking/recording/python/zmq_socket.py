@@ -4,6 +4,8 @@ import msgpack as serializer
 print('Opening ports')
 class ZMQsocket:
 
+    # the ip address of the eyetracker is always 127.0.0.1.
+
     def __init__(self, ip='127.0.0.1', port='50020'):
         """
         Setup zmq socket, context, and remote helper.
@@ -14,7 +16,8 @@ class ZMQsocket:
         self.ip = ip 
         self.port = port
         self.ctx = zmq.Context()
-        self.socket = zmq.Socket(self.ctx, zmq.REQ)
+        self.socket = zmq.Socket(self.ctx, zmq.REQ) # this is pub socket
+        # self.pub_port = self.socket.recv_string() not needed and it seems to fuck up everything
 
     def connect(self):
         """
@@ -77,5 +80,20 @@ class ZMQsocket:
     #test notification, note that you need to listen on the IPC to receive notifications!
     #notify({'subject':"calibration.should_start"})
     #notify({'subject':"calibration.should_stop"})
+
+    # TODO fix sending annotations
+    def send_trigger(self, trigger):
+        payload = serializer.dumps(trigger, use_bin_type=True)
+        self.socket.send_string(trigger['topic'], flags=zmq.SNDMORE)
+        self.socket.send(payload)
+
+    def new_trigger(self, label, duration, time_fn):
+        return{
+            "topic": "annotation",
+            "label": label,
+            "timestamp": time_fn(),
+            "duration": duration,
+        }
+
 
     print('Done!')
