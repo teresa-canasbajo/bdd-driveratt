@@ -5,7 +5,7 @@ How to set up python packages to connect to Pupil Labs eyetracker:
 - Clone repo: https://github.com/mtaung/eye_socket
 - Follow instructions to install: pip install -r requirements.txt (remember to activate your virtual environment if you have one)
 - Install pupil capture to your computer. Find it here: https://github.com/pupil-labs/pupil/releases. Note that you may need an older version to work with annotations. 
-- Important that everytime that you set it up change the files with the correct IP addresses! The IP address of the eyetracker is in the Pupil Capture, remote pluging. 
+- Important that everytime that you set it up change the files with the correct port! The IP address of the eyetracker is in the Pupil Capture, remote pluging. 
 If using it within Psychopy:
 - Import function zmq_socket.py. This will import all functions that you need to interact with Pupil Labs.
 - The class handles the initialisation of the ZMQ socket. The address for this will default to localhost:50020, as these are the defaults for pupil-labs systems.
@@ -13,6 +13,8 @@ If using it within Psychopy:
 - You need to have Pupil Capture running on the background at all times during the experiment. 
 
 The idea is that, if in your Psychopy code you import the zmq_socket function and then you call the function socket.start_calibration() then it will open Pupil Capture, run the calibration, then close the screen. Next, you call the socket.start_recording() and then just put the rest of your code that normally would run your experiment just below. At the end add socket.stop_recording(). 
+
+Notes: If more than one device using the eyetracker's ip address (127.0.0.1), consider using different ports to distinguish them.
 
 ### FUNCTIONS ###
 	connect(): Connect to the defined ZMQ socket. Run this after initialising the socket object in your experiment.
