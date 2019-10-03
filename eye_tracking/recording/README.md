@@ -3,7 +3,7 @@
 How to set up python packages to connect to Pupil Labs eyetracker:
 
 - Clone repo: https://github.com/mtaung/eye_socket
-- Follow instructions to install.
+- Follow instructions to install: pip install -r requirements.txt (remember to activate your virtual environment if you have one)
 - Install pupil capture to your computer. Find it here: https://github.com/pupil-labs/pupil/releases. Note that you may need an older version to work with annotations. 
 - Important that everytime that you set it up change the files with the correct IP addresses! The IP address of the eyetracker is in the Pupil Capture, remote pluging. 
 If using it within Psychopy:
