@@ -17,13 +17,16 @@ class ZMQsocket:
         self.port = port
         self.ctx = zmq.Context()
         self.socket = zmq.Socket(self.ctx, zmq.REQ) # this is pub socket
-        # self.pub_port = self.socket.recv_string() not needed and it seems to fuck up everything
 
     def connect(self):
         """
         Connects to defined zmq socket.
         """
         self.socket.connect(f'tcp://{self.ip}:{self.port}')
+        self.socket.send_string('PUB_PORT')
+        self.pub_port = self.socket.recv_string()
+        self.pub_socket = zmq.Socket(self.ctx, zmq.PUB)
+        self.pub_socket.connect(f"tcp://{self.ip}:{self.pub_port}")
 
     def start_calibration(self):
         """
@@ -58,14 +61,15 @@ class ZMQsocket:
         self.socket.send_string('r')
         return self.socket.recv_string()
 
-    def set_time(self, time):
+    def set_time(self, time_fn):
         """
         Sets the time in pupil.
 
         Parameters:
         time (float): Time to set to. 
         """
-        self.socket.send_string(f'T {time}')
+        self.time_fn = time_fn
+        self.socket.send_string(f'T {time_fn()}')
         return self.socket.recv_string()
     
     # send notification:
@@ -83,17 +87,29 @@ class ZMQsocket:
 
     # TODO fix sending annotations
     def send_trigger(self, trigger):
+        """
+        Sends a trigger object pub_socket
+        """
         payload = serializer.dumps(trigger, use_bin_type=True)
-        self.socket.send_string(trigger['topic'], flags=zmq.SNDMORE)
-        self.socket.send(payload)
+        self.pub_socket.send_string(trigger['topic'], flags=zmq.SNDMORE)
+        self.pub_socket.send(payload)
 
-    def new_trigger(self, label, duration, time_fn):
-        return{
-            "topic": "annotation",
+    def new_trigger(self, topic, label, duration):
+        """
+        Creates a trigger dictionary object (make sure set_time() has been invoked)
+        """
+        return {
+            "topic": topic,
             "label": label,
-            "timestamp": time_fn(),
+            "timestamp": self.time_fn(),
             "duration": duration,
         }
+
+    def annotation(self, label, duration):
+        """
+        Shortcut to sending an annotation to pupil remote (make sure set_time() has been invoked)
+        """
+        self.send_trigger(self.new_trigger('annotation', label, duration))
 
 
     print('Done!')

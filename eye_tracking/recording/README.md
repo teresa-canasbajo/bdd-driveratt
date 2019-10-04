@@ -31,4 +31,10 @@ Notes: If more than one device using the eyetracker's ip address (127.0.0.1), co
 
 	notify(): This functionality is currently incomplete and requires some further work to get going. If you're interested in this or have done so before, feel free to submit a PR.
 
+	new_trigger(): Creates a trigger with a given topic, label, and duration. Make sure to sync timestamps first through set_time().
+
+	send_trigger(): Sends a trigger (like an annotation) to Pupil Remote.
+
+	annotatation(): Shortcut to sending an annotation to Pupil Remote. Make sure to sync timestamps first through set_time().
+
 ### FUNCTIONS
