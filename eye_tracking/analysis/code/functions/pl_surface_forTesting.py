@@ -97,7 +97,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     # Teresa: our surfaces are defined now by four markers, so we are going define that as a variable here, in case
     # that changes
 
-    numMarkers = 8
+    numMarkers = 16
     minConfidence = 0.00001  # just to be able to use the test video, cause I didn't calibrate so
     # confidence is usually around 0
     # TODO change minConfidence
@@ -209,7 +209,7 @@ def surface_map_data(tracker, data):
 # criterion function for defining markers as surfaces, needs to be flexible for multiple surfaces or only one
 def screen_id(tracker, ix, numMarkers, minConfidence):
     # curr method
-    if len(tracker.cache[ix]) == numMarkers:  # basically asking how many markers you've found
+    if len(tracker.cache[ix-1]) == numMarkers:  # basically asking how many markers you've found
         usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
         if len(usable_markers) == numMarkers:
             return True

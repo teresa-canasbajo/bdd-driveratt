@@ -5,4 +5,4 @@ workingpath = '/media/whitney/New Volume/Teresa/bdd-driveratt/VP1/raw'
 # test path
 newtestpath = "/home/whitney/Teresa/surfacetest2/SurfaceTest2"
 
-tracker = map_surface(newtestpath)
+tracker = map_surface(workingpath)
