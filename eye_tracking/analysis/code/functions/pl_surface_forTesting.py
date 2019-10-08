@@ -5,6 +5,7 @@ Created on Fri Apr 20 11:41:34 2018
 
 @author: behinger
 """
+import collections
 
 import functions.add_path
 import numpy as np
@@ -69,7 +70,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
             print(percent_visited)
 
             if percent_visited == 1:
-                # save stuff and stop the process   
+                # save stuff and stop the process
                 tracker.cleanup()
                 break
         try:
@@ -98,10 +99,11 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     # that changes
 
     numMarkers = 16
-    minConfidence = 0.00001  # just to be able to use the test video, cause I didn't calibrate so
+    minConfidence = 0.9  # just to be able to use the test video, cause I didn't calibrate so
     # confidence is usually around 0
     # TODO change minConfidence
 
+    print(tracker.cache)
     ix = 0
     while True:
         # have you found more than four markers? (four markers make 1 surface)
@@ -115,6 +117,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
 
         if screen_id(tracker, ix, numMarkers, minConfidence):
             break
+        break
         ix += 1
 
     # Step 3 This dissables pupil-labs functionality. They ask for 90 frames with the markers. but because we know
@@ -207,11 +210,24 @@ def surface_map_data(tracker, data):
 
 
 # criterion function for defining markers as surfaces, needs to be flexible for multiple surfaces or only one
+# parameters: tag_id that creates a screen, # of screens, how many markers define a surface, etc should work for any
+# situation that adapts screens
 def screen_id(tracker, ix, numMarkers, minConfidence):
     # curr method
-    if len(tracker.cache[ix-1]) == numMarkers:  # basically asking how many markers you've found
-        usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
-        if len(usable_markers) == numMarkers:
-            return True
-    return False
+    # if len(tracker.cache[ix-1]) == numMarkers:  # basically asking how many markers you've found
+    #     usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
+    #     if len(usable_markers) == numMarkers:
+    #         return True
+    # return False
+    counter = {}
+    for l in tracker.cache:
+        if l and type(l[0]) is dict:
+            marker_id = l[0].get('id', 'no_id')
+            counter[marker_id] = counter.get(marker_id, 0) + 1
+        else:
+            print(l)
+    print(counter)
+    print(min)
+    # counter = collections.Counter([c.get(id, 'no_id') for c in tracker.cache if c and type(c[0]) is dict])
+    # print(counter)
     # need to make flexible for 1+ screens
