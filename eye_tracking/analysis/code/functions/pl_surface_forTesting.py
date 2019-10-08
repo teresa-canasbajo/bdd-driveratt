@@ -98,8 +98,8 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     # Teresa: our surfaces are defined now by four markers, so we are going define that as a variable here, in case
     # that changes
 
-    numMarkers = 16
-    minConfidence = 0.9  # just to be able to use the test video, cause I didn't calibrate so
+    numMarkers = 4
+    minConfidence = 0.000002  # just to be able to use the test video, cause I didn't calibrate so
     # confidence is usually around 0
     # TODO change minConfidence
 
@@ -114,10 +114,14 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         # TODO: figure out how the markers are ID'd.
         # TODO: figure out how the markers verts are created and what they mean.
         # TODO: how to detect half screens? like A and C.
-
-        if screen_id(tracker, ix, numMarkers, minConfidence):
+        screen1check = [0, 1, 2, 3]
+        screen2check = [4, 5, 6, 7]
+        screen3check = [8, 9, 10, 11]
+        huhcheck = [8,12,21,0,19,20,4,23]
+        screens = [screen1check, screen2check, screen3check, huhcheck]
+        if screen_id(tracker, ix, numMarkers, minConfidence, screens):
             break
-        break
+        # break
         ix += 1
 
     # Step 3 This dissables pupil-labs functionality. They ask for 90 frames with the markers. but because we know
@@ -212,22 +216,40 @@ def surface_map_data(tracker, data):
 # criterion function for defining markers as surfaces, needs to be flexible for multiple surfaces or only one
 # parameters: tag_id that creates a screen, # of screens, how many markers define a surface, etc should work for any
 # situation that adapts screens
-def screen_id(tracker, ix, numMarkers, minConfidence):
+def screen_id(tracker, ix, numMarkers, minConfidence, screens):
     # curr method
     # if len(tracker.cache[ix-1]) == numMarkers:  # basically asking how many markers you've found
     #     usable_markers = [m for m in tracker.cache[ix] if m['id_confidence'] >= minConfidence]
     #     if len(usable_markers) == numMarkers:
     #         return True
     # return False
-    counter = {}
-    for l in tracker.cache:
-        if l and type(l[0]) is dict:
-            marker_id = l[0].get('id', 'no_id')
-            counter[marker_id] = counter.get(marker_id, 0) + 1
-        else:
-            print(l)
-    print(counter)
-    print(min)
+
+    # screens is an array of arrays that outline which markers define 1 screen
+    for s in screens:
+        usable_markers = []
+        if len(tracker.cache[ix]) >= numMarkers:  # verifying min number of markers that define 1 screen
+            for m in tracker.cache[ix]:
+                # print(m['id'])
+                if (m['id'] in s) & (m['id_confidence'] >= minConfidence):
+                    # print("yes")
+                    # print(m['id'])
+                    usable_markers.append(m)
+            if len(usable_markers) <= numMarkers:
+                print("1 surface found")
+                return True
+    return False
+
+    # Richard's code?
+    # counter = {}
+    # for l in tracker.cache:
+    #     if l and type(l[0]) is dict:
+    #         marker_id = l[0].get('id', 'no_id')
+    #         counter[marker_id] = counter.get(marker_id, 0) + 1
+    #     else:
+    #         print(l)
+    # print(counter)
+    # print(min)
+
     # counter = collections.Counter([c.get(id, 'no_id') for c in tracker.cache if c and type(c[0]) is dict])
     # print(counter)
     # need to make flexible for 1+ screens
