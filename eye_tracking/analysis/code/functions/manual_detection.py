@@ -13,11 +13,12 @@ import cv2
 # test path 2 from 10/7 simulator recording - not all tags are id b/c lighting
 # path = "/home/whitney/Teresa/demos/surfaceTestUpdatedTags/002"
 # test path 3 from prev recording at desk with reflection - all tags id success
-# path = '/home/whitney/Teresa/bdd-driveratt/eye_tracking/analysis'
+# path = '/home/whitney/Teresa/demos/testingSurfaces_Teresa'
 # test path to id tags
 # path = '/home/whitney/Teresa/demos/idtags/013'
-# test path 4 from 10/8 recording at lab
+# test path 4 from 10/8 recording at lab with good lighting
 path = '/home/whitney/Teresa/demos/surfaceTestUpdatedTagsLab/014'
+
 
 # Create video path
 video_path = path + "/world.mp4"

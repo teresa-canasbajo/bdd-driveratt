@@ -7,4 +7,7 @@ newtestpath = "/home/whitney/Teresa/demos/surfacetest2/SurfaceTest2"
 
 pupil_video = '/home/whitney/recordings/2019_10_03/006'
 
-tracker = map_surface(newtestpath)
+# test path 4 from 10/8 recording at lab with good lighting
+path = '/home/whitney/Teresa/demos/surfaceTestUpdatedTagsLab/014'
+
+tracker = map_surface(newtestpath, loadSurface=False)
