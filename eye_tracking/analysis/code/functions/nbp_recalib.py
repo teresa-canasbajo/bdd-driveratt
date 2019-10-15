@@ -18,6 +18,7 @@ def nbp_recalib(pupil, calibration_mode='2d', eyeID=None):
     print('Sorting pupil_positions')
     pupil['pupil_positions'] = sort_pupil(pupil['pupil_positions'])
 
+    # define from which time frame to pull data points, searching for the ones whose notifications say calibration
     calib_data = [note for note in pupil['notifications'] if
                   'subject' in note.keys() and note['subject'] == 'calibration.calibration_data']
 
@@ -26,9 +27,9 @@ def nbp_recalib(pupil, calibration_mode='2d', eyeID=None):
     for calib_idx, single_calib in enumerate(calib_data):
 
         print('Calculating Recalibration Function')
-        tstart = single_calib['pupil_list'][0]['timestamp']
-        tend = single_calib['pupil_list'][-1]['timestamp']
-        dur = tend - tstart
+        tstart = single_calib['pupil_list'][0]['timestamp'] # when calibration started
+        tend = single_calib['pupil_list'][-1]['timestamp'] # when calibration finished
+        dur = tend - tstart # calibration duration
         print('Calibration started at t=%.2fs and stopped at t=%.2fs, duration=%.2fs' % (tstart, tend, dur))
         # get calib timestamps
         tsCalib = [p['timestamp'] for p in single_calib['pupil_list']]  # not sure which timestamp to use..
