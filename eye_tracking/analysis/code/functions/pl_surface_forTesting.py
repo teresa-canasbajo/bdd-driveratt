@@ -248,7 +248,8 @@ def screen_detection(tracker, numMarkers, minConfidence):
             if len(tracker.cache[ix]) >= numMarkers:  # verifying min number of markers that define 1 screen
                 for m in tracker.cache[ix]:
                     # verifying if id associated with screen & meets mim confidence lev reqs
-                    if (m['id'] in s) & (m['id_confidence'] >= minConfidence):
+                    # ToDo: new tracker.cache does not contain info about id_confidence
+                    if (m['id'] in s): # & (m['id_confidence'] >= minConfidence):
                         usable_markers.append(m['id'])
                 if len(usable_markers) >= numMarkers:  # verifying if # of id in this frame is enough to define 1 screen
                     # appending frame each time a screen appears

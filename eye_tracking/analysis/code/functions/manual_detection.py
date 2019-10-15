@@ -17,7 +17,9 @@ import cv2
 # test path to id tags
 # path = '/home/whitney/Teresa/demos/idtags/013'
 # test path 4 from 10/8 recording at lab with good lighting
-path = '/home/whitney/Teresa/demos/surfaceTestUpdatedTagsLab/014'
+# path = '/home/whitney/Teresa/demos/surfaceTestUpdatedTagsLab/014'
+# test path from 10/15 recording at lab with eye & good lighting
+path = '/home/whitney/Teresa/demos/surfaceTestLabEye/000'
 
 
 # Create video path
