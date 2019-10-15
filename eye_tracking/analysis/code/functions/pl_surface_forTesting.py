@@ -8,6 +8,7 @@ Created on Fri Apr 20 11:41:34 2018
 import collections
 
 import functions.add_path
+from functions.manual_detection import extract_frames, detect_tags
 import numpy as np
 import time
 
@@ -75,18 +76,31 @@ def map_surface(folder, loadCache=True, loadSurface=True):
                 # save stuff and stop the process
                 tracker.cleanup()
                 break
+        # try:
+        #     idx, c_m = tracker.cache_queue.get(timeout=5)  # TODO check this for object detection IDS?
+        # except QueueEmptyException:
+        #     print('inside except')
+        #     time.sleep(1)
+        #
+        #     print('Nothing to do, waiting...')
+        #     continue
+        # tracker.cache.update(idx, c_m)
+        #
+        # if tracker.cacher_run.value is False:
+        #     tracker.recalculate()
+        # Create video path
+        video_path = folder + "/world.mp4"
+        # Create frame path using OS package
+        # Define the name of the directory to be created
+        frames_path = folder + "/frames"
         try:
-            idx, c_m = tracker.cache_queue.get(timeout=5)  # TODO check this for object detection IDS?
-        except QueueEmptyException:
-            print('inside except')
-            time.sleep(1)
-
-            print('Nothing to do, waiting...')
-            continue
-        tracker.cache.update(idx, c_m)
-
-        if tracker.cacher_run.value is False:
-            tracker.recalculate()
+            os.mkdir(frames_path)
+        except OSError:
+            print("Creation of the directory %s failed" % frames_path)
+        else:
+            print("Successfully created the directory %s " % frames_path)
+        extract_frames(video_path, frames_path)
+        tracker.cache, _ = detect_tags(frames_path)
 
     # Step 2.    
     # add a single surface
