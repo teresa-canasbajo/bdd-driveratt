@@ -320,8 +320,9 @@ def select_calibration_method(g_pool, pupil_list, ref_list):
     # unpack matching data
     (matched_binocular_data, matched_monocular_data,
         matched_pupil0_data, matched_pupil1_data, pupil0, pupil1) = matched_data
+    # match data has info about both binocular and monocular data, then you can decide which one you use
 
-    mode = g_pool.detection_mapping_mode
+    mode = g_pool.detection_mapping_mode # this is set to 2d as default
 
     if mode == '3d' and not (hasattr(g_pool.capture, 'intrinsics') or g_pool.capture.intrinsics):
         mode = '2d'
@@ -337,7 +338,7 @@ def select_calibration_method(g_pool, pupil_list, ref_list):
             return None, {'subject': 'calibration.failed', 'reason': not_enough_data_error_msg,
                           'timestamp': g_pool.get_timestamp(), 'record': True}
 
-    elif mode == '2d':
+    elif mode == '2d': # it would go here because of the default setting
         if matched_binocular_data:
             return calibrate_2d_binocular(g_pool, matched_binocular_data, matched_pupil0_data, matched_pupil1_data)
         elif matched_monocular_data:

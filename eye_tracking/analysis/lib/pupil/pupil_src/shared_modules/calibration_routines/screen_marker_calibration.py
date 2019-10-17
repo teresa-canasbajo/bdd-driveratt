@@ -12,13 +12,13 @@ See COPYING and COPYING.LESSER for license details.
 import os
 import cv2
 import numpy as np
-from gl_utils import adjust_gl_view,clear_gl_screen,basic_gl_setup
+from shared_modules.gl_utils import adjust_gl_view,clear_gl_screen,basic_gl_setup
 import OpenGL.GL as gl
 from glfw import *
-from circle_detector import CircleTracker
+from shared_modules.circle_detector import CircleTracker
 from platform import system
 
-import audio
+import shared_modules.audio
 
 from pyglui import ui
 from pyglui.cygl.utils import draw_points, draw_polyline, RGBA

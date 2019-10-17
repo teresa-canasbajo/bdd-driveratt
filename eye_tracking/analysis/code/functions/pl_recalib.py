@@ -66,6 +66,9 @@ def notify_all(self, notification=''):
 
 
 def gen_fakepool(inp_gaze=[], calibration_mode='2d'):
+
+    # defines default parameters for calibration data
+
     from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.plugin import Plugin_List
 
     fake_gpool = global_container()
@@ -114,11 +117,13 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=No
     if eyeID is not None:  # remove everthing nonspecified
         pupil = [p for p in pupil if p['id'] == eyeID]
 
-    fake_gpool = gen_fakepool(gaze, calibration_mode)
+    fake_gpool = gen_fakepool(gaze, calibration_mode) # gets default parameters for calibration data
 
     # method, result = select_calibration_method(fake_gpool, pupil_list, ref_list)
     logger.info(calibrate_and_map)
-    calib_generator = calibrate_and_map(fake_gpool, ref, pupil, gaze, 0, 0)
+    calib_generator = calibrate_and_map(fake_gpool, ref, pupil, gaze, 0, 0)  # here the actual calibration is done
+    # calibrate_and_map should work correctly, but check in future if errors.
+
     tmp = next(calib_generator)  # start once
     output = []
     try:

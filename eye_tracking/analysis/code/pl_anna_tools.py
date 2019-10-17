@@ -26,7 +26,7 @@ def tryimport(name, *args, **kwargs):
 
 realimport, builtins.__import__ = builtins.__import__, tryimport
 try:
-    from video_capture import init_playback_source
+    from shared_modules.video_capture import init_playback_source
 
 except Exception as e:
     print('-------------------')

@@ -6,3 +6,5 @@ Surface detector:
 
  To install: pip install pupil-apriltags
 
+This code has been built and modified using Pycharm. Please note that you'll need to add the eye_tracking/analysis/lib/pupil/pupil_src as source root for the paths to work. 
+Otherwise you may need to add the paths in another way.

@@ -13,21 +13,21 @@ import os
 import numpy as np
 from copy import deepcopy
 from pyglui import ui
-from plugin import Producer_Plugin_Base
-from player_methods import correlate_data
-from methods import normalize
+from shared_modules.plugin import Producer_Plugin_Base
+from shared_modules.player_methods import correlate_data
+from shared_modules.methods import normalize
 import OpenGL.GL as gl
 from pyglui.cygl.utils import *
 from pyglui.pyfontstash import fontstash
 from glfw import *
 from time import time
-from calibration_routines import gaze_mapping_plugins
-from calibration_routines.finish_calibration import select_calibration_method
-from file_methods import load_object, save_object
+from shared_modules.calibration_routines import gaze_mapping_plugins
+from shared_modules.calibration_routines.finish_calibration import select_calibration_method
+from shared_modules.file_methods import load_object, save_object
 
-import gl_utils
-import background_helper as bh
-import zmq_tools
+import shared_modules.gl_utils
+import shared_modules.background_helper as bh
+import shared_modules.zmq_tools
 from itertools import chain, cycle
 
 import logging
@@ -157,14 +157,20 @@ class Gaze_From_Recording(Gaze_Producer_Base):
 def calibrate_and_map(g_pool, ref_list, calib_list, map_list, x_offset, y_offset):
     yield "calibrating", []
     method, result = select_calibration_method(g_pool, calib_list, ref_list)
-    if result['subject'] != 'calibration.failed':
+    if result['subject'] != 'calibration.failed': # if it actually works
         logger.info('Offline calibration successful. Starting mapping using {}.'.format(method))
+
+        # mapping actually means taking those pupil position and turning them into gaze positions based on video
+        # coordinates
+
         name, args = result['name'], result['args']
+        # the name is Monocular gaze mapper or binocular gaze mapper depending.
+
         gaze_mapper_cls = gaze_mapping_plugins_by_name[name]
         gaze_mapper = gaze_mapper_cls(g_pool, **args)
 
         for idx, datum in enumerate(map_list):
-            mapped_gaze = gaze_mapper.on_pupil_datum(datum)
+            mapped_gaze = gaze_mapper.on_pupil_datum(datum) # this does the actual mapping
 
             # apply manual correction
             for gp in mapped_gaze:
