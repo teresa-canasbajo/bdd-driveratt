@@ -4,3 +4,6 @@
 [submodule "eye_tracking/analysis/lib/glog"]
 	path = eye_tracking/analysis/lib/glog
 	url = https://github.com/google/glog
+[submodule "eye_tracking/analysis/lib/pyedfread"]
+	path = eye_tracking/analysis/lib/pyedfread
+	url = https://github.com/nwilming/pyedfread
