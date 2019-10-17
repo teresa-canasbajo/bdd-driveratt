@@ -1,0 +1,3 @@
+[submodule "eye_tracking/analysis/lib/pyglui"]
+	path = eye_tracking/analysis/lib/pyglui
+	url = https://github.com/pupil-labs/pyglui
