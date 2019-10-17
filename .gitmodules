@@ -1,3 +1,6 @@
 [submodule "eye_tracking/analysis/lib/pyglui"]
 	path = eye_tracking/analysis/lib/pyglui
 	url = http://github.com/pupil-labs/pyglui
+[submodule "eye_tracking/analysis/lib/glog"]
+	path = eye_tracking/analysis/lib/glog
+	url = https://github.com/google/glog
