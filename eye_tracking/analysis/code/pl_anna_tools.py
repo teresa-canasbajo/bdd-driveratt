@@ -1,27 +1,29 @@
-import av,os
+import av, os
 
 # Pretty serious workaround. Ignores errors in imports :S
 import builtins
 from types import ModuleType
 
+
 class DummyModule(ModuleType):
     def __getattr__(self, key):
         return None
-    __all__ = []   # support wildcard imports
+
+    __all__ = []  # support wildcard imports
+
 
 def tryimport(name, *args, **kwargs):
     try:
-        imp = realimport(name, *args,**kwargs)
-        #print('success: '+name)
-        return imp 
+        imp = realimport(name, *args, **kwargs)
+        # print('success: '+name)
+        return imp
     except Exception as e:
         print('reached exception:' + name)
-        if name =='cPickle': # because how they import cPickle/Pickle
-            return realimport('pickle', *args,**kwargs)    
-        
-        #print(e)
-        return DummyModule(name)
+        if name == 'cPickle':  # because how they import cPickle/Pickle
+            return realimport('pickle', *args, **kwargs)
 
+            # print(e)
+        return DummyModule(name)
 
 
 realimport, builtins.__import__ = builtins.__import__, tryimport
@@ -35,14 +37,9 @@ except Exception as e:
 tryimport, builtins.__import__ = builtins.__import__, realimport
 
 
-
-def init_playback(video_name = 'world.mp4',video_file_path = None):
-
+def init_playback(video_name='world.mp4', video_file_path=None):
     class Global_Container(object):
         pass
 
-
-
-    cap = init_playback_source(Global_Container(), os.path.join(video_file_path,video_name))
-    return(cap)
-
+    cap = init_playback_source(Global_Container(), os.path.join(video_file_path, video_name))
+    return cap

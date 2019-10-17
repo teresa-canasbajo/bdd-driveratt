@@ -17,6 +17,11 @@ pyzmq = "*"
 msgpack-python = "*"
 setuptools = "*"
 ipython = "*"
+av = "*"
+cython = "*"
+opencv-python = "*"
+pyaudio = "*"
+portaudio19-dev = "*"
 
 [requires]
 python_version = "3.6"
