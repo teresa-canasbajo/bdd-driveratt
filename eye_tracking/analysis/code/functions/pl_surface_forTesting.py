@@ -65,17 +65,17 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     print('Finding Markers')
     # This does what offline_surface_tracker.update_marker_cache() does (except the update surface, we dont need it), 
     # but in addition gives us feedback & has a stopping criterion
-    while True:
-        if (time.time() - start) > 1:
-            start = time.time()
-            visited_list = [False if x is False else True for x in tracker.cache]
-            percent_visited = np.mean(np.asarray(visited_list))
-            print(percent_visited)
-
-            if percent_visited == 1:
-                # save stuff and stop the process
-                tracker.cleanup()
-                break
+    # while True:
+        # if (time.time() - start) > 1:
+        #     start = time.time()
+        #     visited_list = [False if x is False else True for x in tracker.cache]
+        #     percent_visited = np.mean(np.asarray(visited_list))
+        #     print(percent_visited)
+        #
+        #     if percent_visited == 1:
+        #         # save stuff and stop the process
+        #         tracker.cleanup()
+        #         break
         # try:
         #     idx, c_m = tracker.cache_queue.get(timeout=5)  # TODO check this for object detection IDS?
         # except QueueEmptyException:
@@ -89,19 +89,23 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         # if tracker.cacher_run.value is False:
         #     tracker.recalculate()
         # Create video path
-        video_path = folder + "/world.mp4"
-        # Create frame path using OS package
-        # Define the name of the directory to be created
-        frames_path = folder + "/frames"
-        try:
-            os.mkdir(frames_path)
-        except OSError:
-            print("Creation of the directory %s failed" % frames_path)
-        else:
-            print("Successfully created the directory %s " % frames_path)
-        extract_frames(video_path, frames_path)
-        tracker.cache, _ = detect_tags(frames_path)
-
+    video_path = folder + "/world.mp4"
+    # Create frame path using OS package
+    # Define the name of the directory to be created
+    frames_path = folder + "/frames"
+    try:
+        os.mkdir(frames_path)
+    except OSError:
+        print("Creation of the directory %s failed" % frames_path)
+    else:
+        print("Successfully created the directory %s " % frames_path)
+    # extract_frames(video_path, frames_path)
+    print('Finding tags.')
+    tracker.cache, tag_ids = detect_tags(frames_path)
+    print('There')
+    tag_count = sum(count for count in tag_ids.values())
+    print(f'Detected {tag_count} tags in {len(tracker.cache)} frames.')
+    print(f'Found IDs of {list(tag_ids.keys())}.')
     # Step 2.    
     # add a single surface
     print('Adding a surface')
