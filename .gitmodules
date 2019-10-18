@@ -7,3 +7,6 @@
 [submodule "eye_tracking/analysis/lib/ceres"]
 	path = eye_tracking/analysis/lib/ceres
 	url = https://ceres-solver.googlesource.com/ceres-solver
+[submodule "eye_tracking/analysis/lib/eigen"]
+	path = eye_tracking/analysis/lib/eigen
+	url = https://github.com/eigenteam/eigen-git-mirror.git
