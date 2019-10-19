@@ -1,40 +1,35 @@
 # bdd-driveratt
 Project in collaboration with Berkeley Deep Drive on driver's attention in manual, semi-autonomous and autonomous vehicles. It uses Pupil Labs and a driving simulator.
 
-Please install packages listed in Pipfile
-We've used pipenv to develop the code
+The main goal of this code is to allow for collection and analysis of eye movement data from Pupil Labs glasses avoiding the use of their GUI.
 
-You will still need to install the following packages with sudo/root privileges:
-`pkg-config`
+Heavily based on behinger/etcomp repository (https://github.com/behinger/etcomp). We deeply appreciate the great code they put together.
+
+This project includes:
+- Matlab and Python scripts to record eye movement data using Pupil Labs glasses.
+- Preprocessing pipeline for Pupil Labs glasses.
+- Makefile for all requirements.
 
 
-## Instructions to install needed packages from root
-### For AV:
-#### General dependencies
-`sudo apt-get install -y python-dev pkg-config
+# Instructions
+1. Clone project and intialize submodules
+`git clone https://github.com/tere93/bdd-driveratt
+git submodule update --init`
+
+2. Run Make file: generates a virtual environment (bdddriverattenv), runs requirements.pip with all required python packages and requirements for Pupil Labs.
+`make
 `
-#### Library components
-`sudo apt-get install -y \
-    libavformat-dev libavcodec-dev libavdevice-dev \
-    libavutil-dev libswscale-dev libswresample-dev libavfilter-dev`
+3. You will still need to install the following packages with sudo/root privileges:
+`pkg-config
+automake
+cmake
+python3-dev
+libglew-dev
+xorg-dev libglu1-mesa-dev <-- needed for libglew`
 
-### For pyglui:
-##### note that this was added as a submodule inside /lib
-`sudo apt-get install libglew-dev
-`
-`sudo pip3 install git+https://github.com/pupil-labs/pyglui
-`
-`sudo python3 setup.py install
-`
-#### Dependencies:
-`sudo apt-get install cmake libx11-dev xorg-dev libglu1-mesa-dev freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev`
 
-### For ceres:
-##### note that this was added as a submodule inside /lib
-##### it needs submodule eigen. clone it in lib as 'eigen3'
+# To do:
+- Add simulator environment scenarios (coded on Prescan/simulink) for driving experiments.
+- Add analysis to categorize eye movements.
 
-`cd 'pathtoceressubmoduleinlib' && \
-		mkdir -p build && cd build && \
-		mkdir -p ../../build_ceres && \
-		cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX='../build_ceres' -DEIGEN_INCLUDE_DIR_HINTS='../../eigen3' -DEIGEN_INCLUDE_DIR='../../eigen3' && \
-		make install`
+
