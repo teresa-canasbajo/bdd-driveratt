@@ -14,27 +14,31 @@ This project includes:
 # Instructions
 1. Clone project and intialize submodules
 
-`git clone https://github.com/tere93/bdd-driveratt
+`git clone https://github.com/tere93/bdd-driveratt`
 
-git submodule update --init`
+`git submodule update --init`
 
 2. Run Make file: generates a virtual environment (bdddriverattenv), runs requirements.pip with all required python packages and requirements for Pupil Labs.
 
 `make
 `
+
 3. You will still need to install the following packages with sudo/root privileges:
 
 `pkg-config
+`
 
-automake
+`automake`
 
-cmake
+`cmake`
 
-python3-dev
+`python3-dev
+`
 
-libglew-dev
+`libglew-dev
+`
 
-xorg-dev libglu1-mesa-dev <-- needed for libglew`
+`xorg-dev libglu1-mesa-dev` <-- needed for libglew
 
 
 # To do:
