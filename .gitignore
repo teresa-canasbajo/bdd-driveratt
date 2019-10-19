@@ -1,6 +1,5 @@
 /eye_tracking/analysis/log_files/*
 /eye_tracking/analysis/local/*
-/eye_tracking/analysis/lib/*
 /eye_tracking/analysis/cache/*
 /eye_tracking/recording/matlab/*.log
 *.pyc
