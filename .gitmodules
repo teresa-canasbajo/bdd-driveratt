@@ -10,3 +10,6 @@
 [submodule "eye_tracking/analysis/lib/eigen"]
 	path = eye_tracking/analysis/lib/eigen
 	url = https://github.com/eigenteam/eigen-git-mirror.git
+[submodule "eye_tracking/analysis/lib/pyedfread"]
+	path = eye_tracking/analysis/lib/pyedfread
+	url = https://github.com/nwilming/pyedfread
