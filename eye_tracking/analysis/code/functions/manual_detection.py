@@ -30,11 +30,13 @@ def extract_frames(video_path: str, frames_path: str) -> None:
     print(f'Extracted {count} frames from {video_path}.')
 
 
-def detect_tags(frames_path: str) -> Tuple[List[List[Dict[str, Any]]], Dict[int, int]]:
+def detect_tags(frames_path: str, aperture=11, visualize=False) -> Tuple[List[List[Dict[str, Any]]], Dict[int, int]]:
     """Detect all tags (Apriltags3) found in a folder of PNG files and return (1) a list of tag objects
     for preprocessing and (2) a dictionary containing the frequency that each tag ID appeared
     Args:
         frames_path (str): path to the directory containing PNG images
+        aperture (int):
+        visualize (bool):
 
     Returns:
         frames (List[Dict[str, Any]]): list of objects containing id (int), centroid (np.array[int]) and corners (np.array[int])
@@ -45,7 +47,7 @@ def detect_tags(frames_path: str) -> Tuple[List[List[Dict[str, Any]]], Dict[int,
     tag_ids = defaultdict(int)
     at_detector = Detector()
 
-    all_images = glob(f'{frames_path}/*.png')
+    all_images = sorted(glob(f'{frames_path}/*.png'), key=os.path.getmtime)
     num_images = len(all_images)
     print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
@@ -55,9 +57,6 @@ def detect_tags(frames_path: str) -> Tuple[List[List[Dict[str, Any]]], Dict[int,
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
         if type(img) == np.ndarray:
-            # Optional print statement
-            # print(f'Analyzing file: {img_path}')
-
             tags_in_framex = []
             for tag in at_detector.detect(img):
                 # Increment frequency
@@ -68,7 +67,7 @@ def detect_tags(frames_path: str) -> Tuple[List[List[Dict[str, Any]]], Dict[int,
                     'id': tag.tag_id,
                     'id_confidence': tag.decision_margin,
                     'soft_id': tag.tag_id,
-                    'perimeter': 10, #cv2.arcLength(img, closed=True),
+                    'perimeter': 100, #cv2.arcLength(img, closed=True),
                     'centroid': tag.center,
                     'verts': tag.corners,
                     'frames_since_true_detection': 0

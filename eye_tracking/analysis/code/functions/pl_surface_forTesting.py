@@ -105,11 +105,12 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     print('There')
     tag_count = sum(count for count in tag_ids.values())
     print(f'Detected {tag_count} tags in {len(tracker.cache)} frames.')
-    print(f'Found IDs of {list(tag_ids.keys())}.')
+    print(f'Found IDs of {sorted(list(tag_ids.keys()))}.')
     # Step 2.    
     # add a single surface
     print('Adding a surface')
     surface = Offline_Reference_Surface(tracker.g_pool)
+    print('Surface before:', surface)
 
     # Original text:
     # First define the markers that should be used for the surface
@@ -118,8 +119,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     # Teresa: our surfaces are defined now by four markers, so we are going define that as a variable here, in case
     # that changes
 
-    numMarkers = 4
-    minConfidence = 0.000002  # just to be able to use the test video, cause I didn't calibrate so
+    minConfidence = 30  # just to be able to use the test video, cause I didn't calibrate so
     # confidence is usually around 0
     # TODO change minConfidence
 
@@ -133,14 +133,20 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     #     # TODO: how to detect half screens? like A and C.
 
     # array of arrays: each element represents the frame & within the frame element, tracker.cache stored if screen id'd
-    screens_per_frame = screen_detection(tracker, numMarkers, minConfidence)
+    screens_per_frame, surface_checker = screen_detection(tracker, minConfidence, [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [8, 9, 10, 11]
+    ])
 
     # Step 3 This dissables pupil-labs functionality. They ask for 90 frames with the markers. but because we know
     # there will be 16 markers, we dont need it (toitoitoi)
     print('Defining & Finding Surface')
+    print(surface_checker[100:150])
     surface.required_build_up = 1
     # iterating through all the frames
     for frame in screens_per_frame:
+        # print(frame)
         # checking if frame has any screens
         if len(frame) > 0:
             for screen in frame:
@@ -151,7 +157,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
 
     # Step 4
     tracker.surfaces = [surface]
-
+    print('Surface after:', surface)
     print('Saving Surface')
     tracker.save_surface_definitions_to_file()
 
@@ -229,35 +235,34 @@ def surface_map_data(tracker, data):
     return gaze_on_srf
 
 
-def screen_detection(tracker, numMarkers, minConfidence):
+def screen_detection(tracker, minConfidence, screens):
     """Identifies 1+ screens for each frame.
         Args:
             tracker: tracker variable
             numMarkers: min number of markers that define 1 screen
             minConfidence: min id confidence level checker
+            screens: list of lists indicating the markers that describe each screen
         """
-    screenA = [0, 1, 2, 3]
-    screenB = [4, 5, 6, 7]
-    screenC = [8, 9, 10, 11]
-    screenUnknownDemo = [8, 12, 21, 0, 19, 20, 4, 23]
-    screens = [screenUnknownDemo, screenA, screenB, screenC]
 
+    min_markers = min(len(s) for s in screens)
     screens_per_frame = []
-    ix = 0
-    while ix < len(tracker.cache):
-        screens_per_frame.append([])
+    surface_checker = []
+    screens_set = [set(s) for s in screens]
+    for i, frame in enumerate(tracker.cache):
+        surfaces_found = []
+        screens_per_frame.append([[] for _ in screens])
+        if len(frame) < min_markers:  # verifying min number of markers that define 1 screen
+            continue
+        # Set of all tags that pass confidence interval
+        tags_verified = set(tag['id'] for tag in frame if tag['id_confidence'] >= minConfidence)
+
         # loops through possible screen options to find if present
-        for s in screens:
-            usable_markers = []
-            if len(tracker.cache[ix]) >= numMarkers:  # verifying min number of markers that define 1 screen
-                for m in tracker.cache[ix]:
-                    # verifying if id associated with screen & meets mim confidence lev reqs
-                    # ToDo: new tracker.cache does not contain info about id_confidence
-                    if (m['id'] in s): # & (m['id_confidence'] >= minConfidence):
-                        usable_markers.append(m['id'])
-                if len(usable_markers) >= numMarkers:  # verifying if # of id in this frame is enough to define 1 screen
-                    # appending frame each time a screen appears
-                    screens_per_frame[ix].append(tracker.cache[ix])
-        ix += 1
-    return screens_per_frame
+        for j, s in enumerate(screens_set):
+            # Check if a "screen" can be made with the tags in the current frame
+            if s.issubset(tags_verified):
+                screens_per_frame[i][j].extend(tag for tag in frame if tag['id'] in s)
+                surfaces_found.append(j)
+        surface_checker.append((i, surfaces_found))
+
+    return screens_per_frame, surface_checker
 
