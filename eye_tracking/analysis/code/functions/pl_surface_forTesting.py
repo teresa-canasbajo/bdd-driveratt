@@ -11,7 +11,7 @@ import functions.add_path
 from functions.manual_detection import extract_frames, detect_tags
 import numpy as np
 import time
-import pickle
+import pickle # to save & restore variable
 
 import os
 import av  # important to load this library before pupil-library! (even though we dont use it...)
@@ -122,12 +122,6 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         print('Adding a surface')
         surface = Offline_Reference_Surface(tracker.g_pool)
         print('Surface before:', surface)
-
-        # store surfaces for parameter loadsurface = True
-        # pickle_out = open("dict.pickle", "wb")
-        # pickle.dump(surface, pickle_out)
-        # pickle_out.close()
-
 
         # Original text:
         # First define the markers that should be used for the surface
