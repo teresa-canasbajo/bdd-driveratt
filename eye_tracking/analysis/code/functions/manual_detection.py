@@ -48,11 +48,17 @@ def detect_tags(frames_path: str, aperture=11, visualize=False) -> Tuple[List[Li
     at_detector = Detector()
 
     all_images = sorted(glob(f'{frames_path}/*.png'), key=os.path.getmtime)
+
+    # Deleted last image after out of range error popped up
+    # TODO: but not analyzing last 2 frames?
+    all_images = all_images[:-2]
+
     num_images = len(all_images)
     print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
     # Iterate thru all PNG images in frames_path
     for i, img_path in enumerate(all_images):
+        # print(img_path)
         # Create a grayscale 2D NumPy array for Detector.detect()
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 

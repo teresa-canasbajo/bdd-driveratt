@@ -11,6 +11,7 @@ import functions.add_path
 from functions.manual_detection import extract_frames, detect_tags
 import numpy as np
 import time
+import pickle
 
 import os
 import av  # important to load this library before pupil-library! (even though we dont use it...)
@@ -52,10 +53,17 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     # offline_surface_tracker.py: where "No surfaces defined" comment came  -- lines 70-71 seem problematic possibly?
     tracker.timeline = None
 
-    if loadSurface and len(tracker.surfaces) == 1 and tracker.surfaces[0].defined:
-        print('Surface already defined, loadSurface=TRUE, thus returning tracker')
-        tracker.cleanup()
-        return tracker
+    if loadSurface:
+        pickle_in = open("dict.pickle", "rb")
+        surface = pickle.load(pickle_in)
+        pickle_in.close()
+
+    # original code
+    # if loadSurface and len(tracker.surfaces) == 1 and tracker.surfaces[0].defined:
+    #     print('Surface already defined, loadSurface=TRUE, thus returning tracker')
+    #     tracker.cleanup()
+    #     return tracker
+
     # Remove the cache if we do not need it
     if not loadCache:
         tracker.invalidate_marker_cache()
@@ -89,71 +97,83 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         # if tracker.cacher_run.value is False:
         #     tracker.recalculate()
         # Create video path
-    video_path = folder + "/world.mp4"
-    # Create frame path using OS package
-    # Define the name of the directory to be created
-    frames_path = folder + "/frames"
-    try:
-        os.mkdir(frames_path)
-    except OSError:
-        print("Creation of the directory %s failed" % frames_path)
-    else:
-        print("Successfully created the directory %s " % frames_path)
-    # extract_frames(video_path, frames_path)
-    print('Finding tags.')
-    tracker.cache, tag_ids = detect_tags(frames_path)
-    print('There')
-    tag_count = sum(count for count in tag_ids.values())
-    print(f'Detected {tag_count} tags in {len(tracker.cache)} frames.')
-    print(f'Found IDs of {sorted(list(tag_ids.keys()))}.')
-    # Step 2.    
-    # add a single surface
-    print('Adding a surface')
-    surface = Offline_Reference_Surface(tracker.g_pool)
-    print('Surface before:', surface)
+    # if not loadSurface:
+    if True:
+        video_path = folder + "/world.mp4"
+        # Create frame path using OS package
+        # Define the name of the directory to be created
+        frames_path = folder + "/frames"
+        try:
+            os.mkdir(frames_path)
+        except OSError:
+            print("Creation of the directory %s failed" % frames_path)
+        else:
+            print("Successfully created the directory %s " % frames_path)
+        extract_frames(video_path, frames_path)
+        print("hello")
+        print('Finding tags.')
+        tracker.cache, tag_ids = detect_tags(frames_path)
+        print('There')
+        tag_count = sum(count for count in tag_ids.values())
+        print(f'Detected {tag_count} tags in {len(tracker.cache)} frames.')
+        print(f'Found IDs of {sorted(list(tag_ids.keys()))}.')
+        # Step 2.
+        # add a single surface
+        print('Adding a surface')
+        surface = Offline_Reference_Surface(tracker.g_pool)
+        print('Surface before:', surface)
 
-    # Original text:
-    # First define the markers that should be used for the surface
-    # find a frame where there are 16 markers and all of them have high confidence
+        # store surfaces for parameter loadsurface = True
+        # pickle_out = open("dict.pickle", "wb")
+        # pickle.dump(surface, pickle_out)
+        # pickle_out.close()
 
-    # Teresa: our surfaces are defined now by four markers, so we are going define that as a variable here, in case
-    # that changes
 
-    minConfidence = 30  # just to be able to use the test video, cause I didn't calibrate so
-    # confidence is usually around 0
-    # TODO change minConfidence
+        # Original text:
+        # First define the markers that should be used for the surface
+        # find a frame where there are 16 markers and all of them have high confidence
 
-    #     # have you found more than four markers? (four markers make 1 surface)
-    #     # then check if those four belong to one surface.
-    #     # if they do, then put them in the usable markers, then name them surface A, B or C.
-    #     # if not then move forward
-    #     # TODO: write criterion function for defining markers as surfaces, needs to be flexible for multiple surfaces or only one
-    #     # TODO: figure out how the markers are ID'd.
-    #     # TODO: figure out how the markers verts are created and what they mean.
-    #     # TODO: how to detect half screens? like A and C.
+        # Teresa: our surfaces are defined now by four markers, so we are going define that as a variable here, in case
+        # that changes
 
-    # array of arrays: each element represents the frame & within the frame element, tracker.cache stored if screen id'd
-    screens_per_frame, surface_checker = screen_detection(tracker, minConfidence, [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [8, 9, 10, 11]
-    ])
+        minConfidence = 30  # just to be able to use the test video, cause I didn't calibrate so
+        # confidence is usually around 0
+        # TODO change minConfidence
 
-    # Step 3 This dissables pupil-labs functionality. They ask for 90 frames with the markers. but because we know
-    # there will be 16 markers, we dont need it (toitoitoi)
-    print('Defining & Finding Surface')
-    print(surface_checker[100:150])
-    surface.required_build_up = 1
-    # iterating through all the frames
-    for frame in screens_per_frame:
-        # print(frame)
-        # checking if frame has any screens
-        if len(frame) > 0:
+        #     # have you found more than four markers? (four markers make 1 surface)
+        #     # then check if those four belong to one surface.
+        #     # if they do, then put them in the usable markers, then name them surface A, B or C.
+        #     # if not then move forward
+        #     # TODO: write criterion function for defining markers as surfaces, needs to be flexible for multiple surfaces or only one
+        #     # TODO: figure out how the markers are ID'd.
+        #     # TODO: figure out how the markers verts are created and what they mean.
+        #     # TODO: how to detect half screens? like A and C.
+
+        # array of arrays: each element represents the frame & within the frame element, tracker.cache stored if screen id'd
+        screens_per_frame, surface_checker = screen_detection(tracker, minConfidence, [
+                [0, 1, 2, 3],
+                [4, 5, 6, 7],
+                [8, 9, 10, 11]
+        ])
+
+        # Step 3 This dissables pupil-labs functionality. They ask for 90 frames with the markers. but because we know
+        # there will be 16 markers, we dont need it (toitoitoi)
+        print('Defining & Finding Surface')
+        print(surface_checker[100:150])
+        surface.required_build_up = 1
+        # iterating through all the frames
+        for frame in screens_per_frame:
             for screen in frame:
-                surface.build_correspondence(screen, 0.3, 0.7)
-    if not surface.defined:
-        raise ('Oh oh trouble ahead. The surface was not defined')
-    surface.init_cache(tracker.cache, 0.3, 0.7)
+                if len(screen) > 0:
+                    surface.build_correspondence(screen, 0.3, 0.7)
+        if not surface.defined:
+            raise ('Oh oh trouble ahead. The surface was not defined')
+        surface.init_cache(tracker.cache, 0.3, 0.7)
+
+        # store surfaces for parameter loadsurface = True
+        # pickle_out = open("dict.pickle", "wb")
+        # pickle.dumps(surface, pickle_out)
+        # pickle_out.close()
 
     # Step 4
     tracker.surfaces = [surface]
@@ -186,7 +206,7 @@ def map_surface(folder, loadCache=True, loadSurface=True):
 def fake_gpool_surface(folder=None):
     if not folder:
         raise ('we need the folder else we cannot load timestamps and surfaces etc.')
-    surface_dir = os.path.join(folder, '../', 'surface')
+    surface_dir = os.path.join(folder, 'surface')
     if not os.path.exists(surface_dir):
         os.makedirs(surface_dir)
 
