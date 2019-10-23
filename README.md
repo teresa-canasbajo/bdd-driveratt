@@ -40,6 +40,11 @@ This project includes:
 
 `xorg-dev libglu1-mesa-dev` <-- needed for libglew
 
+`libportaudio2` <-- for pyaudio
+
+`portaudio19-dev` <-- for pyaudio
+
+`pyaudio`
 
 # To do:
 - Add simulator environment scenarios (coded on Prescan/simulink) for driving experiments.

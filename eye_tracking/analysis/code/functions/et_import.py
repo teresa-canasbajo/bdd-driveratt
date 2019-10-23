@@ -55,8 +55,8 @@ def pl_fix_timelag(pl):
 def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
-    from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules import file_methods as pl_file_methods
-
+    from shared_modules import file_methods as pl_file_methods
+    from debug import file_methods_newplversion
     if subject == '':
         filename = datapath
     else:
@@ -64,7 +64,19 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     print(os.path.join(filename, 'pupil_data'))
     # with dict_keys(['notifications', 'pupil_positions', 'gaze_positions'])
     # where each value is a list that contains a dictionary
-    original_pldata = pl_file_methods.load_object(os.path.join(filename, 'pupil_data'))
+
+    # IMPORTANT: the file to use depends on which version of Pupil labs you used to record.
+    # if old version, your data will be in pupil_data
+    # if newer version, your data will be in pupil.pldata
+
+
+    if os.path.exists(os.path.join(filename, 'pupil_data')):
+        print('Old pupil capture used')
+        original_pldata = pl_file_methods.load_object(os.path.join(filename, 'pupil_data'))
+    elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
+        print('Newer pupil capture used')
+        original_pldata = file_methods_newplversion.load_pldata_file(datapath, 'pupil')
+
     # original_pldata = pl_file_methods.Incremental_Legacy_Pupil_Data_Loader(os.path.join(filename,'pupil_data'))
     # 'notification'
     # dict_keys(['record', 'subject', 'timestamp', 'label', 'duration'])

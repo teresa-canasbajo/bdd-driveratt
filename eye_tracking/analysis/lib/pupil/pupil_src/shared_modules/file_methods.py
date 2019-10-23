@@ -16,9 +16,10 @@ import numpy as np
 import traceback as tb
 import logging
 from glob import iglob
+import collections
+
 logger = logging.getLogger(__name__)
 UnpicklingError = pickle.UnpicklingError
-
 
 class Persistent_Dict(dict):
     """a dict class that uses pickle to save inself to file"""
@@ -65,6 +66,24 @@ def load_object(file_path,allow_legacy=True):
         finally:
             gc.enable()
     return data
+
+def load_pldata_file(directory, topic):
+    ts_file = os.path.join(directory, topic + "_timestamps.npy")
+    msgpack_file = os.path.join(directory, topic + ".pldata")
+    try:
+        data = collections.deque()
+        topics = collections.deque()
+        data_ts = np.load(ts_file)
+        with open(msgpack_file, "rb") as fh:
+            for topic, payload in msgpack.Unpacker(fh, raw=False, use_list=False):
+                data.append(Serialized_Dict(msgpack_bytes=payload))
+                topics.append(topic)
+    except FileNotFoundError:
+        data = []
+        data_ts = []
+        topics = []
+
+    return PLData(data, data_ts, topics)
 
 
 def save_object(object_, file_path):
