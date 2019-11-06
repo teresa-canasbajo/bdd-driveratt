@@ -5,3 +5,6 @@
 	path = eye_tracking/analysis/lib/nslr-hmm
 	url = https://gitlab.com/nslr/nslr-hmm/
 
+[submodule "eye_tracking/analysis/lib/pupil_new"]
+	path = eye_tracking/analysis/lib/pupil_new
+	url = https://github.com/pupil-labs/pupil
