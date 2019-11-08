@@ -47,18 +47,18 @@ def detect_tags(frames_path: str, aperture=11, visualize=False) -> Tuple[List[Li
     tag_ids = defaultdict(int)
     at_detector = Detector()
 
-    all_images = sorted(glob(f'{frames_path}/*.png'), key=os.path.getmtime)
+    # Sort by index in.../frame<index>.png
+    all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
 
     # Deleted last image after out of range error popped up
     # TODO: but not analyzing last 2 frames?
-    all_images = all_images[:-2]
+    all_images = all_images[:-1]
 
     num_images = len(all_images)
     print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
     # Iterate thru all PNG images in frames_path
     for i, img_path in enumerate(all_images):
-        # print(img_path)
         # Create a grayscale 2D NumPy array for Detector.detect()
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
@@ -126,7 +126,13 @@ def main():
     # test path from 10/15 recording at lab with eye & good lighting
     # path = '/home/whitney/Teresa/demos/surfaceTestLabEye/000'
     # test path from 10/17 recording at lab with calibration
-    path = '/home/whitney/Teresa/demos/surfaceANDcalibration_3screens'
+    # path = '/home/whitney/Teresa/demos/surfaceANDcalibration_3screens'
+    # test path from 10/25 recording
+    path = '/home/whitney/Teresa/demos/3screens_1025'
+    # test path from 11/4 recording
+    path = '/home/whitney/Teresa/demos/2019_11_04/000'
+    # id tag
+    # path = '/home/whitney/recordings/2019_11_01/014'
 
     # Create video path
     video_path = path + "/world.mp4"
@@ -134,11 +140,12 @@ def main():
     # Define the name of the directory to be created
     frames_path = path + "/frames"
     try:
-        os.mkdir(frames_path)
+        if not os.path.exists(frames_path):
+            os.mkdir(frames_path)
+        else:
+            print("Successfully created the directory %s " % frames_path)
     except OSError:
         print("Creation of the directory %s failed" % frames_path)
-    else:
-        print("Successfully created the directory %s " % frames_path)
     # Detect tags in frames
     extract_frames(video_path, frames_path)
     frames, tag_ids = detect_tags(frames_path)
