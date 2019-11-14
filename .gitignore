@@ -4,5 +4,5 @@
 /eye_tracking/recording/matlab/*.log
 *.pyc
 *.pyo
-
+eye_tracking/analysis/code/debug/cysignals_crash_logs/
 .idea/*
