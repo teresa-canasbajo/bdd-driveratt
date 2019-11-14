@@ -37,7 +37,7 @@ try:
     from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.calibration_routines.finish_calibration import \
         finish_calibration, select_calibration_method
 
-    from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.gaze_producers import calibrate_and_map
+    #from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.gaze_producers import calibrate_and_map
 
     import lib.pupil.pupil_src.shared_modules.player_methods
 
@@ -92,7 +92,7 @@ def gen_fakepool(inp_gaze=[], calibration_mode='2d'):
     fake_gpool.get_timestamp = lambda: None
     return fake_gpool
 
-
+# TODO: need to rewrite this whole function to match the new API, refer to discord channel
 def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=None):  # eye could be 0 or 1
     if calibration_mode == '3d':
         from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.calibration_routines.optimization_calibration import \
@@ -103,6 +103,7 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=No
     # from calibration_routines.gaze_mappers import Vector_Gaze_Mapper
     import copy
     import sys
+    from pupil_new.pupil_src.shared_modules.gaze_producer.gaze_from_offline_calibration import _setup_controllers
 
     pupil = copy.copy(pupil_list)
     ref = copy.copy(ref_list)
@@ -120,9 +121,14 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=No
     fake_gpool = gen_fakepool(gaze, calibration_mode) # gets default parameters for calibration data
 
     # method, result = select_calibration_method(fake_gpool, pupil_list, ref_list)
-    logger.info(calibrate_and_map)
+    #logger.info(calibrate_and_map)
+    ## needs to be changed cause it's old function
     calib_generator = calibrate_and_map(fake_gpool, ref, pupil, gaze, 0, 0)  # here the actual calibration is done
     # calibrate_and_map should work correctly, but check in future if errors.
+    #gaze_offline_calib._setup_controllers()
+    calib_generator = _setup_controllers(fake_gpool)
+    print("testing calib_generator")
+    print(calib_generator)
 
     tmp = next(calib_generator)  # start once
     output = []

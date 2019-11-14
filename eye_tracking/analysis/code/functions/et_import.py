@@ -100,7 +100,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     return original_pldata, notifications, version
 
 # surfaceMap False in et_import for testing purposes
-def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=True,
+def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=False,
               parsemsg=True, fixTimeLag=True, px2deg=True, pupildetect=None,
               pupildetect_options=None):
     # Input:    subject:         (str) name

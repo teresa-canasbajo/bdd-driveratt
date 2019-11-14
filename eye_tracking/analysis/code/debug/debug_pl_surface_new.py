@@ -18,8 +18,7 @@ import os
 from pupil_new.pupil_src.shared_modules.surface_tracker import surface_tracker_offline
 from pupil_new.pupil_src.shared_modules.surface_tracker import surface
 
-from functions.pl_recalib import gen_fakepool
-
+from pupil_new.pupil_src.shared_modules.surface_tracker import surface_tracker_online
 import av  # important to load this library before pupil-library! (even though we dont use it...)
 
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules import offline_surface_tracker
@@ -43,6 +42,7 @@ def map_surface(folder):
     fake_gpool = fake_gpool_surface(folder)
 
     tracker = surface_tracker_offline.Surface_Tracker_Offline(fake_gpool)
+    tracker_online = surface_tracker_online.Surface_Tracker_Online(fake_gpool)
 #    surface_test = surface.Surface() # parenthesis!
     tracker_subclass = tracker.Surface_Class()
 
@@ -72,35 +72,42 @@ def map_surface(folder):
 
     print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
+    # for i, img_path in enumerate(all_images):
+    #     # Create a grayscale 2D NumPy array for Detector.detect()
+    #     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+    #
+    #     if type(img) == np.ndarray:
+    #         tracker.marker_cache[i] = tracker.marker_detector.detect_markers(img, i)
+    #     print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
+
+    print('Add Surface')
+    all_locations = []
+
+    # first create events dictionary, then call tracker_online.recent_events(events)
+    # loop through all frames and images
     for i, img_path in enumerate(all_images):
         # Create a grayscale 2D NumPy array for Detector.detect()
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
-        if type(img) == np.ndarray:
-            tracker.marker_cache[i] = tracker.marker_detector.detect_markers(img, i)
+        # pupil labs folks say we only need the frame key to work, but we may need to add more, like video info
+        events = {'frame': img} # this creates the dictionary
+        tracker_online.recent_events(events)
+        # now img contains image and i contains frame idx
+
         print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
 
-    print('Add Surface')
-    all_locations = []
-    surface_location = []
 
-    for frame in range(num_images):
-#        surface[frame] = tracker.Surface_Class.update_location(tracker.Surface_Class, frame, tracker.marker_cache[frame], tracker.camera_model)
-
-#        for s in tracker.marker_cache[frame]:
-        if len(tracker.marker_cache[frame]) >= 4: # if is not empty
-            surface_location.append(tracker_subclass.update_location(
-                frame,
-                tracker.marker_cache,
-                tracker.camera_model))
-            #     print(s)
-        #     surface_location.append(tracker.Surface_Class.locate(
-        #          s,
-        #          tracker.camera_model,
-        #          tracker.Surface_Class.registered_markers_undist,
-        #          tracker.Surface_Class.registered_markers_dist))
-        # all_locations.append(surface_location)
-
+    # This is almost working but we're trying recent_events()
+    # surface_location = []
+    #
+    # for frame in range(num_images):
+    #
+    #     if len(tracker.marker_cache[frame]) >= 4: # if is not empty
+    #         surface_location.append(tracker_subclass.update_location(
+    #             frame,
+    #             tracker.marker_cache,
+    #             tracker.camera_model))
+    #
 
 
     print('success!')
@@ -112,7 +119,7 @@ def fake_gpool_surface(folder=None):
     if not os.path.exists(surface_dir):
         os.makedirs(surface_dir)
 
-    fake_gpool = gen_fakepool()
+    fake_gpool = gen_fakepool(folder)
     fake_gpool.surfaces = []
     fake_gpool.rec_dir = surface_dir
     fake_gpool.timestamps = np.load(os.path.join(folder, 'world_timestamps.npy'))

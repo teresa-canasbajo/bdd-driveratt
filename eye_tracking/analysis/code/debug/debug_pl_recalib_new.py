@@ -65,7 +65,7 @@ def notify_all(self, notification=''):
     logger.info(notification)
 
 
-def gen_fakepool(inp_gaze=[], calibration_mode='2d'):
+def gen_fakepool(folder, inp_gaze=[], calibration_mode='2d'):
 
     # defines default parameters for calibration data
 
@@ -78,8 +78,8 @@ def gen_fakepool(inp_gaze=[], calibration_mode='2d'):
     fake_gpool.min_calibration_confidence = 0.6
     fake_gpool.gaze_positions_by_frame = inp_gaze
     fake_gpool.app = 'not-capture'
-    fake_gpool.user_dir = '/work'
-    fake_gpool.rec_dir = '/work'
+    fake_gpool.user_dir = '/home/whitney/pupil_player_settings'
+    fake_gpool.rec_dir = folder
 
     fake_gpool.detection_mapping_mode = calibration_mode
     fake_gpool.plugin_by_name = ''

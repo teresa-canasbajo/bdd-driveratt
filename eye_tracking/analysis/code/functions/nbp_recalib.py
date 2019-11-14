@@ -69,8 +69,10 @@ def nbp_recalib(pupil, notifications, version, calibration_mode='2d', eyeID=None
             # print(len(single_calib))
 
             try:
+                ## needs to be changed cause it's old function calib_generator
                 single_recalib_data = pl.pl_recalibV2(single_calib['pupil_list'], single_calib['ref_list'],
                                                       pupilPosition_cut, calibration_mode=calibration_mode, eyeID=eyeID)
+                # single_recalib_data = gaze_offline_calib._setup_controllers()
             except:
                 continue
 
