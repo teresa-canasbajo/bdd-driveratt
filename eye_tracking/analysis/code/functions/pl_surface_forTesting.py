@@ -53,10 +53,10 @@ def map_surface(folder, loadCache=True, loadSurface=True):
     # offline_surface_tracker.py: where "No surfaces defined" comment came  -- lines 70-71 seem problematic possibly?
     tracker.timeline = None
 
-    if loadSurface:
-        pickle_in = open("dict.pickle", "rb")
-        surface = pickle.load(pickle_in)
-        pickle_in.close()
+    # if loadSurface:
+    #     pickle_in = open("dict.pickle", "rb")
+    #     surface = pickle.load(pickle_in)
+    #     pickle_in.close()
 
     # original code
     # if loadSurface and len(tracker.surfaces) == 1 and tracker.surfaces[0].defined:
@@ -104,24 +104,24 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         # Define the name of the directory to be created
         frames_path = folder + "/frames"
         try:
-            os.mkdir(frames_path)
+            if not os.path.exists(frames_path):
+                os.mkdir(frames_path)
+                print("Successfully created the directory %s " % frames_path)
+                extract_frames(video_path, frames_path)
+            else:
+                print("Directory %s already exists." % frames_path)
         except OSError:
-            print("Creation of the directory %s failed" % frames_path)
-        else:
-            print("Successfully created the directory %s " % frames_path)
-        extract_frames(video_path, frames_path)
-        print("hello")
+                print("Creation of the directory %s failed" % frames_path)
+
         print('Finding tags.')
         tracker.cache, tag_ids = detect_tags(frames_path)
-        print('There')
         tag_count = sum(count for count in tag_ids.values())
         print(f'Detected {tag_count} tags in {len(tracker.cache)} frames.')
         print(f'Found IDs of {sorted(list(tag_ids.keys()))}.')
         # Step 2.
         # add a single surface
         print('Adding a surface')
-        surface = Offline_Reference_Surface(tracker.g_pool)
-        print('Surface before:', surface)
+        # surface = Offline_Reference_Surface(tracker.g_pool)
 
         # Original text:
         # First define the markers that should be used for the surface
@@ -144,25 +144,49 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         #     # TODO: how to detect half screens? like A and C.
 
         # array of arrays: each element represents the frame & within the frame element, tracker.cache stored if screen id'd
-        screens_per_frame, surface_checker = screen_detection(tracker, minConfidence, [
-                [0, 1, 2, 3],
-                [4, 5, 6, 7],
-                [8, 9, 10, 11]
-        ])
+        screens = [
+            [0, 1, 2, 3],
+            [4, 5, 6, 7],
+            [8, 9, 10, 11]
+        ]
+        screens_per_frame, surface_checker = screen_detection(tracker, minConfidence, screens)
 
         # Step 3 This dissables pupil-labs functionality. They ask for 90 frames with the markers. but because we know
         # there will be 16 markers, we dont need it (toitoitoi)
         print('Defining & Finding Surface')
         print(surface_checker[100:150])
-        surface.required_build_up = 1
+
+        surfaces = [Offline_Reference_Surface(tracker.g_pool) for _ in screens]
+        # surface.required_build_up = 1
+
+        # surface class divided by frame and screen
+        surface_frames = []
+
         # iterating through all the frames
-        for frame in screens_per_frame:
-            for screen in frame:
-                if len(screen) > 0:
-                    surface.build_correspondence(screen, 0.3, 0.7)
-        if not surface.defined:
-            raise ('Oh oh trouble ahead. The surface was not defined')
-        surface.init_cache(tracker.cache, 0.3, 0.7)
+        # idx = 0
+
+        for frame in screens_per_frame: # iterating through each frame
+
+            for s, screen in enumerate(frame): # iterating through each screen per frame
+
+                # surface.required_build_up = 1
+
+                # idx = idx + 1 # find surface idx to debug
+
+                # checking to see if screen exists in the frame
+                if len(screen) > 0: # if the screen is not empty
+                    surfaces[s].build_frame_correspondence(screen, 0.3, 0.7)
+
+                surfaces[s].init_cache(frame, 0.3, 0.7)
+                    # surface.init_cache(frame, 0.3, 0.7)  # passing frame works
+
+                surface_frames.append(surfaces)
+
+            # idx = idx + 1
+
+        # if not all(surface.defined for surface in surfaces):
+        #     raise ('Oh oh trouble ahead. The surfaces were not defined')
+        # surface.init_cache(tracker.cache, 0.3, 0.7) # commented out
 
         # store surfaces for parameter loadsurface = True
         # pickle_out = open("dict.pickle", "wb")
@@ -170,8 +194,8 @@ def map_surface(folder, loadCache=True, loadSurface=True):
         # pickle_out.close()
 
     # Step 4
-    tracker.surfaces = [surface]
-    print('Surface after:', surface)
+    tracker.surfaces = surface_frames # [surface]
+    print('Surface after:', surface_frames) # surface)
     print('Saving Surface')
     tracker.save_surface_definitions_to_file()
 
@@ -224,6 +248,7 @@ def list_to_stream(gaze_list):
 
 
 def surface_map_data(tracker, data):
+    # this is what we need to work on:
     # if not (type(data) == list):
     # can also be lib.pupil.pupil_src.shared_modules.player_methods.Bisector
     #    raise 'Did you forget to select what data? I expected a list here'
@@ -241,13 +266,55 @@ def surface_map_data(tracker, data):
     fake_gpool.gaze_positions = tmp
     fake_gpool.gaze_positions_by_frame = correlate_data(data, fake_gpool.timestamps)
 
-    if not (len(tracker.surfaces) == 1):
-        raise ('expected only a single surface!')
-    # And finally calculate the positions 
-    gaze_on_srf = tracker.surfaces[0].gaze_on_srf_in_section()
+    # if not (len(tracker.surfaces) == 1):
+    #     raise ('expected only a single surface!')
+    # And finally calculate the positions
 
-    return gaze_on_srf
+    gazes_on_srf = []
+    frame_num = 0
+    # iterate through frames
+    draw(tracker.surfaces)
+    for t in tracker.surfaces:
+        surface_num = 0
+        # iterate through surfaces
+        for s in t:
+            # verify if surface is detected
+            if s.detected:
+                print(frame_num)
+                print(surface_num)
+                print(tracker.surfaces[frame_num][surface_num].detected)
+                gazes_on_srf.append(tracker.surfaces[frame_num][surface_num].gaze_on_srf_in_section())
+            surface_num += 1
+        frame_num += 1
+    # gaze_on_srf = tracker.surfaces[0][0].gaze_on_srf_in_section()
 
+    # return gaze_on_srf
+    print('gazes_on_srf', gazes_on_srf)
+
+    return gazes_on_srf
+# Draw function for visualizing surfaces (WIP)
+def draw(surfaces):
+    import matplotlib as mp
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import PolyCollection
+
+    plt.figure(figsize=(16, 9))
+    axes = plt.gca()
+    axes.set_xlim([0., 1280.])
+    axes.set_ylim([0., 720.])
+
+
+    for frame in surfaces:
+        for surface in frame:
+            if surface and surface.markers:
+                print(surface.markers)
+                polygons = PolyCollection(surface.markers['verts'],
+                                          edgecolors=((1., 0, .2, .005),),
+                                          facecolors=((0, 0, 0, 0),),
+                                          )
+                axes.add_collection(polygons)
+
+                plt.show()
 
 def screen_detection(tracker, minConfidence, screens):
     """Identifies 1+ screens for each frame.

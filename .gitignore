@@ -7,4 +7,5 @@
 .vscode/
 eye_tracking/analysis/.DS_Store
 
+eye_tracking/analysis/code/debug/cysignals_crash_logs/
 .idea/*

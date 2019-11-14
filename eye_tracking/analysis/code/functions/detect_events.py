@@ -14,7 +14,6 @@ import os
 import logging
 
 # parses SR research EDF data files into pandas df
-from pyedfread import edf
 from functions.pl_detect_blinks import pl_detect_blinks
 
 
