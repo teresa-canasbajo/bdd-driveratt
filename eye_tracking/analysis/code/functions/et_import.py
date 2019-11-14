@@ -72,11 +72,16 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
     if os.path.exists(os.path.join(filename, 'pupil_data')):
         print('Old pupil capture used')
+        version = 'old'
         original_pldata = pl_file_methods.load_object(os.path.join(filename, 'pupil_data'))
+        notifications = []
     elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
         print('Newer pupil capture used')
+        version = 'new'
         original_pldata = file_methods_newplversion.load_pldata_file(datapath, 'pupil')
-
+        notifications = file_methods_newplversion.load_pldata_file(datapath, 'notify')
+        print('notifications_assigned')
+    # TODO Dhakshi redo this:
     # original_pldata = pl_file_methods.Incremental_Legacy_Pupil_Data_Loader(os.path.join(filename,'pupil_data'))
     # 'notification'
     # dict_keys(['record', 'subject', 'timestamp', 'label', 'duration'])
@@ -92,9 +97,9 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
     # Fix the (possible) timelag of pupillabs camera vs. computer time
 
-    return original_pldata
+    return original_pldata, notifications, version
 
-
+# surfaceMap False in et_import for testing purposes
 def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=True,
               parsemsg=True, fixTimeLag=True, px2deg=True, pupildetect=None,
               pupildetect_options=None):
@@ -116,7 +121,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     if surfaceMap:
         # has to be imported before nbp recalib
         try:
-            import functions.pl_surface as pl_surface
+            import functions.pl_surface_forTesting as pl_surface
         except ImportError:
             raise ('Custom Error:Could not import pl_surface')
 
@@ -124,8 +129,10 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     # Get samples df
     # (is still a dictionary here)
-    original_pldata = raw_pl_data(subject=subject, datapath=datapath)
+    # this works already
+    original_pldata, notifications, version = raw_pl_data(subject=subject, datapath=datapath)
 
+    # detect pupil positions, not sure if we need:
     if pupildetect is not None:  # can be 2d or 3d
         from eye_tracking.analysis.code.functions.nbp_pupildetect import nbp_pupildetect
         if subject == '':
@@ -144,17 +151,26 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # recalibrate data
     if recalib:
         from eye_tracking.analysis.code.functions import nbp_recalib
+        # added following line to resolve issue: original_pldata not acting as dictionary --> can't call or add keys
+        if version == 'new':
+            original_pldata = original_pldata._asdict()
+            notifications = notifications._asdict()
         if pupildetect is not None:
-            original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, calibration_mode=pupildetect)
-        original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata)
+            original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications, calibration_mode=pupildetect)
+        original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications, version)
+
     # Fix timing Pupillabs cameras ,have their own timestamps & clock. The msgs are clocked via computertime.
     # Sometimes computertime&cameratime show drift (~40% of cases). We fix this here
     if fixTimeLag:
         original_pldata = pl_fix_timelag(original_pldata)
 
+    # here we are:
     if surfaceMap:
-        folder = os.path.join(datapath, subject, 'raw')
+        folder = os.path.join(datapath) # before it was taking subject, 'raw' as args
+
+        # we have fixed map_surface!
         tracker = pl_surface.map_surface(folder, loadCache=True)  # originally was True
+        # now we are working on surface_map_data:
         gaze_on_srf = pl_surface.surface_map_data(tracker, original_pldata['gaze_positions'])
         logger.warning('Original Data Samples: %s on surface: %s', len(original_pldata['gaze_positions']),
                        len(gaze_on_srf))
@@ -162,6 +178,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     # use pupilhelper func to make samples df (confidence, gx, gy, smpl_time, diameter)
     pldata = gaze_to_pandas(original_pldata['gaze_positions'])
+    print('pldata', pldata)
 
     if surfaceMap:
         pldata.gx = pldata.gx * (1920 - 2 * (75 + 18)) + (75 + 18)  # minus white border of marker & marker
