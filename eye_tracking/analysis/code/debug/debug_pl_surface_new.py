@@ -16,6 +16,8 @@ from glob import glob
 import cv2
 import os
 from pupil_new.pupil_src.shared_modules.surface_tracker import surface_tracker_offline
+from pupil_new.pupil_src.shared_modules.surface_tracker import surface
+
 from functions.pl_recalib import gen_fakepool
 
 import av  # important to load this library before pupil-library! (even though we dont use it...)
@@ -25,11 +27,12 @@ from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules import offline_sur
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.offline_reference_surface import Offline_Reference_Surface
 from IPython.core.debugger import set_trace
 
-from functions.pl_recalib import gen_fakepool
-from functions.pl_recalib import global_container
+
+from debug.debug_pl_recalib_new import gen_fakepool
+from debug.debug_pl_recalib_new import global_container
 from queue import Empty as QueueEmptyException
 
-from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.camera_models import load_intrinsics
+from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.camera_models import load_intrinsics
 from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.player_methods import correlate_data
 
 
@@ -40,7 +43,8 @@ def map_surface(folder):
     fake_gpool = fake_gpool_surface(folder)
 
     tracker = surface_tracker_offline.Surface_Tracker_Offline(fake_gpool)
-    tracker_subclass = tracker.Surface_Class
+#    surface_test = surface.Surface() # parenthesis!
+    tracker_subclass = tracker.Surface_Class()
 
     tracker_detector = tracker.marker_detector
 
@@ -77,13 +81,25 @@ def map_surface(folder):
         print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
 
     print('Add Surface')
+    all_locations = []
+    surface_location = []
+
     for frame in range(num_images):
 #        surface[frame] = tracker.Surface_Class.update_location(tracker.Surface_Class, frame, tracker.marker_cache[frame], tracker.camera_model)
-        surface[frame] = tracker.Surface_Class.locate(tracker.marker_cache[frame],
-                                                      tracker.camera_model,
-                                                      tracker.Surface_Class.registered_markers_undist,
-                                                      tracker.Surface_Class.registered_markers_dist)
 
+#        for s in tracker.marker_cache[frame]:
+        if len(tracker.marker_cache[frame]) >= 4: # if is not empty
+            surface_location.append(tracker_subclass.update_location(
+                frame,
+                tracker.marker_cache,
+                tracker.camera_model))
+            #     print(s)
+        #     surface_location.append(tracker.Surface_Class.locate(
+        #          s,
+        #          tracker.camera_model,
+        #          tracker.Surface_Class.registered_markers_undist,
+        #          tracker.Surface_Class.registered_markers_dist))
+        # all_locations.append(surface_location)
 
 
 
