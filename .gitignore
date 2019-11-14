@@ -4,5 +4,7 @@
 /eye_tracking/recording/matlab/*.log
 *.pyc
 *.pyo
+.vscode/
+eye_tracking/analysis/.DS_Store
 
 .idea/*
