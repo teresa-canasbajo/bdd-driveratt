@@ -8,3 +8,5 @@
 [submodule "eye_tracking/analysis/lib/pupil_new"]
 	path = eye_tracking/analysis/lib/pupil_new
 	url = https://github.com/pupil-labs/pupil
+	ignore = dirty
+
