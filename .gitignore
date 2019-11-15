@@ -6,3 +6,5 @@
 *.pyo
 eye_tracking/analysis/code/debug/cysignals_crash_logs/
 .idea/*
+/temp_venv/
+.ipynb_checkpoints
