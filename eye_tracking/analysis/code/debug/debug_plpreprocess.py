@@ -1,6 +1,6 @@
 from debug.debug_pl_surface import *
 from functions.et_preprocess import *
-import add_path
+import functions.add_path as add_path
 
 from sys import platform
 

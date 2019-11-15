@@ -11,13 +11,22 @@ import functions.add_path
 # import numpy as np
 # import os
 
-from functions.detect_events import make_blinks, make_saccades, make_fixations
 from functions.et_import import import_pl
+
+##########
+# TODO: next functions will need to be looked at before adding them to the respository. Right now i've deleted them so I need
+# to uncomment the following imports:
+
+from functions.detect_events import make_blinks, make_saccades, make_fixations
 from functions.detect_bad_samples import detect_bad_samples, remove_bad_samples
 from functions.et_helper import add_events_to_samples
 from functions.et_helper import load_file, save_file
-from functions.et_make_df import make_events_df
-import functions.et_helper as helper
+#from functions.et_make_df import make_events_df
+#import functions.et_helper as helper
+#################
+
+
+
 from IPython.core.debugger import set_trace
 import os
 import logging

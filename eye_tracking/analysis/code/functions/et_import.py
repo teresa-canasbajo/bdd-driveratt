@@ -8,13 +8,18 @@ import pandas as pd
 import os
 import logging
 
+##########
+# TODO: next functions will need to be looked at before adding them to the respository. Right now i've deleted them so I need
+# to uncomment the following imports:
+
 from functions.et_helper import findFile, gaze_to_pandas
-import functions.et_parse as parse
+#import functions.et_parse as parse
 import functions.et_make_df as make_df
 import functions.et_helper as helper
-from IPython.core.debugger import set_trace
 
-import imp  # for edfread reload
+
+########
+
 
 import scipy
 import scipy.stats
