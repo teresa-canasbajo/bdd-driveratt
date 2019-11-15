@@ -17,6 +17,13 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from PIL import ImageOps
 
+# For extracting frames
+from functions.manual_detection import extract_frames, print_progress_bar
+from glob import glob
+import os
+import json
+import cv2
+
 # For measuring the inference time.
 import time
 
@@ -126,8 +133,8 @@ def run_detector(detector, path):
 
 	result = {key:value.numpy() for key,value in result.items()}
 
-	print("Found %d objects." % len(result["detection_scores"]))
-	print("Inference time: ", end_time-start_time)
+	# print("Found %d objects." % len(result["detection_scores"]))
+	# print("Inference time: ", end_time-start_time)
 
 	return result, img
 
@@ -139,20 +146,65 @@ def draw_frame(result, img):
 	display_image(image_with_boxes)
 
 def main():
-	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1" #@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
-
+	print('Loading detector.')
+	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"#@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
 	detector = hub.load(module_handle).signatures['default']
 
-	image_urls = ["https://i.ibb.co/R3yFCMH/dis4.png",
-						"https://i.ibb.co/S0K9ggp/dis1.png",
-						"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
-						"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"]
+	print('Loaded.')
 
-	for image_url in image_urls:
-		start_time = time.time()
-		image_path = download_and_resize_image(image_url, 640, 480)
-		run_detector(detector, image_path)
-		end_time = time.time()
+	image_urls = [
+		"https://i.ibb.co/S0K9ggp/dis1.png",
+		"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
+		"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
+	]
+	frames_path = './simulation_frames_cut'
+	# extract_frames('/home/whitney/Downloads/bin_recording.mkv', frames_path)
+	frames = detect_objects(frames_path, detector)
+	with open('./frames.json', 'w') as f:
+		json.dump(frames, f, ensure_ascii=False, indent=4)
+	# for image_url in image_urls:
+	# 	start_time = time.time()
+	# 	image_path = download_and_resize_image(image_url, 640, 480)
+	# 	result, img = run_detector(detector, image_path)
+	# 	draw_frame(result, img)
+	# 	end_time = time.time()
+
+
+def detect_objects(frames_path, detector):
+	frames = []
+	all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
+	all_images = all_images[:-1]
+
+	num_images = len(all_images)
+	print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
+
+	# Iterate thru all PNG images in frames_path
+	for i, img_path in enumerate(all_images):
+		# Create a grayscale 2D NumPy array for Detector.detect()
+		result, img = run_detector(detector, img_path)
+		process_result(result)
+		frames.append(result)
+		time.sleep(0.01)
+		print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
+
+	return frames
+
+
+
+def process_result(result):
+	encoding = 'utf-8'
+
+	def process_element(e):
+		if type(e) == np.ndarray:
+			return [process_element(d) for d in e]
+		elif type(e) == bytes:
+			return e.decode(encoding)
+		else:
+			return str(e)
+	for key, val in result.items():
+		if type(val) == np.ndarray:
+			result[key] = [process_element(e) for e in list(val)]
+
 
 if __name__ == '__main__':
 	main()
