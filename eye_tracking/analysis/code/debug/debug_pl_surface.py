@@ -16,23 +16,19 @@ from glob import glob
 import cv2
 import os
 from pupil_new.pupil_src.shared_modules.surface_tracker import surface_tracker_offline
-from pupil_new.pupil_src.shared_modules.surface_tracker import surface
 
 from pupil_new.pupil_src.shared_modules.surface_tracker import surface_tracker_online
 import av  # important to load this library before pupil-library! (even though we dont use it...)
 
-from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules import offline_surface_tracker
 
-from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.offline_reference_surface import Offline_Reference_Surface
 from IPython.core.debugger import set_trace
 
 
-from debug.debug_pl_recalib_new import gen_fakepool
-from debug.debug_pl_recalib_new import global_container
+from debug.debug_pl_recalib import gen_fakepool, global_container
 from queue import Empty as QueueEmptyException
 
-from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.camera_models import load_intrinsics
-from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.player_methods import correlate_data
+from pupil_new.pupil_src.shared_modules.camera_models import load_intrinsics
+from pupil_new.pupil_src.shared_modules.player_methods import correlate_data
 
 
 # %%
