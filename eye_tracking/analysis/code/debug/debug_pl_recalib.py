@@ -37,7 +37,8 @@ try:
     from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.calibration_routines.finish_calibration import \
         finish_calibration, select_calibration_method
 
-    from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.gaze_producers import calibrate_and_map
+    #wrong, old version
+    #from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.gaze_producers import calibrate_and_map
 
     import lib.pupil_new.pupil_src.shared_modules.player_methods
 
@@ -93,10 +94,10 @@ def gen_fakepool(folder, inp_gaze=[], calibration_mode='2d'):
     return fake_gpool
 
 
-def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=None):  # eye could be 0 or 1
-    if calibration_mode == '3d':
-        from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.calibration_routines.optimization_calibration import \
-            bundle_adjust_calibration  # we magically need this for libceres to work
+def pl_recalibV2(pupil_list, ref_list, inp_gaze, version='new', calibration_mode='2d', eyeID=None):  # eye could be 0 or 1
+    #if calibration_mode == '3d':
+        #from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.calibration_routines.optimization_calibration import \
+         #   bundle_adjust_calibration  # we magically need this for libceres to work
 
     # from calibration_routines.gaze_mappers import Binocular_Vector_Gaze_Mapper
     # from calibration_routines.gaze_mappers import Monocular_Gaze_Mapper
@@ -109,8 +110,10 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=No
     gaze = copy.copy(inp_gaze)
 
     # to check pupil labs version
-    if hasattr(lib.pupil.pupil_src.shared_modules.player_methods, 'Bisector'):
+    # there seems to be some problem here
+    #if hasattr(lib.pupil.pupil_src.shared_modules.player_methods, 'Bisector'):
         # pupillab v1.8 or newer needs the data serialized
+    if version == 'new':
         pupil = list_to_stream(pupil)
         gaze = list_to_stream(gaze)
 
@@ -119,9 +122,10 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=No
 
     fake_gpool = gen_fakepool(gaze, calibration_mode) # gets default parameters for calibration data
 
+    calib_generator = finish_calibration(fake_gpool, pupil, ref)
     # method, result = select_calibration_method(fake_gpool, pupil_list, ref_list)
-    logger.info(calibrate_and_map)
-    calib_generator = calibrate_and_map(fake_gpool, ref, pupil, gaze, 0, 0)  # here the actual calibration is done
+    #logger.info(calibrate_and_map)
+    #calib_generator = calibrate_and_map(fake_gpool, ref, pupil, gaze, 0, 0)  # here the actual calibration is done
     # calibrate_and_map should work correctly, but check in future if errors.
 
     tmp = next(calib_generator)  # start once
@@ -144,4 +148,5 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, calibration_mode='2d', eyeID=No
         logger.error('error')
         pass
     calib_generator.close()
-    return output
+    return calib_generator#output
+

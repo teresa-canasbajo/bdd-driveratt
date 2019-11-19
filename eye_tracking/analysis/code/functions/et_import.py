@@ -60,8 +60,8 @@ def pl_fix_timelag(pl):
 def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
-    from shared_modules import file_methods as pl_file_methods
-    from debug import file_methods_newplversion
+    from pupil_new.pupil_src.shared_modules import file_methods as pl_file_methods
+
     if subject == '':
         filename = datapath
     else:
@@ -83,8 +83,8 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
         print('Newer pupil capture used')
         version = 'new'
-        original_pldata = file_methods_newplversion.load_pldata_file(datapath, 'pupil')
-        notifications = file_methods_newplversion.load_pldata_file(datapath, 'notify')
+        original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
+        notifications = pl_file_methods.load_pldata_file(datapath, 'notify')
         print('notifications_assigned')
     # TODO Dhakshi redo this:
     # original_pldata = pl_file_methods.Incremental_Legacy_Pupil_Data_Loader(os.path.join(filename,'pupil_data'))
@@ -155,7 +155,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     # recalibrate data
     if recalib:
-        from eye_tracking.analysis.code.functions import nbp_recalib
+        from debug import debug_nbp_recalib as nbp_recalib
         # added following line to resolve issue: original_pldata not acting as dictionary --> can't call or add keys
         if version == 'new':
             original_pldata = original_pldata._asdict()
@@ -201,14 +201,17 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
         gridnotes = [note for note in original_pldata['notifications'] if 'label' in note.keys()]
-        plmsgs = pd.DataFrame();
+        # come back and fix !!
+        #gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
+        plmsgs = pd.DataFrame()
         for note in gridnotes:
             msg = parse.parse_message(note)
             if not msg.empty:
                 plmsgs = plmsgs.append(msg, ignore_index=True)
         plmsgs = fix_smallgrid_parser(plmsgs)
     else:
-        plmsgs = original_pldata['notifications']
+        #plmsgs = original_pldata['notifications']
+        plmsgs = notifications['data']
 
     plevents = pd.DataFrame()
     return plsamples, plmsgs, plevents

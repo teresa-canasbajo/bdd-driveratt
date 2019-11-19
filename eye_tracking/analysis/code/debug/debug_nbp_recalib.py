@@ -10,7 +10,7 @@ Output:
 """
 
 import numpy as np
-import functions.pl_recalib as pl
+import debug.debug_pl_recalib as pl
 
 
 def nbp_recalib(pupil, notifications, version, calibration_mode='2d', eyeID=None,):
@@ -37,7 +37,7 @@ def nbp_recalib(pupil, notifications, version, calibration_mode='2d', eyeID=None
 
     # we need a loop because there may be multiple calibrations
     for calib_idx, single_calib in enumerate(calib_data):
-        if calib_idx < 1:
+        if calib_idx == 1:
             print('Calculating Recalibration Function')
             tstart = single_calib['pupil_list'][0]['timestamp'] # when calibration started
             tend = single_calib['pupil_list'][-1]['timestamp'] # when calibration finished
@@ -70,9 +70,15 @@ def nbp_recalib(pupil, notifications, version, calibration_mode='2d', eyeID=None
 
             try:
                 ## needs to be changed cause it's old function calib_generator
-                single_recalib_data = pl.pl_recalibV2(single_calib['pupil_list'], single_calib['ref_list'],
-                                                      pupilPosition_cut, calibration_mode=calibration_mode, eyeID=eyeID)
+                a = single_calib['pupil_list']
+                b = single_calib['ref_list']
+                c = pupilPosition_cut
+                # serialization issue maybe
+                single_recalib_data = pl.pl_recalibV2(a, b, c)#, calibration_mode=calibration_mode, eyeID=eyeID)
+
+              #  single_recalib_data = pl.pl_recalibV2(single_calib['pupil_list'], single_calib['ref_list'], pupilPosition_cut)#, calibration_mode=calibration_mode, eyeID=eyeID)
                 # single_recalib_data = gaze_offline_calib._setup_controllers()
+
             except:
                 continue
 
