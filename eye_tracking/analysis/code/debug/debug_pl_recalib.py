@@ -37,6 +37,14 @@ try:
     from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.calibration_routines.finish_calibration import \
         finish_calibration, select_calibration_method
 
+    from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.calibration_routines.gaze_mappers import *
+
+    from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.gaze_producer.controller import *
+    from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.gaze_producer.controller.calculate_all_controller import calculate_all
+
+    from eye_tracking.analysis.lib.pupil_new.pupil_src.shared_modules.gaze_producer.gaze_from_offline_calibration import *
+
+
     #wrong, old version
     #from eye_tracking.analysis.lib.pupil.pupil_src.shared_modules.gaze_producers import calibrate_and_map
 
@@ -109,25 +117,50 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, version='new', calibration_mode
     ref = copy.copy(ref_list)
     gaze = copy.copy(inp_gaze)
 
+
+    #from pupil_new.pupil_src.shared_modules.gaze_producer import gaze_from_offline_calibration
+
+    #offline_calib = gaze_from_offline_calibration.GazeFromOfflineCalibration(gaze)
+
     # to check pupil labs version
     # there seems to be some problem here
     #if hasattr(lib.pupil.pupil_src.shared_modules.player_methods, 'Bisector'):
         # pupillab v1.8 or newer needs the data serialized
-    if version == 'new':
-        pupil = list_to_stream(pupil)
-        gaze = list_to_stream(gaze)
+    #if version == 'new':
+      #  pupil = list_to_stream(pupil)
+       # gaze = list_to_stream(gaze)
 
     if eyeID is not None:  # remove everthing nonspecified
         pupil = [p for p in pupil if p['id'] == eyeID]
 
     fake_gpool = gen_fakepool(gaze, calibration_mode) # gets default parameters for calibration data
 
-    calib_generator = finish_calibration(fake_gpool, pupil, ref)
+    #logger.info(finish_calibration)
+    #calib_generator = finish_calibration(fake_gpool, pupil, ref)
+    #is there a reason why gpool_user directory is in home/whitney/pupil_player_settings/user_calibration_data?
+    #in finish_calibration, it's stopping after the save function - nothing seems to be getting saved, but why?
+    #maybe this is all that's needed once it gets past saving?
+
+    #GazeFromOfflineCalibration(fake_gpool)._setup_controllers()
+
+    #CalibrationController().calculate(finish_calibration(fake_gpool, pupil, ref))
+
+    #calib_generator = Binocular_Gaze_Mapper_Base(g_pool=fake_gpool).map_batch(pupil)
+    #results.extend for loop - results not updating, breaking in datum?
+    #perhaps, this is the wrong function - too deep, instead look 1 above in gaze producers
+
+    #the following is from gaze_producers
+    logger.info(calculate_all)
+    calib_generator = calculate_all()
+
+    #calib_generator = Binocular_Gaze_Mapper(g_pool=fake_gpool, params=gaze)._map_binocular()
+    #doesn't even go into calibrate.make_map_function
+
+    # maybe gaze_mappers class for second half of calibrate_and_map?
     # method, result = select_calibration_method(fake_gpool, pupil_list, ref_list)
     #logger.info(calibrate_and_map)
-    #calib_generator = calibrate_and_map(fake_gpool, ref, pupil, gaze, 0, 0)  # here the actual calibration is done
+    ###calib_generator = calibrate_and_map(fake_gpool, ref, pupil, gaze, 0, 0)  # here the actual calibration is done
     # calibrate_and_map should work correctly, but check in future if errors.
-
     tmp = next(calib_generator)  # start once
     output = []
     try:
@@ -148,5 +181,5 @@ def pl_recalibV2(pupil_list, ref_list, inp_gaze, version='new', calibration_mode
         logger.error('error')
         pass
     calib_generator.close()
-    return calib_generator#output
+    return output
 
