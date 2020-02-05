@@ -17,3 +17,6 @@ glfw
 matplotlib
 nslr
 python-dateutil
+av
+opencv-python
+pyrealsense2
