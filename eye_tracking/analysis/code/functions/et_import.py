@@ -85,8 +85,10 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
         version = 'new'
         original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
         notifications = pl_file_methods.load_pldata_file(datapath, 'notify')
+        gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
+
         print('notifications_assigned')
-    # TODO Dhakshi redo this:
+
     # original_pldata = pl_file_methods.Incremental_Legacy_Pupil_Data_Loader(os.path.join(filename,'pupil_data'))
     # 'notification'
     # dict_keys(['record', 'subject', 'timestamp', 'label', 'duration'])
