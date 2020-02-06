@@ -104,7 +104,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
     # Fix the (possible) timelag of pupillabs camera vs. computer time
 
-    return original_pldata, notifications, version
+    return original_pldata, notifications, version, gaze
 
 # surfaceMap False in et_import for testing purposes
 def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=False,
@@ -137,7 +137,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # Get samples df
     # (is still a dictionary here)
     # this works already
-    original_pldata, notifications, version = raw_pl_data(subject=subject, datapath=datapath)
+    original_pldata, notifications, version, gaze = raw_pl_data(subject=subject, datapath=datapath)
 
     # detect pupil positions, not sure if we need:
     if pupildetect is not None:  # can be 2d or 3d
@@ -184,6 +184,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         original_pldata['gaze_positions'] = gaze_on_srf
 
     # use pupilhelper func to make samples df (confidence, gx, gy, smpl_time, diameter)
+    original_pldata = original_pldata._asdict()
+    original_pldata['gaze_positions'] = gaze
     pldata = gaze_to_pandas(original_pldata['gaze_positions'])
     print('pldata', pldata)
 
@@ -202,7 +204,10 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     if parsemsg:
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
-        gridnotes = [note for note in original_pldata['notifications'] if 'label' in note.keys()]
+        topics = [n for n in notifications[2]]
+        gridnotes = [note for note in notifications[0] if topics[0] in notifications[0][0]['subject']]
+        # gridnotes.append(note for note in notifications[0] if topics[1] in notifications[0][0]['subject'])
+        # gridnotes.append(note for note in notifications[0] if topics[2] in notifications[0][0]['subject'])
         # come back and fix !!
         #gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
         plmsgs = pd.DataFrame()
