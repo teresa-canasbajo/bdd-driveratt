@@ -10,3 +10,9 @@
 	url = https://github.com/pupil-labs/pupil
 	ignore = dirty
 
+[submodule "libuvc"]
+	path = libuvc
+	url = https://github.com/pupil-labs/libuvc
+[submodule "eye_tracking/analysis/lib/pyuvc"]
+	path = eye_tracking/analysis/lib/pyuvc
+	url = https://github.com/pupil-labs/pyuvc

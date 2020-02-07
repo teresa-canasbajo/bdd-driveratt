@@ -31,6 +31,7 @@ def make_samples_df(etsamples, px2deg=True):
     etsamples_reduced = etsamples.loc[:, fields_to_copy]
 
     for fieldname in fields_to_fillin:
+        # error: cannot set a frame with no defined index and a scalar
         etsamples_reduced.loc[:, fieldname] = np.nan
 
     if px2deg:

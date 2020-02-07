@@ -27,7 +27,7 @@ python-reqs: ${VENV}
 	)
 
 
-compile-dependencies: pyav opencv glfw ceres pyglui
+compile-dependencies: cysignals pyav opencv glfw glog ceres
 		echo 'done'
 
 uneyesrc = ${installfolder}/build/src_uneye
@@ -56,34 +56,48 @@ ${glfwsrc}:
 		git clone https://github.com/glfw/glfw ${glfwsrc}
 
 ${glfwbuild}:
-		mkdir ${glfwsrc}/build
+		# mkdir ${glfwsrc}/build
 		cd ${glfwsrc}/build && \
 		cmake -DCMAKE_INSTALL_PREFIX='../../build_glfw' -DBUILD_SHARED_LIBS=ON ../ &&\
 		make -j && \
 		make install
 
+cysignalssrc = ${installfolder}/build/src_cysignals
+
+${cysignalssrc}:
+		git clone https://github.com/sagemath/cysignals ${cysignalssrc}
+
+cysignals: ${VENV} ${cysignalssrc}
+		echo 'trying to install cysignals..' 
+		cd ${cysignalssrc} && \
+		sudo apt-get install python3-sphinx && \
+		make configure && \
+		make && \
+		make install && \
+		echo 'installed cysignals' 
 
 pyavsrc = ${installfolder}/build/src_pyav
 
 ${pyavsrc}:
-		git clone https://github.com/pupil-labs/PyAV ${pyavsrc}
+		git clone git@github.com:mikeboers/PyAV ${pyavsrc}
 
 pyav: ${VENV} ${pyavsrc} ffmpeg
 		cd ${pyavsrc} && \
-		git checkout setup.py && \
-		sed -e "s/'avformat_open_input'/'avformat_open_input'/g" setup.py --> test.py && \
-		export PKG_CONFIG_PATH=:${CURDIR}/${ffmpegbuild}/lib/pkgconfig:${PKG_CONFIG_PATH} && \
-		sudo python3 setup.py install
+        ./scripts/build-deps && \
+        make
 
-pygluisrc = ${installfolder}/build/src_pyglui
+# pygluisrc = ${installfolder}/build/src_pyglui
 
-${pygluisrc}:
-		git clone http://github.com/pupil-labs/pyglui --recursive ${pygluisrc}
+#${pygluisrc}:
+		#git clone http://github.com/pupil-labs/pyglui --recursive ${pygluisrc}
 
-pyglui: ${VENV} ${pygluisrc}
-		cd ${pygluisrc} && \
-		git checkout setup.py && \
-		sudo python3 setup.py install
+# git checkout setup.py && \
+#
+# pyglui: ${VENV} ${pygluisrc}
+# 		cd ${pygluisrc} && \
+# 		sudo python3 setup.py install
+
+
 
 opencvsrc = ${installfolder}/build/src_opencv
 opencvbuild = ${installfolder}/build/build_opencv
@@ -107,7 +121,7 @@ ${opencvbuild}: ${opencvsrc}
                 make install
 		# now add opencv to python
 		echo 'set up for python 3.6, you may need to adjust for your python version'
-		cp ${opencvbuild}/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so ${VENV}/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so
+		cp ${opencvbuild}/lib/python3.7/site-packages/cv2.cpython-37m-x86_64-linux-gnu.so ${VENV}/lib/python3.7/site-packages/cv2.cpython-37m-x86_64-linux-gnu.so
 
 cleanopencv:
 		rm -r ${opencvbuild}
@@ -132,10 +146,21 @@ ${eigensrc}:
 		cd ${eigensrc}&&\
 		git checkout tags/3.3.4
 
+glogsrc = ${installfolder}/build/src_glog/
+
+#${glogsrc}:
+ #       git clone https://github.com/google/glog ${glogsrc}
+
+glog: ${VENV} ${glogsrc}
+		cd ${glogsrc} && \
+		cmake -H. -Bbuild -G 'Unix Makefiles' && \
+		cmake --build build
+
 #suitesparsesrc   = ${installfolder}/build/src_suitesparse
 #suitesparsebuild = ${installfolder}/build/build_suitesparse
 
 #${suitesparsesrc}: #
+
 #		git clone https://github.com/jlblancoc/suitesparse-metis-for-windows/ ${suitesparsesrc}
 
 

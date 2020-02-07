@@ -16,5 +16,7 @@ msgpack_python
 glfw
 matplotlib
 nslr
-cysignals
 python-dateutil
+av
+opencv-python
+pyrealsense2

@@ -8,13 +8,18 @@ import pandas as pd
 import os
 import logging
 
+##########
+# TODO: next functions will need to be looked at before adding them to the respository. Right now i've deleted them so I need
+# to uncomment the following imports:
+
 from functions.et_helper import findFile, gaze_to_pandas
-import functions.et_parse as parse
+#import functions.et_parse as parse
 import functions.et_make_df as make_df
 import functions.et_helper as helper
-from IPython.core.debugger import set_trace
 
-import imp  # for edfread reload
+
+########
+
 
 import scipy
 import scipy.stats
@@ -55,8 +60,8 @@ def pl_fix_timelag(pl):
 def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
-    from shared_modules import file_methods as pl_file_methods
-    from debug import file_methods_newplversion
+    from pupil_new.pupil_src.shared_modules import file_methods as pl_file_methods
+
     if subject == '':
         filename = datapath
     else:
@@ -78,10 +83,12 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
         print('Newer pupil capture used')
         version = 'new'
-        original_pldata = file_methods_newplversion.load_pldata_file(datapath, 'pupil')
-        notifications = file_methods_newplversion.load_pldata_file(datapath, 'notify')
+        original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
+        notifications = pl_file_methods.load_pldata_file(datapath, 'notify')
+        gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
+
         print('notifications_assigned')
-    # TODO Dhakshi redo this:
+
     # original_pldata = pl_file_methods.Incremental_Legacy_Pupil_Data_Loader(os.path.join(filename,'pupil_data'))
     # 'notification'
     # dict_keys(['record', 'subject', 'timestamp', 'label', 'duration'])
@@ -97,7 +104,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
     # Fix the (possible) timelag of pupillabs camera vs. computer time
 
-    return original_pldata, notifications, version
+    return original_pldata, notifications, version, gaze
 
 # surfaceMap False in et_import for testing purposes
 def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=False,
@@ -130,7 +137,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # Get samples df
     # (is still a dictionary here)
     # this works already
-    original_pldata, notifications, version = raw_pl_data(subject=subject, datapath=datapath)
+    original_pldata, notifications, version, gaze = raw_pl_data(subject=subject, datapath=datapath)
 
     # detect pupil positions, not sure if we need:
     if pupildetect is not None:  # can be 2d or 3d
@@ -150,7 +157,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     # recalibrate data
     if recalib:
-        from eye_tracking.analysis.code.functions import nbp_recalib
+        from debug import debug_nbp_recalib as nbp_recalib
         # added following line to resolve issue: original_pldata not acting as dictionary --> can't call or add keys
         if version == 'new':
             original_pldata = original_pldata._asdict()
@@ -177,6 +184,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         original_pldata['gaze_positions'] = gaze_on_srf
 
     # use pupilhelper func to make samples df (confidence, gx, gy, smpl_time, diameter)
+    original_pldata = original_pldata._asdict()
+    original_pldata['gaze_positions'] = gaze
     pldata = gaze_to_pandas(original_pldata['gaze_positions'])
     print('pldata', pldata)
 
@@ -195,15 +204,21 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     if parsemsg:
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
-        gridnotes = [note for note in original_pldata['notifications'] if 'label' in note.keys()]
-        plmsgs = pd.DataFrame();
+        topics = [n for n in notifications[2]]
+        gridnotes = [note for note in notifications[0] if topics[0] in notifications[0][0]['subject']]
+        # gridnotes.append(note for note in notifications[0] if topics[1] in notifications[0][0]['subject'])
+        # gridnotes.append(note for note in notifications[0] if topics[2] in notifications[0][0]['subject'])
+        # come back and fix !!
+        #gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
+        plmsgs = pd.DataFrame()
         for note in gridnotes:
             msg = parse.parse_message(note)
             if not msg.empty:
                 plmsgs = plmsgs.append(msg, ignore_index=True)
         plmsgs = fix_smallgrid_parser(plmsgs)
     else:
-        plmsgs = original_pldata['notifications']
+        #plmsgs = original_pldata['notifications']
+        plmsgs = notifications['data']
 
     plevents = pd.DataFrame()
     return plsamples, plmsgs, plevents
