@@ -201,19 +201,17 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # get the nice samples df
     plsamples = make_df.make_samples_df(pldata, px2deg=px2deg)
 
+    notifications = notifications._asdict()
     if parsemsg:
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
-        topics = [n for n in notifications[2]]
-        gridnotes = [note for note in notifications[0] if topics[0] in notifications[0][0]['subject']]
-        # gridnotes.append(note for note in notifications[0] if topics[1] in notifications[0][0]['subject'])
-        # gridnotes.append(note for note in notifications[0] if topics[2] in notifications[0][0]['subject'])
+
+        gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
         # come back and fix !!
         #gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
         plmsgs = pd.DataFrame()
         for note in gridnotes:
             msg = parse.parse_message(note)
-            
             if not msg.empty:
                 plmsgs = plmsgs.append(msg, ignore_index=True)
         plmsgs = fix_smallgrid_parser(plmsgs)

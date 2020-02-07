@@ -25,6 +25,7 @@ def gaze_to_pandas(gaze):
 
     list_diam = []
     list_pa = []
+    gaze = gaze[0]
     for idx, p in enumerate(gaze):
 
         if p:
