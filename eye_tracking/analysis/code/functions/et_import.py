@@ -213,6 +213,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         plmsgs = pd.DataFrame()
         for note in gridnotes:
             msg = parse.parse_message(note)
+            
             if not msg.empty:
                 plmsgs = plmsgs.append(msg, ignore_index=True)
         plmsgs = fix_smallgrid_parser(plmsgs)
