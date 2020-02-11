@@ -13,10 +13,9 @@ import logging
 # to uncomment the following imports:
 
 from functions.et_helper import findFile, gaze_to_pandas
-#import functions.et_parse as parse
+# import functions.et_parse as parse
 import functions.et_make_df as make_df
 import functions.et_helper as helper
-
 
 ########
 
@@ -37,7 +36,7 @@ def pl_fix_timelag(pl):
     slope, intercept, low, high = scipy.stats.theilslopes(t_cam, t_msg)
     logger = logging.getLogger(__name__)
     logger.warning("fixing lag (at t=0) of :%.2fms, slope of %.7f (in a perfect world this is 0ms & 1.0)" % (
-    intercept * 1000, slope))
+        intercept * 1000, slope))
     # fill it back in
     # gonna do it with a for-loop because other stuff is too voodo or not readable for me
 
@@ -74,7 +73,6 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     # if old version, your data will be in pupil_data
     # if newer version, your data will be in pupil.pldata
 
-
     if os.path.exists(os.path.join(filename, 'pupil_data')):
         print('Old pupil capture used')
         version = 'old'
@@ -106,9 +104,11 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
     return original_pldata, notifications, version, gaze
 
+
 # surfaceMap False in et_import for testing purposes
+# parsemsg False: not currently working, may be needed in the future if notifications of start/end/etc important
 def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=False,
-              parsemsg=True, fixTimeLag=True, px2deg=True, pupildetect=None,
+              parsemsg=False, fixTimeLag=False, px2deg=True, pupildetect=None,
               pupildetect_options=None):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
@@ -163,7 +163,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
             original_pldata = original_pldata._asdict()
             notifications = notifications._asdict()
         if pupildetect is not None:
-            original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications, calibration_mode=pupildetect)
+            original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications,
+                                                                        calibration_mode=pupildetect)
         original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications, version)
 
     # Fix timing Pupillabs cameras ,have their own timestamps & clock. The msgs are clocked via computertime.
@@ -173,7 +174,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     # here we are:
     if surfaceMap:
-        folder = os.path.join(datapath) # before it was taking subject, 'raw' as args
+        folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
 
         # we have fixed map_surface!
         tracker = pl_surface.map_surface(folder, loadCache=True)  # originally was True
@@ -202,13 +203,14 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     plsamples = make_df.make_samples_df(pldata, px2deg=px2deg)
 
     notifications = notifications._asdict()
+
     if parsemsg:
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
 
         gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
         # come back and fix !!
-        #gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
+        # gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
         plmsgs = pd.DataFrame()
         for note in gridnotes:
             msg = parse.parse_message(note)
@@ -216,7 +218,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
                 plmsgs = plmsgs.append(msg, ignore_index=True)
         plmsgs = fix_smallgrid_parser(plmsgs)
     else:
-        #plmsgs = original_pldata['notifications']
+        # plmsgs = original_pldata['notifications']
         plmsgs = notifications['data']
 
     plevents = pd.DataFrame()

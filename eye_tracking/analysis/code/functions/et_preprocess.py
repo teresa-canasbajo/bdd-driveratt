@@ -21,7 +21,7 @@ from functions.detect_events import make_blinks, make_saccades, make_fixations
 from functions.detect_bad_samples import detect_bad_samples, remove_bad_samples
 from functions.et_helper import add_events_to_samples
 from functions.et_helper import load_file, save_file
-#from functions.et_make_df import make_events_df
+from functions.et_make_df import make_events_df
 #import functions.et_helper as helper
 #################
 
@@ -65,6 +65,7 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     for evtfunc in eventfunctions:
         logger.debug('Events: calling %s', evtfunc.__name__)
         etsamples, etevents = evtfunc(etsamples, etevents)
+
 
     # Make a nice etevent df
     etevents = make_events_df(etevents)

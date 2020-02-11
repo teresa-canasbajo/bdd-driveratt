@@ -338,7 +338,8 @@ def save_file(data, subject, datapath, outputprefix=''):
     # make separate csv file for every df 
     data[0].to_csv(os.path.join(preprocessed_path, filename_samples), index=False)
     data[1].to_csv(os.path.join(preprocessed_path, filename_cleaned_samples), index=False)
-    data[2].to_csv(os.path.join(preprocessed_path, filename_msgs), index=False)
+    # since notifications not relevant, did not properly process data[2] information
+    # data[2].to_csv(os.path.join(preprocessed_path, filename_msgs), index=False)
     data[3].to_csv(os.path.join(preprocessed_path, filename_events), index=False)
 
 

@@ -16,7 +16,7 @@ elif platform == 'linux' and hostname == 'teresa-desktop':
     super_best = '/home/teresa//Documents/demos/super_best'
 
 # surfaceMap False in et_import for testing purposes
-data = preprocess_et(subject='', datapath=super_best, save=True, eventfunctions=(make_blinks,make_saccades,make_fixations))
+data = preprocess_et(subject='', datapath=super_best, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
 
 # preprocess_et does not take et anymore
 
