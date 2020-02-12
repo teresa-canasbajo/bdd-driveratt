@@ -15,8 +15,11 @@ elif (platform == 'linux' or platform == 'linux2') and hostname != 'teresa-deskt
 elif platform == 'linux' and hostname == 'teresa-desktop':
     super_best = '/home/teresa//Documents/demos/super_best'
 
+demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
+
 # surfaceMap False in et_import for testing purposes
-data = preprocess_et(subject='', datapath=super_best, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
+# data = preprocess_et(subject='', datapath=super_best, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
+data = preprocess_et(subject='', datapath=demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
 
 # preprocess_et does not take et anymore
 

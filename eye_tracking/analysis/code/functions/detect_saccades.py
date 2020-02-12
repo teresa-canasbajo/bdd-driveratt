@@ -305,8 +305,14 @@ def interpolate_gaze(etsamples, fs=None):
     #    idx_notnan = etsamples[np.isfinite(etsamples.gx)].index
     #    idx_nan = etsamples[np.isnan(etsamples.gx)].index
 
+    # etsamples['gx'].dropna(inplace=True)
+    # etsamples['gy'].dropna(inplace=True)
     etsamples['gx'].fillna(0, inplace=True)
     etsamples['gy'].fillna(0, inplace=True)
+    # etsamples.dropna(subset=['gx'], inplace=True)
+    # etsamples.dropna(subset=['gy'], inplace=True)
+    # etsamples = etsamples.dropna(subset=['gx'])
+    # etsamples = etsamples.dropna(subset=['gy'])
 
     # find the time range
     fromT = etsamples.smpl_time.iloc[0]  # find the first sample

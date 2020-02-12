@@ -25,12 +25,12 @@ def gaze_to_pandas(gaze):
 
     list_diam = []
     list_pa = []
-    gaze = gaze[0]
+    gaze = gaze.data # filter only for data
     for idx, p in enumerate(gaze):
 
         if p:
             if 'surface' in gaze[0]['topic']:
-                # we have a surface mapped dictionairy. We have to get the real base_data
+                # we have a surface mapped dictionary. We have to get the real base_data
                 # the schachtelung is: surfacemapped => base_data World Mapped => base_data pupil
                 p_basedata = p['base_data']['base_data']
             else:
