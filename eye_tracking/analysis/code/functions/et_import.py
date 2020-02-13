@@ -200,7 +200,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     pldata.sort_values('smpl_time', inplace=True)
 
     # get the nice samples df
-    plsamples = make_df.make_samples_df(pldata, px2deg=px2deg)
+    # px2deg is set to False so gx & gy values do not change - original set to px2deg, which is True (also in default = True)
+    plsamples = make_df.make_samples_df(pldata, px2deg=False)
 
     notifications = notifications._asdict()
 

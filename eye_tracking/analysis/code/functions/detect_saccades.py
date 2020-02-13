@@ -300,19 +300,9 @@ def interpolate_gaze(etsamples, fs=None):
 
     logger.debug('Start.... Interpolating Samples')
 
-    #    # teresa added this because gx and gy had some nans that were not letting me do the interp
-    #    fixed_etsamples = etsamples[np.isfinite(etsamples.gx)]
-    #    idx_notnan = etsamples[np.isfinite(etsamples.gx)].index
-    #    idx_nan = etsamples[np.isnan(etsamples.gx)].index
-
-    # etsamples['gx'].dropna(inplace=True)
-    # etsamples['gy'].dropna(inplace=True)
+    # teresa added this because gx and gy had some nans that were not letting me do the interp
     etsamples['gx'].fillna(0, inplace=True)
     etsamples['gy'].fillna(0, inplace=True)
-    # etsamples.dropna(subset=['gx'], inplace=True)
-    # etsamples.dropna(subset=['gy'], inplace=True)
-    # etsamples = etsamples.dropna(subset=['gx'])
-    # etsamples = etsamples.dropna(subset=['gy'])
 
     # find the time range
     fromT = etsamples.smpl_time.iloc[0]  # find the first sample

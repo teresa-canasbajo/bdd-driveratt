@@ -45,9 +45,8 @@ def make_samples_df(etsamples, px2deg=True):
 
 def make_events_df(etevents):
     # why do we have an end_point column?
-    fields_to_keep = set(
-        ['blink_id', 'start_gx', 'start_gy', 'end_gx', 'end_gy', 'end_time', 'start_time', 'type', 'amplitude',
-         'duration', 'end_point', 'peak_velocity', 'mean_gx', 'mean_gy', 'rms', 'sd'])
+    fields_to_keep = {'blink_id', 'start_gx', 'start_gy', 'end_gx', 'end_gy', 'end_time', 'start_time', 'type',
+                      'amplitude', 'duration', 'end_point', 'peak_velocity', 'mean_gx', 'mean_gy', 'rms', 'sd'}
 
     fields_to_fill_in = fields_to_keep - set(etevents.columns)
     fields_to_copy = fields_to_keep - fields_to_fill_in
