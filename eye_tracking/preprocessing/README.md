@@ -1,5 +1,5 @@
 
-# Analysis pipeline
+# Preprocessing pipeline
 ## Installation
 
 1. Clone project and intialize submodules
