@@ -18,7 +18,7 @@ from PIL import ImageFont
 from PIL import ImageOps
 
 # For extracting frames
-from functions.manual_detection import extract_frames, print_progress_bar
+from eye_tracking.analysis.categorization.manual_detection import extract_frames, print_progress_bar
 from glob import glob
 import os
 import json
@@ -157,7 +157,7 @@ def main():
 		"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
 		"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
 	]
-	frames_path = './simulation_frames_cut'
+	frames_path = './billboard_frames_cut'
 	# extract_frames('/home/whitney/Downloads/bin_recording.mkv', frames_path)
 	frames = detect_objects(frames_path, detector)
 	with open('./frames.json', 'w') as f:
