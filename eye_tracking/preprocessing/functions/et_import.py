@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-import numpy as np
 import pandas as pd
 
 import os
@@ -14,18 +12,14 @@ import logging
 
 from eye_tracking.preprocessing.functions.et_helper import findFile, gaze_to_pandas
 import eye_tracking.preprocessing.functions.et_make_df as make_df
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as pl_file_methods
+
 
 ########
-
-
-import scipy
-import scipy.stats
-
 
 def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
-    from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as pl_file_methods
 
     if subject == '':
         filename = datapath
@@ -71,7 +65,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         try:
             import functions.pl_surface_forTesting as pl_surface
         except ImportError:
-            raise ('Custom Error:Could not import pl_surface')
+            raise Exception('Custom Error:Could not import pl_surface')
 
     assert (type(subject) == str)
 
@@ -109,7 +103,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     plsamples = make_df.make_samples_df(pldata)
 
     notifications = notifications._asdict()
-
     if parsemsg:
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
@@ -124,7 +117,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
                 plmsgs = plmsgs.append(msg, ignore_index=True)
         plmsgs = fix_smallgrid_parser(plmsgs)
     else:
-        # plmsgs = original_pldata['notifications']
         plmsgs = notifications['data']
 
     plevents = pd.DataFrame()

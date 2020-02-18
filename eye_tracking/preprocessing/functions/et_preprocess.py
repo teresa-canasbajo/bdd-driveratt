@@ -17,7 +17,6 @@ from eye_tracking.preprocessing.functions.et_helper import add_events_to_samples
 from eye_tracking.preprocessing.functions.et_helper import load_file, save_file
 from eye_tracking.preprocessing.functions.et_make_df import make_events_df
 
-import os
 import logging
 
 
@@ -53,7 +52,6 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     for evtfunc in eventfunctions:
         logger.debug('Events: calling %s', evtfunc.__name__)
         etsamples, etevents = evtfunc(etsamples, etevents)
-
 
     # Make a nice etevent df
     etevents = make_events_df(etevents)
