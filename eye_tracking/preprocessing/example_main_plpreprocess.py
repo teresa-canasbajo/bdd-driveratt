@@ -1,6 +1,5 @@
-from debug.debug_pl_surface import *
-from functions.et_preprocess import *
-import functions.add_path as add_path
+from eye_tracking.preprocessing.debug.debug_pl_surface import *
+from eye_tracking.preprocessing.functions.et_preprocess import *
 
 from sys import platform
 import socket
@@ -18,12 +17,6 @@ elif platform == 'linux' and hostname == 'teresa-desktop':
 demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
 
 # surfaceMap False in et_import for testing purposes
-# data = preprocess_et(subject='', datapath=super_best, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
 data = preprocess_et(subject='', datapath=demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
-
-# preprocess_et does not take et anymore
-
-
-#test = map_surface(super_best)
 
 print('done!')

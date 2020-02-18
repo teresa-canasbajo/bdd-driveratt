@@ -57,7 +57,7 @@ def pl_fix_timelag(pl):
 def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
-    from pupil_new.pupil_src.shared_modules import file_methods as pl_file_methods
+    from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as pl_file_methods
 
     if subject == '':
         filename = datapath
@@ -67,40 +67,18 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     # with dict_keys(['notifications', 'pupil_positions', 'gaze_positions'])
     # where each value is a list that contains a dictionary
 
-    # IMPORTANT: the file to use depends on which version of Pupil labs you used to record.
-    # if old version, your data will be in pupil_data
-    # if newer version, your data will be in pupil.pldata
-
     if os.path.exists(os.path.join(filename, 'pupil_data')):
-        print('Old pupil capture used')
-        version = 'old'
-        original_pldata = pl_file_methods.load_object(os.path.join(filename, 'pupil_data'))
-        notifications = []
+        logging.warning('This code only works for data from pupil capture versions greater than 1.17. Please update '
+                        'your pupil capture & try again with new data.')
+
     elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
         print('Newer pupil capture used')
-        version = 'new'
         original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
         notifications = pl_file_methods.load_pldata_file(datapath, 'notify')
         gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
-
         print('notifications_assigned')
 
-    # original_pldata = pl_file_methods.Incremental_Legacy_Pupil_Data_Loader(os.path.join(filename,'pupil_data'))
-    # 'notification'
-    # dict_keys(['record', 'subject', 'timestamp', 'label', 'duration'])
-
-    # 'pupil_positions'
-    # dict_keys(['diameter', 'confidence', 'method', 'norm_pos', 'timestamp', 'id', 'topic', 'ellipse'])
-
-    # 'gaze_positions'
-    # dict_keys(['base_data', 'timestamp', 'topic', 'confidence', 'norm_pos'])
-    # where 'base_data' has a dict within a list
-    # dict_keys(['diameter', 'confidence', 'method', 'norm_pos', 'timestamp', 'id', 'topic', 'ellipse'])
-    # where 'normpos' is a list (with horizon. and vert. component)
-
-    # Fix the (possible) timelag of pupillabs camera vs. computer time
-
-    return original_pldata, notifications, version, gaze
+    return original_pldata, notifications, gaze
 
 
 # surfaceMap False in et_import for testing purposes
@@ -119,10 +97,12 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     assert (not surfaceMap, 'Surface detector NOT functional yet. If you want to continue without it, please turn '
                             'surfaceMap to False')
     if surfaceMap:
-        logging.warning('Surface detector NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
+        logging.warning(
+            'Surface detector NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
 
     if recalib:
-        logging.warning('Recalib NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
+        logging.warning(
+            'Recalib NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
 
     if pupildetect:
         # has to be imported first
@@ -144,7 +124,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # Get samples df
     # (is still a dictionary here)
     # this works already
-    original_pldata, notifications, version, gaze = raw_pl_data(subject=subject, datapath=datapath)
+    original_pldata, notifications, gaze = raw_pl_data(subject=subject, datapath=datapath)
 
     # detect pupil positions, not sure if we need:
     if pupildetect is not None:  # can be 2d or 3d

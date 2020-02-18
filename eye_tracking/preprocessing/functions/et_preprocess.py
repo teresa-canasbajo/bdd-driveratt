@@ -10,21 +10,12 @@ Modified: Saturday Fri Feb 15
 @author: tere93
 """
 
-import functions.add_path
-# import pandas as pd
-# import numpy as np
-# import os
-
 from eye_tracking.preprocessing.functions.et_import import import_pl
-
-
-
 from eye_tracking.preprocessing.functions.detect_events import make_blinks, make_saccades, make_fixations
 from eye_tracking.preprocessing.functions.detect_bad_samples import detect_bad_samples, remove_bad_samples
 from eye_tracking.preprocessing.functions.et_helper import add_events_to_samples
 from eye_tracking.preprocessing.functions.et_helper import load_file, save_file
 from eye_tracking.preprocessing.functions.et_make_df import make_events_df
-
 
 import os
 import logging
@@ -50,7 +41,6 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     # import pl data
     logger.debug("Importing et data")
     logger.debug('Caution: etevents might be empty')
-    # we are still here, in import pl:
     etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, fixTimeLag=False, recalib=False, surfaceMap=False, **kwargs)
 
     # Mark bad samples
