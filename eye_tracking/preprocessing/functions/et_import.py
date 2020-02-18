@@ -52,7 +52,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 # surfaceMap False in et_import for testing purposes
 # parsemsg False: not currently working, may be needed in the future if notifications of start/end/etc important
 def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=False,
-              parsemsg=False, pupildetect=None, pupildetect_options=None):
+              parsemsg=False):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
     #           surfaceMap:
@@ -71,14 +71,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         logging.warning(
             'Recalib NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
 
-    if pupildetect:
-        # has to be imported first
-        import av
-        import ctypes
-        # not needed for now
-        ctypes.cdll.LoadLibrary(
-            '/net/store/nbp/users/behinger/projects/etcomp/local/build/build_ceres_working/lib/libceres.so.2')
-
     if surfaceMap:
         # has to be imported before nbp recalib
         try:
@@ -93,20 +85,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # this works already
     original_pldata, notifications, gaze = raw_pl_data(subject=subject, datapath=datapath)
 
-    # detect pupil positions, not sure if we need:
-    if pupildetect is not None:  # can be 2d or 3d
-        from eye_tracking.analysis.code.functions.nbp_pupildetect import nbp_pupildetect
-        if subject == '':
-            filename = datapath
-        else:
-            filename = os.path.join(datapath, subject, 'raw')
-
-        pupil_positions_0 = nbp_pupildetect(detector_type=pupildetect, eye_id=0, folder=filename,
-                                            pupildetect_options=pupildetect_options)
-        pupil_positions_1 = nbp_pupildetect(detector_type=pupildetect, eye_id=1, folder=filename,
-                                            pupildetect_options=pupildetect_options)
-        pupil_positions = pupil_positions_0 + pupil_positions_1
-        original_pldata['pupil_positions'] = pupil_positions
 
     # recalibrate data
     if recalib:
@@ -114,9 +92,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         # added following line to resolve issue: original_pldata not acting as dictionary --> can't call or add keys
         original_pldata = original_pldata._asdict()
         notifications = notifications._asdict()
-        if pupildetect is not None:
-            original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications,
-                                                                        calibration_mode=pupildetect)
         original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications)
 
     # here we are:
