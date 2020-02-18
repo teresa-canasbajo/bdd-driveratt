@@ -163,9 +163,11 @@ def main(to_extract=""):
 	# 	"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
 	# 	"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
 	# ]
+	
 	frames_path = './simulation_frames_cut'
 	if to_extract:
 		extract_frames(to_extract, frames_path)
+
 	frames = detect_objects(frames_path, detector)
 	with open('./frames.json', 'w') as f:
 		json.dump(frames, f, ensure_ascii=False, indent=4)
