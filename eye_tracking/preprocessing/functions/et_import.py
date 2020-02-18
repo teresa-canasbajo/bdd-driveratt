@@ -22,38 +22,6 @@ import scipy
 import scipy.stats
 
 
-# %% PUPILLABS
-def pl_fix_timelag(pl):
-    # fixes the pupillabs latency lag (which can be super large!!)
-
-    t_cam = np.asarray(
-        [p['recent_frame_timestamp'] for p in pl['notifications'] if p['subject'] == 'trigger'])  # camera time
-    t_msg = np.asarray([p['timestamp'] for p in pl['notifications'] if p['subject'] == 'trigger'])  # msg time
-
-    # slope, intercept, r_value, p_value, std_err  = scipy.stats.linregress(t_msg,t_cam) # predict camera time based on msg time
-    slope, intercept, low, high = scipy.stats.theilslopes(t_cam, t_msg)
-    logger = logging.getLogger(__name__)
-    logger.warning("fixing lag (at t=0) of :%.2fms, slope of %.7f (in a perfect world this is 0ms & 1.0)" % (
-        intercept * 1000, slope))
-    # fill it back in
-    # gonna do it with a for-loop because other stuff is too voodo or not readable for me
-
-    # Use this code (and change t_cam and t_msg above) if you want everything in computer time timestamps
-    # for ix,m in enumerate(pl['gaze_positions']):
-    #    pl['gaze_positions'][ix]['timestamp'] = pl['gaze_positions'][ix]['timestamp']  * slope + intercept   
-    #    for ix2,m2 in enumerate(pl['gaze_positions'][ix]['pupil_positions']):
-    #            pl['gaze_positions'][ix]['pupil_positions']['timestamp'] = pl['gaze_positions'][ix]['pupil_positions']['timestamp']  * slope + intercept
-    # for ix,m in enumerate(pl['gaze_positions']):
-    #     pl['pupil_positions'][ix]['timestamp'] = pl['pupil_positions'][ix]['timestamp']  * slope + intercept# + 0.045 # the 45ms  are the pupillabs defined delay between camera image & timestamp3   
-
-    # this code is to get notifications into sample time stamp. But for now we 
-    for ix, m in enumerate(pl['notifications']):
-        pl['notifications'][ix]['timestamp'] = pl['notifications'][ix][
-                                                   'timestamp'] * slope + intercept + 0.045  # the 45ms  are the pupillabs defined delay between camera image & timestamp3
-
-    return (pl)
-
-
 def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
@@ -84,8 +52,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 # surfaceMap False in et_import for testing purposes
 # parsemsg False: not currently working, may be needed in the future if notifications of start/end/etc important
 def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=False,
-              parsemsg=False, fixTimeLag=False, px2deg=True, pupildetect=None,
-              pupildetect_options=None):
+              parsemsg=False, pupildetect=None, pupildetect_options=None):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
     #           surfaceMap:
@@ -140,24 +107,17 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
                                             pupildetect_options=pupildetect_options)
         pupil_positions = pupil_positions_0 + pupil_positions_1
         original_pldata['pupil_positions'] = pupil_positions
-        recalib = True
 
     # recalibrate data
     if recalib:
         from debug import debug_nbp_recalib as nbp_recalib
         # added following line to resolve issue: original_pldata not acting as dictionary --> can't call or add keys
-        if version == 'new':
-            original_pldata = original_pldata._asdict()
-            notifications = notifications._asdict()
+        original_pldata = original_pldata._asdict()
+        notifications = notifications._asdict()
         if pupildetect is not None:
             original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications,
                                                                         calibration_mode=pupildetect)
-        original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications, version)
-
-    # Fix timing Pupillabs cameras ,have their own timestamps & clock. The msgs are clocked via computertime.
-    # Sometimes computertime&cameratime show drift (~40% of cases). We fix this here
-    if fixTimeLag:
-        original_pldata = pl_fix_timelag(original_pldata)
+        original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications)
 
     # here we are:
     if surfaceMap:
