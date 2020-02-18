@@ -22,7 +22,6 @@ import av  # important to load this library before pupil-library! (even though w
 
 from IPython.core.debugger import set_trace
 
-from debug.debug_pl_recalib import gen_fakepool, global_container
 from queue import Empty as QueueEmptyException
 
 from pupil_new.pupil_src.shared_modules.camera_models import load_intrinsics

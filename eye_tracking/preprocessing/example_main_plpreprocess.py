@@ -1,4 +1,3 @@
-from eye_tracking.preprocessing.debug.debug_pl_surface import *
 from eye_tracking.preprocessing.functions.et_preprocess import *
 
 from sys import platform
