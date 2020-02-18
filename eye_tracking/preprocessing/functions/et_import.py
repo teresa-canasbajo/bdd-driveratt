@@ -51,8 +51,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
 # surfaceMap False in et_import for testing purposes
 # parsemsg False: not currently working, may be needed in the future if notifications of start/end/etc important
-def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', recalib=True, surfaceMap=False,
-              parsemsg=False):
+def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=False, parsemsg=False):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
     #           surfaceMap:
@@ -67,10 +66,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         logging.warning(
             'Surface detector NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
 
-    if recalib:
-        logging.warning(
-            'Recalib NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
-
     if surfaceMap:
         # has to be imported before nbp recalib
         try:
@@ -82,19 +77,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     # Get samples df
     # (is still a dictionary here)
-    # this works already
     original_pldata, notifications, gaze = raw_pl_data(subject=subject, datapath=datapath)
 
-
-    # recalibrate data
-    if recalib:
-        from debug import debug_nbp_recalib as nbp_recalib
-        # added following line to resolve issue: original_pldata not acting as dictionary --> can't call or add keys
-        original_pldata = original_pldata._asdict()
-        notifications = notifications._asdict()
-        original_pldata['gaze_positions'] = nbp_recalib.nbp_recalib(original_pldata, notifications)
-
-    # here we are:
     if surfaceMap:
         folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
 
