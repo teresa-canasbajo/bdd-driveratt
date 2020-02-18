@@ -37,6 +37,8 @@
 
 ## Instructions of use
 
+We want to acknowledge once again the work of @behinger who put together a lot of the code used here in the preprocessing folder. Our main change is here that the code is now functional for Pupil Labs versions >1.17.
+
 ```python
 import functions.et_preprocess
 from functions.detect_events import make_blinks,make_saccades,make_fixations
