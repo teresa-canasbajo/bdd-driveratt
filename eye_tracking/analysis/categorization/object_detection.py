@@ -18,7 +18,7 @@ from PIL import ImageFont
 from PIL import ImageOps
 
 # For extracting frames
-from functions.manual_detection import extract_frames, print_progress_bar
+from eye_tracking.analysis.categorization.manual_detection import extract_frames, print_progress_bar
 from glob import glob
 import os
 import json
@@ -27,8 +27,25 @@ import cv2
 # For measuring the inference time.
 import time
 
+# For runtime arguments
+import sys
+
 # Check available GPU devices.
 print("The following GPU devices are available: %s" % tf.test.gpu_device_name())
+gpus = tf.config.experimental.list_physical_devices('GPU')
+print("Num GPUs Available: ", len(gpus))
+if gpus:
+  try:
+    # Currently, memory growth needs to be the same across GPUs
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+  except RuntimeError as e:
+    # Memory growth must be set before GPUs have been initialized
+    print(e)
+
+################################################################################################################
+#                                     Visualizing Images and Bounding Boxes                                    #
+################################################################################################################
 
 def display_image(image):
 	fig = plt.figure(figsize=(20, 15))
@@ -123,6 +140,65 @@ def load_img(path):
 	img = tf.image.decode_jpeg(img, channels=3)
 	return img
 
+def draw_frame(result, img):
+	image_with_boxes = draw_boxes(
+			img.numpy(), result["detection_boxes"],
+			result["detection_class_entities"], result["detection_scores"])
+
+	display_image(image_with_boxes)
+
+################################################################################################################
+#                                                 Processing Frames                                            #
+################################################################################################################
+
+def main(to_extract=""):
+	print('Loading detector.')
+	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"#@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
+	detector = hub.load(module_handle).signatures['default']
+
+	print('Loaded.')
+
+	# image_urls = [
+	# 	"https://i.ibb.co/S0K9ggp/dis1.png",
+	# 	"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
+	# 	"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
+	# ]
+	frames_path = './simulation_frames_cut'
+	if to_extract:
+		extract_frames(to_extract, frames_path)
+	frames = detect_objects(frames_path, detector)
+	with open('./frames.json', 'w') as f:
+		json.dump(frames, f, ensure_ascii=False, indent=4)
+	# for image_url in image_urls:
+	# 	start_time = time.time()
+	# 	image_path = download_and_resize_image(image_url, 640, 480)
+	# 	result, img = run_detector(detector, image_path)
+	# 	draw_frame(result, img)
+	# 	end_time = time.time()
+
+def detect_objects(frames_path, detector):
+	frames = []
+	all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
+	all_images = all_images[:-1] #whats wrong with the last frame?
+
+	num_images = len(all_images)
+	if num_images <= 0:
+		print("No frames found in frames path.")
+		return []
+
+	print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
+
+	# Iterate thru all PNG images in frames_path
+	for i, img_path in enumerate(all_images):
+		# Create a grayscale 2D NumPy array for Detector.detect()
+		result, img = run_detector(detector, img_path)
+		process_result(result)
+		frames.append(result)
+		time.sleep(0.01)
+		print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
+
+	return frames
+
 def run_detector(detector, path):
 	img = load_img(path)
 
@@ -137,59 +213,6 @@ def run_detector(detector, path):
 	# print("Inference time: ", end_time-start_time)
 
 	return result, img
-
-def draw_frame(result, img):
-	image_with_boxes = draw_boxes(
-			img.numpy(), result["detection_boxes"],
-			result["detection_class_entities"], result["detection_scores"])
-
-	display_image(image_with_boxes)
-
-def main():
-	print('Loading detector.')
-	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"#@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
-	detector = hub.load(module_handle).signatures['default']
-
-	print('Loaded.')
-
-	image_urls = [
-		"https://i.ibb.co/S0K9ggp/dis1.png",
-		"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
-		"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
-	]
-	frames_path = './simulation_frames_cut'
-	# extract_frames('/home/whitney/Downloads/bin_recording.mkv', frames_path)
-	frames = detect_objects(frames_path, detector)
-	with open('./frames.json', 'w') as f:
-		json.dump(frames, f, ensure_ascii=False, indent=4)
-	# for image_url in image_urls:
-	# 	start_time = time.time()
-	# 	image_path = download_and_resize_image(image_url, 640, 480)
-	# 	result, img = run_detector(detector, image_path)
-	# 	draw_frame(result, img)
-	# 	end_time = time.time()
-
-
-def detect_objects(frames_path, detector):
-	frames = []
-	all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
-	all_images = all_images[:-1]
-
-	num_images = len(all_images)
-	print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
-
-	# Iterate thru all PNG images in frames_path
-	for i, img_path in enumerate(all_images):
-		# Create a grayscale 2D NumPy array for Detector.detect()
-		result, img = run_detector(detector, img_path)
-		process_result(result)
-		frames.append(result)
-		time.sleep(0.01)
-		print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
-
-	return frames
-
-
 
 def process_result(result):
 	encoding = 'utf-8'
@@ -207,4 +230,5 @@ def process_result(result):
 
 
 if __name__ == '__main__':
-	main()
+	args = sys.argv[1:]
+	main(*args)
