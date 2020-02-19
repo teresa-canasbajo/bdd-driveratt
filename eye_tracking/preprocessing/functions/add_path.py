@@ -14,8 +14,8 @@ import pandas as pd
 
 def add_path():
     print('Adding relevant files...')
-    sys.path.append(os.path.abspath('../../lib/pupil_new/pupil_src/shared_modules/calibration_routines'))
-    sys.path.append(os.path.abspath("../../lib/pupil_new/pupil_src/shared_modules/"))
+    sys.path.append(os.path.abspath('../../lib/pupil_API/pupil_src/shared_modules/calibration_routines'))
+    sys.path.append(os.path.abspath("../../lib/pupil_API/pupil_src/shared_modules/"))
     sys.path.append(os.path.abspath("../"))
     sys.path.append(os.path.abspath("../functions"))
     sys.path.append(os.path.abspath("../lib/nslr-hmm"))
