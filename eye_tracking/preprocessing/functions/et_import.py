@@ -13,6 +13,8 @@ import logging
 from eye_tracking.preprocessing.functions.et_helper import findFile, gaze_to_pandas
 import eye_tracking.preprocessing.functions.et_make_df as make_df
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as pl_file_methods
+import eye_tracking.preprocessing.functions.et_parse as parse
+
 
 
 ########
@@ -34,7 +36,6 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
                         'your pupil capture & try again with new data.')
 
     elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
-        print('Newer pupil capture used')
         original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
         notifications = pl_file_methods.load_pldata_file(datapath, 'notify')
         gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
@@ -106,10 +107,14 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     if parsemsg:
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
-
-        gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
+        # gridnotes = [note for note in notifications['data'] if notifications['topics'] in note['topic']]
         # come back and fix !!
         # gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
+        gridnotes = []
+        for note in notifications['data']:
+            for t in notifications['topics']:
+                if note['topic'] in t:
+                    gridnotes.append(note)
         plmsgs = pd.DataFrame()
         for note in gridnotes:
             msg = parse.parse_message(note)

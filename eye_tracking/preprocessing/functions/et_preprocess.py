@@ -40,11 +40,17 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     # import pl data
     logger.debug("Importing et data")
     logger.debug('Caution: etevents might be empty')
-    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, surfaceMap=False, **kwargs)
+    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, surfaceMap=False, parsemsg=False, **kwargs)
 
     # Mark bad samples
     logger.debug('Marking bad et samples')
     etsamples = detect_bad_samples(etsamples)
+
+    # etsamples = etsamples[20:]
+    # # Remove samples with low confidence
+    # ix_low_confidence = (etsamples.confidence < 0.70)
+    # etsamples['low_conf'] = ix_low_confidence
+    # etsamples = etsamples[etsamples['low_conf'] == False]
 
     # Detect events
     # by our default first blinks, then saccades, then fixations
