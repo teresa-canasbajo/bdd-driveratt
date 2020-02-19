@@ -18,7 +18,7 @@ def add_path():
     sys.path.append(os.path.abspath("../../lib/pupil_API/pupil_src/shared_modules/"))
     sys.path.append(os.path.abspath("../"))
     sys.path.append(os.path.abspath("../functions"))
-    sys.path.append(os.path.abspath("../lib/nslr-hmm"))
+    sys.path.append(os.path.abspath("../../lib/nslr-hmm/"))
 
     pd.options.display.max_columns = 30
     print('Done.')
