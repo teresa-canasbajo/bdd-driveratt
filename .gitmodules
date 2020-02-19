@@ -1,8 +1,4 @@
 
-[submodule "eye_tracking/lib/nslr-hmm"]
-	path = eye_tracking/lib/nslr-hmm
-	url = https://gitlab.com/nslr/nslr-hmm/
-
 [submodule "eye_tracking/lib/pupil_API"]
 	path = eye_tracking/analysis/lib/pupil_API
 	url = https://github.com/pupil-labs/pupil
