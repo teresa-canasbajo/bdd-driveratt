@@ -37,11 +37,13 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
     elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
         original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
+        # notifications may actually not be relevant anymore
         notifications = pl_file_methods.load_pldata_file(datapath, 'notify')
+        annotations = pl_file_methods.load_pldata_file(datapath, 'annotation')
         gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
         print('notifications_assigned')
 
-    return original_pldata, notifications, gaze
+    return original_pldata, annotations, gaze
 
 
 # surfaceMap False in et_import for testing purposes
@@ -72,7 +74,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     # Get samples df
     # (is still a dictionary here)
-    original_pldata, notifications, gaze = raw_pl_data(subject=subject, datapath=datapath)
+    original_pldata, annotations, gaze = raw_pl_data(subject=subject, datapath=datapath)
 
     if surfaceMap:
         folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
@@ -103,61 +105,25 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # get the nice samples df
     plsamples = make_df.make_samples_df(pldata)
 
-    notifications = notifications._asdict()
     if parsemsg:
+        annotations = annotations._asdict()
         # Get msgs df      
         # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
         # gridnotes = [note for note in notifications['data'] if notifications['topics'] in note['topic']]
         # come back and fix !!
         # gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
-        gridnotes = []
-        for note in notifications['data']:
-            for t in notifications['topics']:
-                if note['topic'] in t:
-                    gridnotes.append(note)
+        annot_msg = [annot for annot in annotations['data']]
+        # for note in annotations['data']:
+        #     for t in notifications['label']:
+        #         if note['topic'] in t:
+        #             annot_msg.append(note)
         plmsgs = pd.DataFrame()
-        for note in gridnotes:
+        for note in annot_msg:
             msg = parse.parse_message(note)
             if not msg.empty:
                 plmsgs = plmsgs.append(msg, ignore_index=True)
-        plmsgs = fix_smallgrid_parser(plmsgs)
     else:
-        plmsgs = notifications['data']
+        plmsgs = annotations['data']
 
     plevents = pd.DataFrame()
     return plsamples, plmsgs, plevents
-
-
-def fix_smallgrid_parser(etmsgs):
-    # This fixes the missing separation between smallgrid before and small grid after. During experimental sending
-    # both were named identical.
-    replaceGrid = pd.Series([k for l in [13 * ['SMALLGRID_BEFORE'], 13 * ['SMALLGRID_AFTER']] * 6 for k in l])
-    ix = etmsgs.query('grid_size==13').index
-    if len(ix) is not 156:
-        raise RuntimeError('we need to have 156 small grid msgs')
-
-    replaceGrid.index = ix
-    etmsgs.loc[ix, 'condition'] = replaceGrid
-
-    # this here fixes that all buttonpresses and stop messages etc. were send as GRID and not SMALLGG 
-    for blockid in etmsgs.block.dropna().unique():
-        if blockid == 0:
-            continue
-        tmp = etmsgs.query('block==@blockid')
-        t_before_start = tmp.query('condition=="DILATION"& exp_event=="stop"').msg_time.values
-        t_before_end = tmp.query('condition=="SHAKE"   & exp_event=="stop"').msg_time.values
-        t_after_start = tmp.query('condition=="SHAKE"   & exp_event=="stop"').msg_time.values
-        t_after_end = tmp.iloc[-1].msg_time
-
-        t_before_start = float(t_before_start)
-        t_before_end = float(t_before_end)
-        t_after_start = float(t_after_start)
-        t_after_end = float(t_after_end)
-
-        ix = tmp.query('condition=="GRID"&msg_time>@t_before_start & msg_time<=@t_before_end').index
-        etmsgs.loc[ix, 'condition'] = 'SMALLGRID_BEFORE'
-
-        ix = tmp.query('condition=="GRID"&msg_time>@t_after_start  & msg_time<=@t_after_end').index
-        etmsgs.loc[ix, 'condition'] = 'SMALLGRID_AFTER'
-
-    return etmsgs

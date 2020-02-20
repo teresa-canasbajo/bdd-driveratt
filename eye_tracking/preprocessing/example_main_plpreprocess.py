@@ -17,6 +17,6 @@ demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
 diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'
 
 # surfaceMap False in et_import for testing purposes
-data = preprocess_et(subject='', datapath=demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
+data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
 
 print('done!')
