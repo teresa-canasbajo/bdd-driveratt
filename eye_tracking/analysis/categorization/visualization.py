@@ -6,8 +6,8 @@ def main():
 	df = pd.read_csv("targets.csv")
 	entity_fixation_counts = df.count()
 
-	entities = df.columns[2:]
-	counts = entity_fixation_counts.iloc[2:]/len(df)
+	entities = df.columns[3:]
+	counts = entity_fixation_counts.iloc[3:]/len(df)
 
 	sns.barplot(entities, counts)
 	plt.xlabel("Entity")

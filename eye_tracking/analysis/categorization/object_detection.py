@@ -18,7 +18,8 @@ from PIL import ImageFont
 from PIL import ImageOps
 
 # For extracting frames
-from eye_tracking.analysis.categorization.manual_detection import extract_frames, print_progress_bar
+# from eye_tracking.analysis.categorization.manual_detection import extract_frames, print_progress_bar
+from manual_detection import extract_frames, print_progress_bar
 from glob import glob
 import os
 import json
@@ -32,16 +33,6 @@ import sys
 
 # Check available GPU devices.
 print("The following GPU devices are available: %s" % tf.test.gpu_device_name())
-gpus = tf.config.experimental.list_physical_devices('GPU')
-print("Num GPUs Available: ", len(gpus))
-if gpus:
-  try:
-    # Currently, memory growth needs to be the same across GPUs
-    for gpu in gpus:
-      tf.config.experimental.set_memory_growth(gpu, True)
-  except RuntimeError as e:
-    # Memory growth must be set before GPUs have been initialized
-    print(e)
 
 ################################################################################################################
 #                                     Visualizing Images and Bounding Boxes                                    #
@@ -163,7 +154,7 @@ def main(to_extract=""):
 	# 	"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
 	# 	"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
 	# ]
-	
+
 	frames_path = './simulation_frames_cut'
 	if to_extract:
 		extract_frames(to_extract, frames_path)
