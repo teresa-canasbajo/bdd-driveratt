@@ -15,20 +15,19 @@ import pickle  # to save & restore variable
 from glob import glob
 import cv2
 import os
-from pupil_new.pupil_src.shared_modules.surface_tracker import surface_tracker_offline
+from surface_tracker import surface_tracker_offline
 
-from pupil_new.pupil_src.shared_modules.surface_tracker import surface_tracker_online
+from surface_tracker import surface_tracker_online
 import av  # important to load this library before pupil-library! (even though we dont use it...)
 
 from IPython.core.debugger import set_trace
 
-from debug.debug_pl_recalib import gen_fakepool, global_container
 from queue import Empty as QueueEmptyException
 
-from pupil_new.pupil_src.shared_modules.camera_models import load_intrinsics
-from pupil_new.pupil_src.shared_modules.player_methods import correlate_data
+from camera_models import load_intrinsics
+from player_methods import correlate_data
 
-from pupil_new.pupil_src.shared_modules.video_capture import fake_backend
+from video_capture import fake_backend
 
 
 # %%

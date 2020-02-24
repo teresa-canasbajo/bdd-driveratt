@@ -282,9 +282,11 @@ class Offline_Fixation_Detector(Fixation_Detector_Base):
         self.prev_index = -1
         self.bg_task = None
         self.status = ""
-        self.notify_all(
-            {"subject": "fixation_detector.should_recalculate", "delay": 0.5}
-        )
+        # we need to uncomment:
+
+        # self.notify_all(
+        #     {"subject": "fixation_detector.should_recalculate", "delay": 0.5}
+        # )
 
     def init_ui(self):
         self.add_menu()

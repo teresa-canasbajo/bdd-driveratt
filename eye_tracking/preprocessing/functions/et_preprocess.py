@@ -17,7 +17,6 @@ from eye_tracking.preprocessing.functions.et_helper import add_events_to_samples
 from eye_tracking.preprocessing.functions.et_helper import load_file, save_file
 from eye_tracking.preprocessing.functions.et_make_df import make_events_df
 
-import os
 import logging
 
 
@@ -41,11 +40,14 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     # import pl data
     logger.debug("Importing et data")
     logger.debug('Caution: etevents might be empty')
-    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, fixTimeLag=False, recalib=False, surfaceMap=False, **kwargs)
+    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, surfaceMap=False, parsemsg=True, **kwargs)
 
     # Mark bad samples
     logger.debug('Marking bad et samples')
     etsamples = detect_bad_samples(etsamples)
+
+    if(datapath == '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'):
+        etsamples = etsamples[20:]
 
     # Detect events
     # by our default first blinks, then saccades, then fixations
@@ -53,7 +55,6 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     for evtfunc in eventfunctions:
         logger.debug('Events: calling %s', evtfunc.__name__)
         etsamples, etevents = evtfunc(etsamples, etevents)
-
 
     # Make a nice etevent df
     etevents = make_events_df(etevents)

@@ -22,7 +22,7 @@ import logging
 
 # %% MAKE SAMPLES
 
-def make_samples_df(etsamples, px2deg=True):
+def make_samples_df(etsamples):
     fields_to_keep = set(['smpl_time', 'gx', 'gy', 'confidence', 'pa', 'type', 'gx_vel', 'gy_vel'])
 
     fields_to_fillin = fields_to_keep - set(etsamples.columns)
@@ -33,12 +33,6 @@ def make_samples_df(etsamples, px2deg=True):
     for fieldname in fields_to_fillin:
         # error: cannot set a frame with no defined index and a scalar
         etsamples_reduced.loc[:, fieldname] = np.nan
-
-    if px2deg:
-        # convert pixels into visual degrees
-        # VD
-        etsamples_reduced.gx = helper.px2deg(etsamples_reduced.gx, 'horizontal')
-        etsamples_reduced.gy = helper.px2deg(etsamples_reduced.gy, 'vertical')
 
     return (etsamples_reduced)
 

@@ -1,18 +1,16 @@
-[submodule "eye_tracking/analysis/lib/pupil"]
-	path = eye_tracking/analysis/lib/pupil
-	url = http://github.com/behinger/pupil
-[submodule "eye_tracking/analysis/lib/nslr-hmm"]
-	path = eye_tracking/analysis/lib/nslr-hmm
-	url = https://gitlab.com/nslr/nslr-hmm/
 
-[submodule "eye_tracking/analysis/lib/pupil_new"]
-	path = eye_tracking/analysis/lib/pupil_new
+[submodule "eye_tracking/lib/pupil_API"]
+	path = eye_tracking/analysis/lib/pupil_API
 	url = https://github.com/pupil-labs/pupil
 	ignore = dirty
 
 [submodule "libuvc"]
 	path = libuvc
 	url = https://github.com/pupil-labs/libuvc
-[submodule "eye_tracking/analysis/lib/pyuvc"]
-	path = eye_tracking/analysis/lib/pyuvc
+[submodule "eye_tracking/lib/pyuvc"]
+	path = eye_tracking/lib/pyuvc
 	url = https://github.com/pupil-labs/pyuvc
+
+[submodule "eye_tracking/lib/nslr-hmm"]
+	path = eye_tracking/lib/nslr-hmm
+	url = https://github.com/pupil-labs/nslr-hmm

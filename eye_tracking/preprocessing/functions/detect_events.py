@@ -66,7 +66,7 @@ def make_saccades(etsamples, etevents, engbert_lambda=5):
 
 # unnecessary et in parameter
 def make_fixations(etsamples, etevents):
-    from functions.et_helper import winmean
+    from eye_tracking.preprocessing.functions.et_helper import winmean
     # this happened already:  
     # etsamples, etevents = make_blinks(etsamples, etevents)
     # etsamples, etevents = make_saccades(etsamples, etevents)

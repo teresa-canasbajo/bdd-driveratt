@@ -257,17 +257,6 @@ def set_to_full_names(df):
 
 # %% everything related to VISUAL DEGREES
 
-def size_px2deg(px, mm_per_px=0.276, distance=600):
-    """
-    function to get the picture size of the freeviewing task
-    from pixels into visual angle
-    """
-
-    deg = 2 * np.arctan2(px / 2 * mm_per_px, distance) * 180 / np.pi
-
-    return deg
-
-
 def px2deg(px, orientation, mm_per_px=0.276, distance=600):
     # VD
     # "gx_px - gx_px-midpoint"
@@ -338,8 +327,7 @@ def save_file(data, subject, datapath, outputprefix=''):
     # make separate csv file for every df 
     data[0].to_csv(os.path.join(preprocessed_path, filename_samples), index=False)
     data[1].to_csv(os.path.join(preprocessed_path, filename_cleaned_samples), index=False)
-    # since notifications not relevant, did not properly process data[2] information
-    # data[2].to_csv(os.path.join(preprocessed_path, filename_msgs), index=False)
+    data[2].to_csv(os.path.join(preprocessed_path, filename_msgs), index=False)
     data[3].to_csv(os.path.join(preprocessed_path, filename_events), index=False)
 
 
