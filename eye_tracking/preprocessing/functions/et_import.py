@@ -28,7 +28,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     else:
         filename = os.path.join(datapath, subject, postfix)
     print(os.path.join(filename, 'pupil_data'))
-    # with dict_keys(['notifications', 'pupil_positions', 'gaze_positions'])
+    # with dict_keys(['annotations', 'pupil_positions', 'gaze_positions'])
     # where each value is a list that contains a dictionary
 
     if os.path.exists(os.path.join(filename, 'pupil_data')):
@@ -37,8 +37,6 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
     elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
         original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
-        # notifications may actually not be relevant anymore
-        notifications = pl_file_methods.load_pldata_file(datapath, 'notify')
         annotations = pl_file_methods.load_pldata_file(datapath, 'annotation')
         gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
         print('notifications_assigned')
@@ -47,8 +45,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
 
 # surfaceMap False in et_import for testing purposes
-# parsemsg False: not currently working, may be needed in the future if notifications of start/end/etc important
-def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=False, parsemsg=False):
+def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=False, parsemsg=True):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
     #           surfaceMap:
@@ -107,16 +104,8 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     if parsemsg:
         annotations = annotations._asdict()
-        # Get msgs df      
-        # make a list of gridnotes that contain all notifications of original_pldata if they contain 'label'
-        # gridnotes = [note for note in notifications['data'] if notifications['topics'] in note['topic']]
-        # come back and fix !!
-        # gridnotes = [note for note in notifications['data'] if 'topics' in note.keys()]
+        # Get msgs df
         annot_msg = [annot for annot in annotations['data']]
-        # for note in annotations['data']:
-        #     for t in notifications['label']:
-        #         if note['topic'] in t:
-        #             annot_msg.append(note)
         plmsgs = pd.DataFrame()
         for note in annot_msg:
             msg = parse.parse_message(note)
