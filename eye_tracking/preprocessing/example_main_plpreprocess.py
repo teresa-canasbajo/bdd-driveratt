@@ -15,6 +15,7 @@ elif platform == 'linux' and hostname == 'teresa-desktop':
 
 demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
 diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'
+diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject4/000'
 
 # surfaceMap False in et_import for testing purposes
 data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
