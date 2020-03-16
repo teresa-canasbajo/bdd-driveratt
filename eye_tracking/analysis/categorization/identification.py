@@ -1,15 +1,16 @@
+import sys
 import json
 import random
 import pandas as pd
 
 from bisect import bisect_left
 
-def main():
-    with open('./frames.json', 'r') as f:
-        items = ['Tree', 'Vehicle', 'Billboard', 'Person', 'Building', 'Skyscraper'] #TODO: how should the items of interest be specified? 600 potential classes from base detector, but the ones we're interested in maybe we want to specify manually
-        frames = json.load(f) #TODO: this json should be modified so that frame dictionarys have a key corresponding to the same image frame the fixations.csv will later specify
+def main(json_filepath, output_filepath):
+    with open(json_filepath, 'r') as f:
+        items = ['Tree', 'Vehicle','Person', 'Building', 'Skyscraper']
+        frames = json.load(f) #frame results listed chronologically
         fixations = generate_fixations_frame()
-        fixations = [(random.uniform(0, 1), random.uniform(0, 1)) for _ in frames] #TODO: modify code to pull fixations from actual csv
+        fixations = [(random.uniform(0, 1), random.uniform(0, 1)) for _ in frames]
         # print('Frame  \tFixation     \tObjects')
         data = []
         for i, frame in enumerate(frames):
@@ -18,10 +19,9 @@ def main():
             objects = identify(x, y, frame)
             boxes = [objects.get(item, None) for item in items]
             data.append([i, "(%.3f,  %.3f)" % (x, y)] + boxes)
-        print("Average billboard confidence: %f" % average_billboard_confidence(frames))
         columns = ['Frame', 'Fixation'] + items
         df = pd.DataFrame(data, columns=columns)
-        df.to_csv(r'./object_fixations.csv')
+        df.to_csv(output_filepath)
 
 def generate_fixations_frame():
     df = pd.read_csv('fixations.csv')
@@ -35,22 +35,6 @@ def generate_fixations_frame():
             fixations_by_frame += [(0, 0) * frame_span]
     return fixations_by_frame
 
-def average_billboard_confidence(frames):
-    cumulative_sum = 0
-    frames_with_billboards = 0
-    for i, frame in enumerate(frames):
-        bc = billboard_confidence(frame)
-        if bc != 0:
-            cumulative_sum += bc
-            frames_with_billboards += 1
-    return cumulative_sum/frames_with_billboards
-
-def billboard_confidence(frame):
-    billboard_scores = [float(frame['detection_scores'][i]) for i in range(len(frame['detection_scores'])) if frame['detection_class_entities'][i] == 'Billboard']
-    if len(billboard_scores) > 0:
-        return billboard_scores[0]
-    return 0
-
 def identify(x, y, frame):
     """Identifies all potential entities that the user was fixated on during a
     keyframe of the simulation based on highest confidence bounding boxes.
@@ -60,7 +44,7 @@ def identify(x, y, frame):
     y -- number of test iterations (float)
     frame -- tensorflow_hub detector output; comes sorted in descending order by scores (dict)
     """
-    min_confidence = 0.2 #TODO: should this be specified more empiraclly? 
+    min_confidence = 0.2 #TODO: should this be specified more empiraclly? or maybe set it super low only for billboard class?
     scores = [float(s) for s in frame['detection_scores'][::-1]]
     cutoff = len(scores) - bisect_left(scores, min_confidence) 
     print('Cut: ', cutoff)
@@ -74,4 +58,6 @@ def identify(x, y, frame):
     return {entities[j]: boxes[j] for j, box in enumerate(boxes[::-1]) if inside_box(box)}
 
 if __name__ == '__main__':
-    main()
+    args = sys.argv[1:]
+    assert(len(args) >= 2)
+    main(*args)

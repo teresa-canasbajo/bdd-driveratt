@@ -11,6 +11,3 @@
 	path = eye_tracking/lib/pyuvc
 	url = https://github.com/pupil-labs/pyuvc
 
-[submodule "eye_tracking/lib/nslr-hmm"]
-	path = eye_tracking/lib/nslr-hmm
-	url = https://github.com/pupil-labs/nslr-hmm

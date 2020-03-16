@@ -142,7 +142,7 @@ def draw_frame(result, img):
 #                                                 Processing Frames                                            #
 ################################################################################################################
 
-def main(to_extract=""):
+def main(frames_path, to_extract=""):
 	print('Loading detector.')
 	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"#@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
 	detector = hub.load(module_handle).signatures['default']
@@ -155,12 +155,12 @@ def main(to_extract=""):
 	# 	"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
 	# ]
 
-	frames_path = './simulation_frames_cut'
+	# frames_path = './billboard_frames'
 	if to_extract:
 		extract_frames(to_extract, frames_path)
 
 	frames = detect_objects(frames_path, detector)
-	with open('./frames.json', 'w') as f:
+	with open('./billboard_frames.json', 'w') as f:
 		json.dump(frames, f, ensure_ascii=False, indent=4)
 	# for image_url in image_urls:
 	# 	start_time = time.time()
@@ -172,7 +172,7 @@ def main(to_extract=""):
 def detect_objects(frames_path, detector):
 	frames = []
 	all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
-	all_images = all_images[:-1] #whats wrong with the last frame?
+	# all_images = all_images[:-1] #whats wrong with the last frame?
 
 	num_images = len(all_images)
 	if num_images <= 0:
@@ -224,4 +224,5 @@ def process_result(result):
 
 if __name__ == '__main__':
 	args = sys.argv[1:]
+	assert(len(args) >= 1)
 	main(*args)
