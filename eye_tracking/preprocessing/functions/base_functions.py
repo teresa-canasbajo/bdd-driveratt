@@ -43,6 +43,7 @@ def fake_gpool_surface(folder=None):
     fake_gpool.surfaces = []
     fake_gpool.rec_dir = surface_dir
     fake_gpool.timestamps = np.load(os.path.join(folder, 'world_timestamps.npy'))
+    fake_gpool.capture.timestamps = np.load(os.path.join(folder, 'world_timestamps.npy'))
     fake_gpool.capture.source_path = os.path.join(folder, 'world.mp4')
     fake_gpool.capture.intrinsics = load_intrinsics('', 'Pupil Cam1 ID2', (1280, 720))
     fake_gpool.seek_control = global_container()

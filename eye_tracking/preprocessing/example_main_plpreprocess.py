@@ -10,13 +10,16 @@ if platform == 'darwin':
 elif (platform == 'linux' or platform == 'linux2') and hostname != 'teresa-desktop':
     super_best = '/home/whitney/Teresa/demos/super_best'
     original = '/media/whitney/New Volume/Teresa/bdd-driveratt/VP1/raw'
+    demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
+    diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'
+    diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject4/000'
 elif platform == 'linux' and hostname == 'teresa-desktop':
     super_best = '/home/teresa//Documents/demos/super_best'
+    diff_demo = '/home/teresa//Documents/demos/super_best'
 
-demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
-diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'
+
 
 # surfaceMap False in et_import for testing purposes
-data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
+data = preprocess_et(subject='', datapath=super_best, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
 
 print('done!')
