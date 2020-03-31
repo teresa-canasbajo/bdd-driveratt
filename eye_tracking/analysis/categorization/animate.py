@@ -20,8 +20,9 @@ def draw_box(ymin, xmin, ymax, xmax, img_length, img_width):
     length = (ymax-ymin)
     return patches.Rectangle((xmin, ymin), width, length, linewidth=1, edgecolor='r', facecolor='none')
 
-def animate_tf(input_dir_path, output_dir_path, json_path, animation_filename, threshold):
+def animate_tf(input_dir_path, json_path, animation_filename, threshold):
     frames = sorted(glob.glob(input_dir_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
+    output_dir_path = input_dir_path + '_animate_tf'
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
     with open(json_path, 'r') as f:
@@ -47,7 +48,8 @@ def animate_tf(input_dir_path, output_dir_path, json_path, animation_filename, t
     print_progress_bar(total, total, prefix='Progress:', suffix='Complete', length=50)
     animate(output_dir_path, animation_filename)
 
-def animate_tf_smoothed(input_dir_path, output_dir_path, csv_path, animation_filename):
+def animate_tf_smoothed(input_dir_path, csv_path, animation_filename):
+    output_dir_path = input_dir_path + '_animate_tf_smoothed'
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
     smoothed_bbs = pd.read_csv(csv_path, dtype=object)
@@ -68,7 +70,9 @@ def animate_tf_smoothed(input_dir_path, output_dir_path, csv_path, animation_fil
     print_progress_bar(total, total, prefix='Progress:', suffix='Complete', length=50)
     animate(output_dir_path, animation_filename)
 
-def animate_compare(original_path, smoothed_path, output_filename):
+def animate_tf_compare(path_to_frames, output_filename):
+    original_path = path_to_frames + '_animate_tf'
+    smoothed_path = path_to_frames + '_animate_tf_smoothed'
     fig, ax = plt.subplots(1, 2)
     original_frames = sorted(glob.glob(original_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
     smoothed_frames = sorted(glob.glob(smoothed_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
@@ -95,6 +99,9 @@ def animate_compare(original_path, smoothed_path, output_filename):
     anim.save(output_filename + '.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
     plt.show()
+
+# --------------------------------------------------------------------------------------
+# PLEASE IGNORE: old method used for animating results from Google Vision API
 
 # def animate_google(input_dir_path, output_dir_path, csv_path, animation_filename):
 #     frames = sorted(glob.glob(input_dir_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
@@ -126,7 +133,7 @@ def animate_compare(original_path, smoothed_path, output_filename):
 #         plt.close()
 #     print_progress_bar(1, total, prefix='Progress:', suffix='Complete', length=50)
 #     animate(output_dir_path, animation_filename)
-
+# ------------------------------------------------------------------------------------
 def animate(frame_path, output_filename):
     fig = plt.figure()
     frames = sorted(glob.glob(frame_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
@@ -155,7 +162,7 @@ if args[0] == 'tf':
 elif args[0] == 'tf_smoothed':
     animate_tf_smoothed(args[1], args[2], args[3], args[4])
 elif args[0] == 'tf_compare':
-    animate_compare(args[1], args[2], args[3])
+    animate_tf_compare(args[1], args[2], args[3])
 # elif args[0] == 'google':
 #     animate_google(args[1], args[2], args[3], args[4])
 else:

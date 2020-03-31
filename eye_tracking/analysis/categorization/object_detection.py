@@ -149,25 +149,12 @@ def main(frames_path, to_extract=""):
 
 	print('Loaded.')
 
-	# image_urls = [
-	# 	"https://i.ibb.co/S0K9ggp/dis1.png",
-	# 	"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
-	# 	"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
-	# ]
-
-	# frames_path = './billboard_frames'
 	if to_extract:
 		extract_frames(to_extract, frames_path)
 
 	frames = detect_objects(frames_path, detector)
-	with open('./billboard_frames.json', 'w') as f:
+	with open('./frames.json', 'w') as f:
 		json.dump(frames, f, ensure_ascii=False, indent=4)
-	# for image_url in image_urls:
-	# 	start_time = time.time()
-	# 	image_path = download_and_resize_image(image_url, 640, 480)
-	# 	result, img = run_detector(detector, image_path)
-	# 	draw_frame(result, img)
-	# 	end_time = time.time()
 
 def detect_objects(frames_path, detector):
 	frames = []

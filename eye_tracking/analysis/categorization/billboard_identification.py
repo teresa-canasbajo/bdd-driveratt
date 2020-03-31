@@ -6,6 +6,69 @@ import numpy as np
 
 from bisect import bisect_left
 
+#----------------------------------------------------------------------------------------
+# PLEASE IGNORE; old experimental version
+
+# def main(json_filepath, output_filepath, detection_threshold, smoothing_threshold, fps):
+#     fps = int(fps)
+#     detection_threshold = float(detection_threshold)
+#     smoothing_threshold = float(smoothing_threshold)
+#     with open(json_filepath, 'r') as f:
+#         frames = json.load(f)
+#         avg_conf, max_conf, min_conf = billboard_confidence_stats(frames)
+#         print("Average billboard confidence: %f" % avg_conf)
+#         print("Max billboard confidence: %f" % max_conf)
+#         print("Min billboard confidence: %f" % min_conf)
+
+#         smoothed = []
+#         original = []
+#         frame_num = []
+#         n = len(frames)
+#         last_billboard_detection = 0
+#         for i, frame in enumerate(frames):
+#             original_boxes = []
+#             smoothed_boxes = []
+#             for j in range(len(frame['detection_class_labels'])):
+#                 if (frame['detection_class_labels'][j] == '87' and float(frame['detection_scores'][j]) >= detection_threshold and 
+#                   float(frame['detection_boxes'][j][2]) - float(frame['detection_boxes'][j][0]) < 0.5 and 
+#                   float(frame['detection_boxes'][j][3]) - float(frame['detection_boxes'][j][1]) < 0.5):
+#                     box = frame['detection_boxes'][j]
+#                     n = i-last_billboard_detection
+
+#                     # try to interpolate if this next detection is within a specified window
+#                     if n > 1 and n/fps <= smoothing_threshold:
+#                         best_metric = 0
+#                         most_likely_correspondence = None
+#                         for prev_bb in smoothed[last_billboard_detection]:
+#                             metric = iou(prev_bb, box)
+#                             if metric > best_metric:
+#                                 best_metric = metric
+#                                 most_likely_correspondence = prev_bb
+
+#                         # smooth if best IoU is at least 0.5
+#                         if best_metric >= 0.5:
+#                             print(best_metric)
+#                             for j in range(1, n):
+#                                 t = j/n
+#                                 inter_ymin = (1-t)*float(most_likely_correspondence[0]) + t*float(box[0])
+#                                 inter_xmin = (1-t)*float(most_likely_correspondence[1]) + t*float(box[1])
+#                                 inter_ymax = (1-t)*float(most_likely_correspondence[2]) + t*float(box[2])
+#                                 inter_xmax = (1-t)*float(most_likely_correspondence[3]) + t*float(box[3])
+#                                 # if len(smoothed[-(n-j)]) > 0:
+#                                 #     print("oops")
+#                                 #     return
+#                                 smoothed[-(n-j)].append([str(inter_ymin), str(inter_xmin), str(inter_ymax), str(inter_xmax)])
+#                     original_boxes.append(box)
+#                     smoothed_boxes.append(box)
+#                     last_billboard_detection = i
+#             original.append(original_boxes)
+#             smoothed.append(smoothed_boxes)
+#             frame_num.append(i)
+#         columns = ['Frame', 'Original', 'Smoothed']
+#         df = pd.DataFrame(zip(frame_num, original, smoothed), columns=columns)
+#         df.to_csv(output_filepath)
+# -----------------------------------------------------------------------------------------
+
 def main(json_filepath, output_filepath, detection_threshold, smoothing_threshold, fps):
     fps = int(fps)
     detection_threshold = float(detection_threshold)
@@ -20,8 +83,7 @@ def main(json_filepath, output_filepath, detection_threshold, smoothing_threshol
         smoothed = []
         original = []
         frame_num = []
-        n = len(frames)
-        last_billboard_detection = 0
+        history = [] #each entry corresponds to a billboard instance, its value being its last seen location
         for i, frame in enumerate(frames):
             original_boxes = []
             smoothed_boxes = []
@@ -30,24 +92,32 @@ def main(json_filepath, output_filepath, detection_threshold, smoothing_threshol
                   float(frame['detection_boxes'][j][2]) - float(frame['detection_boxes'][j][0]) < 0.5 and 
                   float(frame['detection_boxes'][j][3]) - float(frame['detection_boxes'][j][1]) < 0.5):
                     box = frame['detection_boxes'][j]
-                    n = i-last_billboard_detection
-                    # interpolate if this next detection is within a half second window
-                    if n > 1 and n/fps <= smoothing_threshold:
-                        for prev_bb in smoothed[last_billboard_detection]:
-                            if iou(prev_bb, box) >= 0.5:
-                                for j in range(1, n):
-                                    t = j/n
-                                    inter_ymin = (1-t)*float(prev_bb[0]) + t*float(box[0])
-                                    inter_xmin = (1-t)*float(prev_bb[1]) + t*float(box[1])
-                                    inter_ymax = (1-t)*float(prev_bb[2]) + t*float(box[2])
-                                    inter_xmax = (1-t)*float(prev_bb[3]) + t*float(box[3])
-                                    if len(smoothed[-(n-j)]) > 0:
-                                        print("oops")
-                                        return
-                                    smoothed[-(n-j)].append([str(inter_ymin), str(inter_xmin), str(inter_ymax), str(inter_xmax)])
+
+                    best_metric = 0
+                    most_likely_correspondence = None
+                    for h in range(len(history)):
+                        prev_box, last_seen = history[h]
+                        metric = iou(prev_box, box)
+                        time_gap = (i-last_seen)/fps
+                        if metric >= 0.4 and time_gap <= smoothing_threshold and metric > best_metric:
+                            best_metric = metric
+                            most_likely_correspondence = h
+
+                    if most_likely_correspondence is not None:
+                        # print(best_metric)
+                        prev_box, last_seen = history[most_likely_correspondence]
+                        for step in range(1, i-last_seen):
+                            t = step/(i-last_seen)
+                            inter_ymin = (1-t)*float(prev_box[0]) + t*float(box[0])
+                            inter_xmin = (1-t)*float(prev_box[1]) + t*float(box[1])
+                            inter_ymax = (1-t)*float(prev_box[2]) + t*float(box[2])
+                            inter_xmax = (1-t)*float(prev_box[3]) + t*float(box[3])
+                            smoothed[last_seen+step].append([str(inter_ymin), str(inter_xmin), str(inter_ymax), str(inter_xmax)])
+                        history[most_likely_correspondence] = (box, i)
+                    else:
+                        history.append((box, i))
                     original_boxes.append(box)
                     smoothed_boxes.append(box)
-                    last_billboard_detection = i
             original.append(original_boxes)
             smoothed.append(smoothed_boxes)
             frame_num.append(i)
@@ -102,28 +172,12 @@ def iou(box1, box2):
     assert iou >= 0.0
     return iou
 
-def identify(x, y, frame):
-    """Identifies all potential entities that the user was fixated on during a
-    keyframe of the simulation based on highest confidence bounding boxes.
-
-    Keyword arguments:
-    x -- relative path to config file (float)
-    y -- number of test iterations (float)
-    frame -- tensorflow_hub detector output; comes sorted in descending order by scores (dict)
-    """
-    min_confidence = 0.2 #TODO: should this be specified more empiraclly? or maybe set it super low only for billboard class?
-    scores = [float(s) for s in frame['detection_scores'][::-1]]
-    cutoff = len(scores) - bisect_left(scores, min_confidence) 
-    print('Cut: ', cutoff)
-    boxes = frame['detection_boxes'][:cutoff]
-    entities = frame['detection_class_entities'][:cutoff]
-
-    def inside_box(box):
-        ymin, xmin, ymax, xmax = map(lambda s: float(s), box)
-        return xmin <= x <= xmax and ymin <= y <= ymax
-
-    return {entities[j]: boxes[j] for j, box in enumerate(boxes[::-1]) if inside_box(box)}
-    
+def euclid_center_dist(box1, box2):
+    box1 = np.array(box1, dtype=np.float32)
+    box2 = np.array(box2, dtype=np.float32)
+    center1 = ( (box1[3]-box1[1])/2, (box1[2]-box1[0])/2 )
+    center2 = ( (box2[3]-box2[1])/2, (box2[2]-box2[0])/2 )
+    return ((center1[0]-center2[0])**2 + (center1[1] - center2[1])**2 )**(1/2)
 
 if __name__ == '__main__':
     args = sys.argv[1:]

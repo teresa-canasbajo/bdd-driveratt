@@ -1,9 +1,10 @@
+import sys
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def main():
-	df = pd.read_csv("targets.csv")
+def main(filename):
+	df = pd.read_csv(filename)
 	entity_fixation_counts = df.count()
 
 	entities = df.columns[3:]
@@ -16,4 +17,6 @@ def main():
 	plt.show()
 
 if __name__ == '__main__':
-    main()
+	args = sys.argv[1:]
+	assert(len(args) >= 1)
+	main(args[0])
