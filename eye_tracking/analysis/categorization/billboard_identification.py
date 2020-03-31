@@ -70,6 +70,16 @@ from bisect import bisect_left
 # -----------------------------------------------------------------------------------------
 
 def main(json_filepath, output_filepath, detection_threshold, smoothing_threshold, fps):
+    """Generate a csv file containing all billboard detections per video frame,
+    with gaps in the detections smoothed via linear interpolation.
+
+    Keyword arguments:
+    json_filepath -- path to output of object_detection.py
+    output_filepath -- savepath for generated csv
+    detection_threshold -- specifies minimum acceptable detection score
+    smoothing_threshold -- specifies maximum time delay between associated billboards when smoothing
+    fps -- frame rate of original video
+    """
     fps = int(fps)
     detection_threshold = float(detection_threshold)
     smoothing_threshold = float(smoothing_threshold)
@@ -83,7 +93,7 @@ def main(json_filepath, output_filepath, detection_threshold, smoothing_threshol
         smoothed = []
         original = []
         frame_num = []
-        history = [] #each entry corresponds to a billboard instance, its value being its last seen location
+        history = [] # each entry corresponds to a billboard instance, its value being its last seen location
         for i, frame in enumerate(frames):
             original_boxes = []
             smoothed_boxes = []
@@ -126,6 +136,12 @@ def main(json_filepath, output_filepath, detection_threshold, smoothing_threshol
         df.to_csv(output_filepath)
 
 def billboard_confidence_stats(frames):
+    """Calculates the max, min, and avg confidence
+    of the most likely billboard detections.
+
+    Keyword arguments:
+    frames -- json object contains all detections per frame
+    """
     cumulative_sum = 0
     frames_with_billboards = 0
     max_conf = float("-inf")
@@ -141,6 +157,12 @@ def billboard_confidence_stats(frames):
     return cumulative_sum/frames_with_billboards, max_conf, min_conf
 
 def billboard_confidence(frame):
+    """Returns the confidence of the most likely billboard detection
+    if it exists.
+
+    Keyword arguments:
+    frame -- TFHub detection result dictionary
+    """
     billboard_scores = [float(frame['detection_scores'][i]) for i in range(len(frame['detection_scores'])) if frame['detection_class_entities'][i] == 'Billboard']
     if len(billboard_scores) > 0:
         return billboard_scores[0]
@@ -149,7 +171,7 @@ def billboard_confidence(frame):
 def iou(box1, box2):
     """Calculates Intersection over Union of two bounding boxes.
 
-    Keyword arugments:
+    Keyword arguments:
     box1 -- first bounding box ordered ymin, xmin, ymax, xmax
     box2 -- second bounding box ordered ymin, xmin, ymax, xmax
     """
@@ -173,6 +195,13 @@ def iou(box1, box2):
     return iou
 
 def euclid_center_dist(box1, box2):
+    """Calculates the euclidean distance between the centers of two
+    bounding boxes.
+
+    Keyword arguments:
+    box1 -- first bounding box ordered ymin, xmin, ymax, xmax
+    box2 -- second bounding box ordered ymin, xmin, ymax, xmax
+    """
     box1 = np.array(box1, dtype=np.float32)
     box2 = np.array(box2, dtype=np.float32)
     center1 = ( (box1[3]-box1[1])/2, (box1[2]-box1[0])/2 )

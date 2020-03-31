@@ -12,6 +12,16 @@ from expand_bounding_box import expand_logo_bb
 from manual_detection import print_progress_bar
 
 def draw_box(ymin, xmin, ymax, xmax, img_length, img_width):
+    """Overlays a red bounding box over the current plot figure.
+
+    Keyword arguments: 
+    ymin -- normalized top edge
+    xmin -- normalized left edge
+    ymax -- normalized bottom edge
+    xmax -- normalized right edge
+    img_length -- image length
+    img_width -- image width
+    """
     ymin = float(ymin) * img_length
     xmin = float(xmin) * img_width
     ymax = float(ymax) * img_length
@@ -21,6 +31,14 @@ def draw_box(ymin, xmin, ymax, xmax, img_length, img_width):
     return patches.Rectangle((xmin, ymin), width, length, linewidth=1, edgecolor='r', facecolor='none')
 
 def animate_tf(input_dir_path, json_path, animation_filename, threshold):
+    """Overlays the detected bounding boxes onto the original subject video.
+
+    Keyword arguments: 
+    input_dir_path -- path to directory containing raw video frames
+    json_path -- path to output of object_detection.py
+    animation_filename -- savepath for generated video
+    threshold -- minimum acceptable detection score
+    """
     frames = sorted(glob.glob(input_dir_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
     output_dir_path = input_dir_path + '_animate_tf'
     if not os.path.exists(output_dir_path):
@@ -49,6 +67,13 @@ def animate_tf(input_dir_path, json_path, animation_filename, threshold):
     animate(output_dir_path, animation_filename)
 
 def animate_tf_smoothed(input_dir_path, csv_path, animation_filename):
+    """Overlays the smoothed bounding box detections onto the original subject video.
+
+    Keyword arguments: 
+    input_dir_path -- path to directory containing raw video frames
+    csv_path -- path to output of identification.py
+    animation_filename -- savepath for generated video
+    """
     output_dir_path = input_dir_path + '_animate_tf_smoothed'
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
@@ -71,6 +96,14 @@ def animate_tf_smoothed(input_dir_path, csv_path, animation_filename):
     animate(output_dir_path, animation_filename)
 
 def animate_tf_compare(path_to_frames, output_filename):
+    """Animates the original and smoothed bounding box detections
+    side by side. Assumes that both animations have already been
+    separately generated.
+
+    Keyword arguments: 
+    path_to_frames -- path to original raw frames
+    output_filename -- savepath for generated animation
+    """
     original_path = path_to_frames + '_animate_tf'
     smoothed_path = path_to_frames + '_animate_tf_smoothed'
     fig, ax = plt.subplots(1, 2)
@@ -135,6 +168,12 @@ def animate_tf_compare(path_to_frames, output_filename):
 #     animate(output_dir_path, animation_filename)
 # ------------------------------------------------------------------------------------
 def animate(frame_path, output_filename):
+    """Produces a matplotlib animation using the images in the specified directory.
+
+    Keyword arguments: 
+    frame_path -- path to directory containing images to be used
+    output_filename -- savepath for generated animation
+    """
     fig = plt.figure()
     frames = sorted(glob.glob(frame_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
 

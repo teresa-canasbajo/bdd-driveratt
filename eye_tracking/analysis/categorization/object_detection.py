@@ -39,13 +39,15 @@ print("The following GPU devices are available: %s" % tf.test.gpu_device_name())
 ################################################################################################################
 
 def display_image(image):
+	"""Displays an image using matplotlib."""
 	fig = plt.figure(figsize=(20, 15))
 	plt.grid(False)
 	plt.imshow(image)
 
 
-def download_and_resize_image(url, new_width=256, new_height=256,
-															display=False):
+def download_and_resize_image(url, new_width=256, new_height=256, display=False):
+	"""Downloads an image from the web and rescales it to the specified size"""
+
 	_, filename = tempfile.mkstemp(suffix=".jpg")
 	response = urlopen(url)
 	image_data = response.read()
@@ -62,6 +64,7 @@ def download_and_resize_image(url, new_width=256, new_height=256,
 
 def draw_bounding_box_on_image(image, ymin, xmin, ymax, xmax, color, font, thickness=4, display_str_list=()):
 	"""Adds a bounding box to an image."""
+
 	draw = ImageDraw.Draw(image)
 	im_width, im_height = image.size
 	(left, right, top, bottom) = (xmin * im_width, xmax * im_width,
@@ -98,6 +101,7 @@ def draw_bounding_box_on_image(image, ymin, xmin, ymax, xmax, color, font, thick
 
 def draw_boxes(image, boxes, class_names, scores, max_boxes=10, min_score=0.1):
 	"""Overlay labeled boxes on an image with formatted scores and label names."""
+
 	colors = list(ImageColor.colormap.values())
 
 	try:
@@ -127,11 +131,13 @@ def draw_boxes(image, boxes, class_names, scores, max_boxes=10, min_score=0.1):
 	return image
 
 def load_img(path):
+	"""Loads an image as a TF tensor."""
 	img = tf.io.read_file(path)
 	img = tf.image.decode_jpeg(img, channels=3)
 	return img
 
 def draw_frame(result, img):
+	"""Overlays all object detections onto the image."""
 	image_with_boxes = draw_boxes(
 			img.numpy(), result["detection_boxes"],
 			result["detection_class_entities"], result["detection_scores"])
@@ -142,7 +148,15 @@ def draw_frame(result, img):
 #                                                 Processing Frames                                            #
 ################################################################################################################
 
-def main(frames_path, to_extract=""):
+def main(frames_path, output_path, to_extract=""):
+	"""Uses a pre-trained object detector from TensorflowHub to detect all occuring objects
+	in a subject video and saves all detections to a json file.
+
+	frames_path -- path to directory containing raw video frames
+	output_path -- savepath for generated json
+	to_extract -- path to raw video file; if specified will extract single frames into frames_path (default "")
+	"""
+
 	print('Loading detector.')
 	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"#@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
 	detector = hub.load(module_handle).signatures['default']
@@ -153,10 +167,17 @@ def main(frames_path, to_extract=""):
 		extract_frames(to_extract, frames_path)
 
 	frames = detect_objects(frames_path, detector)
-	with open('./frames.json', 'w') as f:
+	with open(output_path, 'w') as f:
 		json.dump(frames, f, ensure_ascii=False, indent=4)
 
 def detect_objects(frames_path, detector):
+	"""Loops through all images in the directory and compiles the results of object detection
+	in a list.
+
+	frames_path -- path to directory containing raw video frames
+	detector -- TensorflowHub detector object
+	"""
+
 	frames = []
 	all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
 	# all_images = all_images[:-1] #whats wrong with the last frame?
@@ -180,6 +201,11 @@ def detect_objects(frames_path, detector):
 	return frames
 
 def run_detector(detector, path):
+	"""Detects all objects in the image and returns a list of results. 
+
+	detector -- TensorflowHub detector object 
+	path -- path to image
+	"""
 	img = load_img(path)
 
 	converted_img  = tf.image.convert_image_dtype(img, tf.float32)[tf.newaxis, ...]
@@ -195,6 +221,10 @@ def run_detector(detector, path):
 	return result, img
 
 def process_result(result):
+	"""Properly encodes all detection results.
+
+	result -- TensorflowHub detection result dictionary
+	"""
 	encoding = 'utf-8'
 
 	def process_element(e):
@@ -211,5 +241,5 @@ def process_result(result):
 
 if __name__ == '__main__':
 	args = sys.argv[1:]
-	assert(len(args) >= 1)
+	assert(len(args) >= 2)
 	main(*args)

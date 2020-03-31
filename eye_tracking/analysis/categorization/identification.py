@@ -6,6 +6,14 @@ import ast
 from bisect import bisect_left
 
 def main(json_filepath, smoothed_billboards_path, output_filepath):
+    """Categorizes each fixation by the object the subject was fixated on (if any). 
+    Handles billboards separately due to the need for smoothing.
+
+    Keyword arguments: 
+    json_filepath -- path to output of object_detection.py
+    smoothed_billboards_path -- path to output of billboard_identification.py
+    output_filepath -- savepath for generated csv
+    """
     with open(json_filepath, 'r') as f:
         items = ['Tree', 'Vehicle','Person', 'Building', 'Skyscraper']
         frames = json.load(f) #frame results listed chronologically
@@ -72,9 +80,9 @@ def inside_box(x, y, box):
     specified bounding box.
 
     Keyword arguments:
-    x -- x coord (float)
-    y -- y coord (float)
-    box -- bounding box defined by its edge locations (list)
+    x -- x coord 
+    y -- y coord 
+    box -- bounding box ordered ymin, xmin, ymax, xmax 
     """
     ymin, xmin, ymax, xmax = map(lambda s: float(s), box)
     return xmin <= x <= xmax and ymin <= y <= ymax
@@ -84,9 +92,9 @@ def identify(x, y, frame):
     keyframe of the simulation based on highest confidence bounding boxes.
 
     Keyword arguments:
-    x -- relative path to config file (float)
-    y -- number of test iterations (float)
-    frame -- tensorflow_hub detector output; comes sorted in descending order by scores (dict)
+    x -- relative path to config file
+    y -- number of test iterations
+    frame -- tensorflow_hub detector output sorted in descending order of scores
     """
     min_confidence = 0.2 #TODO: should this be specified more empiraclly? or maybe set it super low only for billboard class?
     scores = [float(s) for s in frame['detection_scores'][::-1]]

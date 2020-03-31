@@ -3,8 +3,13 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def main(filename):
-	df = pd.read_csv(filename)
+def main(path_to_categorizations):
+    """Visualizes the proportion of frames fixated on each object class.
+
+    Keyword arguments: 
+    path_to_categorizations -- output of identification.py
+    """
+	df = pd.read_csv(path_to_categorizations)
 	entity_fixation_counts = df.count()
 
 	entities = df.columns[3:]
