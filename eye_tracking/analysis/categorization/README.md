@@ -32,6 +32,7 @@ See ```visualization.py``` for details.
 This stage simply turns all the information we have compiled into a final summarizing figure of object fixations as a percentage of total video frames. 
 The current code produces simple seaborn bar plots, but can be easily improved to generate nicer or more complicated figures (be sure to maintain compatability with Pandas).
 
+Usage:
 ```
 python visualization.py PATH_TO_CSV
 ```
