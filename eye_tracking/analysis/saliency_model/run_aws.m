@@ -13,5 +13,5 @@ for n=3:length(to_process)
 	smap = aws(im)
 	graymap = mat2gray(smap)
 	% imwrite(graymap, strcat('aws_maps/', filename(1:length(filename)-3)), 'png')
-	imwrite(graymap, strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/aws_maps/', filename(1:length(filename)-3)), 'png')
+	imwrite(graymap, strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/aws_maps/', filename(1:length(filename)-3), 'png'))
 end

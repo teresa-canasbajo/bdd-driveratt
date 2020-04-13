@@ -12,6 +12,6 @@ for n=3:length(to_process)
 	graymap_big = imresize(graymap, [ size(im, 1), size(im, 2) ] )
 	% imwrite(graymap, strcat('simpsal_maps/', filename(1:length(filename)-3)), 'png')
 	% imwrite(graymap, strcat('simpsal_maps/', filename(1:length(filename)-4)), '_big.png')
-	imwrite(graymap, strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/simpsal_maps/', filename(1:length(filename)-3)), 'png')
-	imwrite(graymap, strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/simpsal_maps/', filename(1:length(filename)-4)), '_big.png')
+	imwrite(graymap, strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/simpsal_maps/', filename(1:length(filename)-3), 'png'))
+	imwrite(graymap, strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/simpsal_maps/', filename(1:length(filename)-4), '_big.png'))
 end
