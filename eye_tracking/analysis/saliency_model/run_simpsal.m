@@ -3,7 +3,7 @@ mkdir '/media/whitney/New Volume/Teresa/bdd-driveratt/demo/simpsal_maps'
 addpath('./simpsal/')
 % to_process = dir('frames')
 to_process = dir('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/frames')
-for n=3:length(to_process)
+parfor n=3:length(to_process)
 	filename = to_process(n).name
 	% im = imread(strcat('frames/', filename))
 	im = imread(strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/frames/', filename))

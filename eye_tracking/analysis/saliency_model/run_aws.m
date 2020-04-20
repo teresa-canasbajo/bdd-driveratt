@@ -1,12 +1,12 @@
 % example of running on command line: 
-% matlab -nodisplay -nosplash -nodesktop -r "run('/home/jszou/cs/eye_tracking/bdd-driveratt/eye_tracking/analysis/saliency_model/run_aws.m'); exit;"
+% matlab -nodisplay -nosplash -nodesktop -r "run('/home/whitney/Teresa/bdd-driveratt/eye_tracking/analysis/saliency_model/run_aws.m'); exit;"
 %
 % mkdir aws_maps
 mkdir '/media/whitney/New Volume/Teresa/bdd-driveratt/demo/aws_maps'
 addpath('./aws/')
 % to_process = dir('frames')
 to_process = dir('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/frames')
-for n=3:length(to_process)
+parfor n=3:length(to_process)
 	filename = to_process(n).name
 	% im = imread(strcat('frames/', filename))
 	im = imread(strcat('/media/whitney/New Volume/Teresa/bdd-driveratt/demo/frames/', filename))
