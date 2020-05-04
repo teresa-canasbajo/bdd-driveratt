@@ -84,6 +84,14 @@ def generatePlots(data):
     #Average Saccade Amplitude
     plot_saccade_amplitude(data)
 
+
+############
+
+############
+def t_test(a,b):
+    t, p = stats.ttest_ind(a,b)
+    return t, p
+
 ############
 # run report
 ############
