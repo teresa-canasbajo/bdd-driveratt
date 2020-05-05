@@ -15,7 +15,7 @@ import logging
 import os
 import typing
 
-import file_methods
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.file_methods as file_methods
 
 from .surface import Surface
 from .surface_serializer import InvalidSurfaceDefinition

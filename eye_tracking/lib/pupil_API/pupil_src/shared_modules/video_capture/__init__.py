@@ -25,7 +25,7 @@ These backends are available:
 import os
 import numpy as np
 from glob import glob
-from camera_models import load_intrinsics
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
 
 import logging
 

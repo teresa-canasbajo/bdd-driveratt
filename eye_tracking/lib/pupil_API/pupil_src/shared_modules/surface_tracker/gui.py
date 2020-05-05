@@ -12,18 +12,18 @@ See COPYING and COPYING.LESSER for license details.
 import platform
 import typing
 from enum import Enum
-
-import cv2
-import numpy as np
+import logging
 import OpenGL.GL as gl
+import cv2
+import glfw
+import numpy as np
 import pyglui
 import pyglui.cygl.utils as pyglui_utils
+from pyglui import ui
+from pyglui.pyfontstash import fontstash
 
-import gl_utils
-import glfw
-
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.gl_utils as gl_utils
 from .surface_marker import Surface_Marker_Type
-
 
 SURFACE_TRACKER_CHANGED_DELAY = 1.0
 
@@ -91,9 +91,11 @@ class GUI:
         text_font_color_rgba = rgb_to_rgba(PUPIL_COLOR_RGB_PRIMARY_IRIS_LIGHT_BLUE)
 
         self.glfont = pyglui.pyfontstash.fontstash.Context()
-        self.glfont.add_font("opensans", pyglui.ui.get_opensans_font_path())
-        self.glfont.set_size(23)
-        self.glfont.set_color_float(text_font_color_rgba)
+        logger = logging.getLogger(__name__)
+        logger.warning('we commented out the next three lines because of an issue with Pyglui')
+        # self.glfont.add_font("opensans", pyglui.ui.get_opensans_font_path())
+        # self.glfont.set_size(23)
+        # self.glfont.set_color_float(text_font_color_rgba)
 
     def update(self):
         if self.show_heatmap:

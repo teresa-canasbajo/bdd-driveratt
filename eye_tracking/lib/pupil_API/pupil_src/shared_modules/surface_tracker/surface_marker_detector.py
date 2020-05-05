@@ -15,7 +15,7 @@ import logging
 import typing as T
 from collections import namedtuple
 
-import square_marker_detect
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.square_marker_detect as square_marker_detect
 import pupil_apriltags
 
 from .surface_marker import Surface_Marker, Surface_Marker_Type

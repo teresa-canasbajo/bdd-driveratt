@@ -15,8 +15,8 @@ from time import monotonic, sleep
 import numpy as np
 from pyglui import cygl
 
-import gl_utils
-from plugin import Plugin
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.gl_utils as gl_utils
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.plugin import Plugin
 
 logger = logging.getLogger(__name__)
 

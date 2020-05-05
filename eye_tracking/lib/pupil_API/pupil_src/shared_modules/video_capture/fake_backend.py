@@ -15,8 +15,8 @@ import cv2
 import numpy as np
 from time import time, sleep
 from pyglui import ui
-from camera_models import Dummy_Camera
-from file_methods import load_object
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import Dummy_Camera
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.file_methods import load_object
 
 # logging
 import logging

@@ -323,6 +323,7 @@ def save_file(data, subject, datapath, outputprefix=''):
     filename_cleaned_samples = str(et) + '_cleaned_samples.csv'
     filename_msgs = str(et) + '_msgs.csv'
     filename_events = str(et) + '_events.csv'
+    filename_timestamps = str(et) + '_timestamps.csv'
 
     # make separate csv file for every df 
     data[0].to_csv(os.path.join(preprocessed_path, filename_samples), index=False)
@@ -330,6 +331,11 @@ def save_file(data, subject, datapath, outputprefix=''):
     data[2].to_csv(os.path.join(preprocessed_path, filename_msgs), index=False)
     data[3].to_csv(os.path.join(preprocessed_path, filename_events), index=False)
 
+    #save timestamps as csv
+    timestamps_path = os.path.join(datapath, subject, 'world_timestamps.npy')
+    a = np.load(timestamps_path)
+    df_timestamps = pd.DataFrame(a)
+    df_timestamps.to_csv(os.path.join(preprocessed_path, filename_timestamps), index=False)
 
 def findFile(path, ftype):
     # finds file for el edf

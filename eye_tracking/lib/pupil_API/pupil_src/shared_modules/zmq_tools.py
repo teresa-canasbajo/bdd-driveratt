@@ -134,6 +134,7 @@ class Msg_Streamer(ZMQ_Socket):
     Not threadsave. Make a new one for each thread
     """
 
+
     def __init__(self, ctx, url):
         self.socket = zmq.Socket(ctx, zmq.PUB)
         self.socket.connect(url)

@@ -45,7 +45,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 
 
 # surfaceMap False in et_import for testing purposes
-def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=False, parsemsg=True):
+def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=False, parsemsg=True, markers_per_screen = 4):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
     #           surfaceMap:
@@ -61,34 +61,28 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
             'Surface detector NOT functional yet. If you want to continue without it, please turn surfaceMap to False')
 
     if surfaceMap:
-        # has to be imported before nbp recalib
-        try:
-            import functions.pl_surface_forTesting as pl_surface
-        except ImportError:
-            raise Exception('Custom Error:Could not import pl_surface')
-
-    assert (type(subject) == str)
+        import eye_tracking.preprocessing.debug.debug_pl_surface as pl_surface
 
     # Get samples df
     # (is still a dictionary here)
     original_pldata, annotations, gaze = raw_pl_data(subject=subject, datapath=datapath)
-
-    if surfaceMap:
-        folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
-
-        # we have fixed map_surface!
-        tracker = pl_surface.map_surface(folder, loadCache=True)  # originally was True
-        # now we are working on surface_map_data:
-        gaze_on_srf = pl_surface.surface_map_data(tracker, original_pldata['gaze_positions'])
-        logger.warning('Original Data Samples: %s on surface: %s', len(original_pldata['gaze_positions']),
-                       len(gaze_on_srf))
-        original_pldata['gaze_positions'] = gaze_on_srf
 
     # use pupilhelper func to make samples df (confidence, gx, gy, smpl_time, diameter)
     original_pldata = original_pldata._asdict()
     original_pldata['gaze_positions'] = gaze
     pldata = gaze_to_pandas(original_pldata['gaze_positions'])
     print('pldata', pldata)
+
+    if surfaceMap:
+        folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
+
+        # we have fixed map_surface! - not working - make sure surface only created when markers are there
+        tracker = pl_surface.map_surface(folder, markers_per_screen=markers_per_screen)#, loadCache=True)  # originally was True
+        # now we are working on surface_map_data:
+        gaze_on_srf = pl_surface.surface_map_data(tracker, gaze)
+        logger.warning('Original Data Samples: %s on surface: %s', len(original_pldata['gaze_positions']),
+                       len(gaze_on_srf))
+        original_pldata['gaze_positions'] = gaze_on_srf
 
     if surfaceMap:
         pldata.gx = pldata.gx * (1920 - 2 * (75 + 18)) + (75 + 18)  # minus white border of marker & marker

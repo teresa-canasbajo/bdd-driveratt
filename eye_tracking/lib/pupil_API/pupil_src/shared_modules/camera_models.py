@@ -17,7 +17,7 @@ import typing
 import cv2
 import numpy as np
 
-from file_methods import load_object, save_object
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.file_methods import load_object, save_object
 
 logger = logging.getLogger(__name__)
 __version__ = 1

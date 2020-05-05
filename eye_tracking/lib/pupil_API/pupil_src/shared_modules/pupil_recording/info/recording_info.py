@@ -18,7 +18,7 @@ import os
 import typing as T
 import uuid
 
-from version_utils import get_version
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.version_utils import get_version
 
 from .. import Version
 

@@ -18,10 +18,10 @@ import time
 import numpy as np
 from pyglui import cygl
 
-import gl_utils
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.gl_utils as gl_utils
 import uvc
-from camera_models import load_intrinsics
-from version_utils import VersionFormat
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.version_utils import VersionFormat
 
 from .base_backend import Base_Manager, Base_Source, InitialisationError
 from .utils import Check_Frame_Stripes, Exposure_Time

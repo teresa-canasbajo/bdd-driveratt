@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from camera_models import load_intrinsics
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
 
 class global_container():
     pass
@@ -8,8 +8,8 @@ class global_container():
 def notify_all(self, notification=''):
     logger.info(notification)
 
-def gen_fakepool(inp_gaze=[], calibration_mode='2d'):
-    from plugin import Plugin_List
+def gen_fakepool(inp_gaze=[], surface_dir = '', calibration_mode='2d'):
+    from eye_tracking.lib.pupil_API.pupil_src.shared_modules.plugin import Plugin_List
 
     fake_gpool = global_container()
     fake_gpool.capture = global_container()
@@ -18,10 +18,16 @@ def gen_fakepool(inp_gaze=[], calibration_mode='2d'):
     fake_gpool.min_calibration_confidence = 0.6
     fake_gpool.gaze_positions_by_frame = inp_gaze
     fake_gpool.app = 'not-capture'
-    fake_gpool.user_dir = '/work'
-    fake_gpool.rec_dir = '/work'
+    #user_dir seems problematic aka not found later on
+    # fake_gpool.user_dir = '/work'
+    # fake_gpool.rec_dir = '/work'
+    surface_dir = os.path.join(surface_dir, 'work')
+    if not os.path.exists(surface_dir):
+        os.mkdir(surface_dir)
+    fake_gpool.user_dir = surface_dir
+    fake_gpool.rec_dir = surface_dir
 
-    fake_gpool.detection_mapping_mode = calibration_mode
+    # fake_gpool.detection_mapping_mode = calibration_mode
     fake_gpool.plugin_by_name = ''
     fake_gpool.plugins = Plugin_List(fake_gpool, [])
 

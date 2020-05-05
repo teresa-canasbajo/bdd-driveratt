@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 import pyglui
 import pyglui.cygl.utils as pyglui_utils
-import gl_utils
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.gl_utils as gl_utils
 
 from .gui import Heatmap_Mode
 from .surface_tracker import Surface_Tracker

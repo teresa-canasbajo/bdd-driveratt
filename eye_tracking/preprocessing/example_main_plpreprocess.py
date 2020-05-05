@@ -14,10 +14,15 @@ elif platform == 'linux' and hostname == 'teresa-desktop':
     super_best = '/home/teresa//Documents/demos/super_best'
 
 demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
-diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'
+manual_demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/manual_demo'
+auto_demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/auto_demo'
+# diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'
 diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject4/000'
+naive_diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Naive_Subjects/Subject_AS/000'
 
 # surfaceMap False in et_import for testing purposes
-data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
+data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations), markers_per_screen = 10)
+
+# data = preprocess_et(subject='', datapath=demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations), markers_per_screen = 4)
 
 print('done!')

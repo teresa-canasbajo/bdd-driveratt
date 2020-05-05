@@ -17,8 +17,8 @@ import types
 
 import cv2
 
-import background_helper
-import player_methods
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.background_helper as background_helper
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.player_methods as player_methods
 
 logger = logging.getLogger(__name__)
 

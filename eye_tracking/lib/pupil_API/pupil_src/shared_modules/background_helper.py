@@ -16,7 +16,7 @@ from ctypes import c_bool
 
 import zmq
 
-import zmq_tools
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.zmq_tools as zmq_tools
 
 logger = logging.getLogger(__name__)
 

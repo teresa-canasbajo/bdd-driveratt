@@ -22,9 +22,9 @@ import OpenGL.GL as gl
 import pyglui
 import pyglui.cygl.utils as pyglui_utils
 
-import file_methods
-import gl_utils
-from plugin import Analysis_Plugin_Base
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.file_methods as file_methods
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.gl_utils as gl_utils
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.plugin import Analysis_Plugin_Base
 
 from . import background_tasks, offline_utils
 from .cache import Cache

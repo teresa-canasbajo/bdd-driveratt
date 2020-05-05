@@ -17,8 +17,8 @@ import uuid
 import cv2
 import numpy as np
 
-import methods
-from stdlib_utils import is_none, is_not_none
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.methods as methods
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.stdlib_utils import is_none, is_not_none
 
 from .surface_marker import Surface_Marker_UID
 from .surface_marker_aggregate import Surface_Marker_Aggregate

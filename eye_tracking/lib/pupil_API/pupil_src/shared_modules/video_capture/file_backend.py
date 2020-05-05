@@ -20,12 +20,12 @@ import typing as T
 from multiprocessing import cpu_count
 from abc import ABC, abstractmethod
 from time import sleep
-from camera_models import load_intrinsics
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
 from .utils import VideoSet
 
-import player_methods as pm
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.player_methods as pm
 from .base_backend import Base_Manager, Base_Source, EndofVideoError, Playback_Source
-from pupil_recording import PupilRecording
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.pupil_recording import PupilRecording
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

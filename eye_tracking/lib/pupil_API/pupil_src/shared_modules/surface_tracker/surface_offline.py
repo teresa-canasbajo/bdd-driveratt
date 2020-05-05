@@ -13,7 +13,7 @@ import logging
 import multiprocessing
 import platform
 
-import player_methods
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.player_methods as player_methods
 
 from . import background_tasks, offline_utils
 from .cache import Cache

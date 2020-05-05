@@ -14,8 +14,8 @@ import os
 import typing as T
 import uuid
 
-import csv_utils
-from methods import get_system_info
+import eye_tracking.lib.pupil_API.pupil_src.shared_modules.csv_utils as csv_utils
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.methods import get_system_info
 
 from .recording_info import RecordingInfoFile, Version
 

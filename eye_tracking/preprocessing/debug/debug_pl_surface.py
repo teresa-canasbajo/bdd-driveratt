@@ -5,34 +5,32 @@ Created on Fri Apr 20 11:41:34 2018
 
 @author: behinger
 """
-import collections
+# import collections
 
-import functions.add_path
-from functions.manual_detection import extract_frames, detect_tags, print_progress_bar
+# import functions.add_path
+from eye_tracking.preprocessing.functions.manual_detection import extract_frames, detect_tags, print_progress_bar
 import numpy as np
-import time
-import pickle  # to save & restore variable
+# import time
+# import pickle  # to save & restore variable
 from glob import glob
 import cv2
 import os
-from surface_tracker import surface_tracker_offline
 
-from surface_tracker import surface_tracker_online
-import av  # important to load this library before pupil-library! (even though we dont use it...)
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.surface_tracker import surface_tracker_online, surface_tracker_offline
+# import av  # important to load this library before pupil-library! (even though we dont use it...)
 
-from IPython.core.debugger import set_trace
+# from IPython.core.debugger import set_trace
 
-from queue import Empty as QueueEmptyException
+# from queue import Empty as QueueEmptyException
 
-from camera_models import load_intrinsics
-from player_methods import correlate_data
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.player_methods import correlate_data
 
-from video_capture import fake_backend
-
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.video_capture import fake_backend
+from eye_tracking.preprocessing.functions.base_functions import gen_fakepool, global_container
 
 # %%
-
-def map_surface(folder):
+def map_surface(folder, markers_per_screen):
     # 1. create class with info about the folder
     fake_gpool = fake_gpool_surface(folder)
 
@@ -55,6 +53,9 @@ def map_surface(folder):
     # Sort by index in.../frame<index>.png
     all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
     all_images = all_images[:-1]
+    # bad images cuz they don't have actual surface
+    # all_images = all_images[24720:24984]
+    all_images = all_images[793:966]
 
     num_images = len(all_images)
 
@@ -80,11 +81,18 @@ def map_surface(folder):
         print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
 
         # a surface is defined by at least 4 markers.
+        # seems like surfaces are already defined in recent_events - not sure, but all markers in 1 frame seem to be stated as 1 surface
         # TODO: we need to predefine surfaces!!
-        if len(tracker_online.markers) >= 4:
-            tracker_online.on_add_surface_click()
+        if len(tracker_online.markers) >= markers_per_screen:
+            size = len(tracker_online.markers)
+            while size >= markers_per_screen:
+                # how do we know which markers are associated with this surface?
+                tracker_online.on_add_surface_click()
+                size -= markers_per_screen
 
     print('success!')
+
+    return tracker_online
 
 
 def fake_gpool_surface(folder=None):
@@ -94,7 +102,7 @@ def fake_gpool_surface(folder=None):
     if not os.path.exists(surface_dir):
         os.makedirs(surface_dir)
 
-    fake_gpool = gen_fakepool(folder)
+    fake_gpool = gen_fakepool(folder, surface_dir)
     fake_gpool.surfaces = []
     fake_gpool.rec_dir = surface_dir
     fake_gpool.timestamps = np.load(os.path.join(folder, 'world_timestamps.npy'))
@@ -117,3 +125,39 @@ def define_event(idx, all_images, fake_gpool):
     index = idx
     events = {'frame': fake_backend.Frame(timestamp, img, index)}
     return events
+
+
+def surface_map_data(tracker, data):
+    import eye_tracking.lib.pupil_API.pupil_src.shared_modules.player_methods as player_methods
+    import eye_tracking.lib.pupil_API.pupil_src.shared_modules.surface_tracker.surface as surface
+
+    tmp = data
+    if hasattr(player_methods, 'Bisector'):
+        # pupil labs starting from v1.8 needs the data as a Bisector
+        data_dict = data._asdict()
+        data = [t for t in data_dict['data']]
+        time = [t for t in data_dict['timestamps']]
+        tmp = player_methods.Bisector(data, time)
+
+    fake_gpool = tracker.g_pool
+    fake_gpool.gaze_positions = tmp
+    fake_gpool.gaze_positions_by_frame = correlate_data(data, list(fake_gpool.timestamps))
+
+    # if not (len(tracker.surfaces) == 1):
+    #     raise 'expected only a single surface!'
+    # And finally calculate the positions
+    # gaze_on_srf = tracker.surfaces[0].gaze_on_srf_in_section()
+
+    # gaze_on_srf = fake_gpool.gaze_positions_by_frame
+    # trying the following -- gaze_on_srf_in_section() seems to be from prev API
+    # gaze_on_srf = tracker.surfaces[0].update_gaze_history()
+    # check out map_gaze_and_fixation_events under surface - surface api
+    # also surface_tracker file see code below
+    # for surface in self.surfaces:
+    #     if surface.detected:
+    #         gaze_on_surf = surface.map_gaze_and_fixation_events(
+    #             gaze_events, self.camera_model
+    #         )
+
+
+    return gaze_on_srf

@@ -16,7 +16,7 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 from pyglui import ui
 
-from plugin import Plugin
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.plugin import Plugin
 
 from . import gui
 from .surface_file_store import Surface_File_Store
