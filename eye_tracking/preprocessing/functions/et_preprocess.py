@@ -23,7 +23,7 @@ import logging
 # %%
 
 def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', load=False, save=False,
-                  eventfunctions=(make_blinks, make_saccades, make_fixations), outputprefix='', markers_per_screen = 4, **kwargs):
+                  eventfunctions=(make_blinks, make_saccades, make_fixations), outputprefix='', markers_per_screen = 10, **kwargs):
     # Output:     3 cleaned dfs: etsamples, etmsgs, etevents   
     # get a logger for the preprocess function    
     logger = logging.getLogger(__name__)

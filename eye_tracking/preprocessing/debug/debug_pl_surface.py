@@ -55,7 +55,7 @@ def map_surface(folder, markers_per_screen):
     all_images = all_images[:-1]
     # bad images cuz they don't have actual surface
     # all_images = all_images[24720:24984]
-    all_images = all_images[793:966]
+    # all_images = all_images[793:966]
 
     num_images = len(all_images)
 
