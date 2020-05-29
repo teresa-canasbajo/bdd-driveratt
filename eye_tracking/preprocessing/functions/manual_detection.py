@@ -5,9 +5,6 @@ from glob import glob
 import os
 import time
 import sys
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from PIL import Image
 import numpy as np
 import cv2
 import pandas as pd
@@ -63,6 +60,7 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
         all_images = all_images[:-1]
 
     num_images = len(all_images)
+    img_n_total = []
     # print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
     starting_frame = False
@@ -72,6 +70,11 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
     bottom_left_corner = []
     bottom_right_corner = []
     center = []
+    norm_top_left_corner = []
+    norm_top_right_corner = []
+    norm_bottom_left_corner = []
+    norm_bottom_right_corner = []
+    norm_center = []
     # Iterate thru all PNG images in frames_path
     for i, img_path in enumerate(all_images):
         # Create a grayscale 2D NumPy array for Detector.detect()
@@ -99,31 +102,58 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
                 #  "frames_since_true_detection": 0}
             frames.append(tags_in_framex)
 
+        # all frame numbers
+        head, tail = os.path.split(img_path)
+        img_n_total.append(int(''.join(list(filter(str.isdigit, tail)))))
+
+        # detect surfaces once the first frame with all tags are identified
         if len(tags_in_framex) == 10:
             starting_frame = True
 
         if starting_frame:
-            head, tail = os.path.split(img_path)
+            # frame number
             img_n.append(int(''.join(list(filter(str.isdigit, tail)))))
 
             # create bounding box
-            tl, tr, bl, br, c = bounding_box(frames_path, frames, img_path, tags)
+            tl, tr, bl, br, c, norm_tl, norm_tr, norm_bl, norm_br, norm_c = bounding_box(frames_path, frames, img_path, tags)
             top_left_corner.append(tl)
             top_right_corner.append(tr)
             bottom_left_corner.append(bl)
             bottom_right_corner.append(br)
             center.append(c)
+            norm_top_left_corner.append(norm_tl)
+            norm_top_right_corner.append(norm_tr)
+            norm_bottom_left_corner.append(norm_bl)
+            norm_bottom_right_corner.append(norm_br)
+            norm_center.append(norm_c)
 
         time.sleep(0.01)
         print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
 
-    bb_coords = {'Image': img_n,
-                 'Top Left Corner': top_left_corner,
-                 'Bottom Left Corner': bottom_left_corner,
-                 'Bottom Right Corner': bottom_right_corner,
-                 'Top Right Corner': top_right_corner,
-                 'Center': center}
-    coordinates_df = pd.DataFrame(bb_coords, columns=['Image', 'Top Left Corner', 'Bottom Left Corner', 'Bottom Right Corner', 'Top Right Corner', 'Center'])
+    # match world timestamps to appropriate frame
+    head, tail = os.path.split(frames_path)
+    timestamps_path = os.path.join(head, 'world_timestamps.npy')
+    a = np.load(timestamps_path)
+    t = {'Image': img_n_total, 'Timestamp': a}
+    timestamp = []
+    for i in img_n:
+        x = t['Image'].index(i)
+        timestamp.append(t['Timestamp'][x-1])
+
+    bb_coords = {'image': img_n,
+                 'timestamp': timestamp,
+                 'top_left': top_left_corner,
+                 'bottom_left': bottom_left_corner,
+                 'bottom_right': bottom_right_corner,
+                 'top_right': top_right_corner,
+                 'center': center,
+                 'norm_top_left': norm_top_left_corner,
+                 'norm_bottom_left': norm_bottom_left_corner,
+                 'norm_bottom_right': norm_bottom_right_corner,
+                 'norm_top_right': norm_top_right_corner,
+                 'norm_center': norm_center
+                 }
+    coordinates_df = pd.DataFrame(bb_coords)
     # coordinates_df.to_csv(os.path.join(frames_path, 'coordinates.csv'), index=False)
 
     return frames, dict(tag_ids), coordinates_df
@@ -208,8 +238,8 @@ def bounding_box(folder, frame, img_path, tag):
         if not os.path.exists(bounding_box_frames_path):
             os.mkdir(bounding_box_frames_path)
             print("Successfully created the directory %s " % bounding_box_frames_path)
-        else:
-            print("Directory %s already exists." % bounding_box_frames_path)
+        # else:
+        #     print("Directory %s already exists." % bounding_box_frames_path)
     except OSError:
         print("Creation of the directory %s failed" % bounding_box_frames_path)
 
@@ -230,6 +260,16 @@ def bounding_box(folder, frame, img_path, tag):
     center = intersection([l, r], [bottom_midpoint, top_midpoint])
 
     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
+
+    # for normalization calculations
+    height = img.shape[0]
+    width = img.shape[1]
+    norm_tl = normalize(tl, width, height)
+    norm_tr = normalize(tr, width, height)
+    norm_bl = normalize(bl, width, height)
+    norm_br = normalize(br, width, height)
+    norm_center = normalize(center, width, height)
+
     # pts = np.array(coordinates, np.int32)
         # pts = np.array([top_left, bottom_left, bottom_right, top_right], np.int32)
 
@@ -241,6 +281,7 @@ def bounding_box(folder, frame, img_path, tag):
     thickness = 2
 
     cv2.rectangle(img, tl, br, red, thickness) # rectangle
+
     cv2.line(img, l, r, red, thickness) # horizontal line
     cv2.line(img, bottom_midpoint, top_midpoint, red, thickness) # vertical line
     cv2.circle(img, center, 2, (0, 255, 255), 8)  # point in the center of the screen
@@ -248,7 +289,12 @@ def bounding_box(folder, frame, img_path, tag):
     head, tail = os.path.split(img_path)
     cv2.imwrite(bounding_box_frames_path + "/" + tail, img)
 
-    return tl, tr, bl, br, center
+    return tl, tr, bl, br, center, norm_tl, norm_tr, norm_bl, norm_br, norm_center
+
+def normalize(coord, width, height):
+    x = coord[0]/width
+    y = coord[1]/height
+    return (x, y)
 
 def intersection(L1, L2):
     xdiff = (L1[0][0] - L1[1][0], L2[0][0] - L2[1][0])

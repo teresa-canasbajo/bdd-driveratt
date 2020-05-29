@@ -40,7 +40,7 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     # import pl data
     logger.debug("Importing et data")
     logger.debug('Caution: etevents might be empty')
-    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, surfaceMap=False, parsemsg=True, markers_per_screen=markers_per_screen, **kwargs)
+    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, surfaceMap=True, parsemsg=True, markers_per_screen=markers_per_screen, **kwargs)
 
     # Mark bad samples
     logger.debug('Marking bad et samples')
