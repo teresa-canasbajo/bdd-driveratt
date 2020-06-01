@@ -30,7 +30,6 @@ def extract_frames(video_path: str, frames_path: str) -> None:
     # Optional print statement
     print(f'Extracted {count} frames from {video_path}.')
 
-
 def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], aperture=11, visualize=False) -> Tuple[List[List[Dict[str, Any]]], Dict[int, int], pd.DataFrame]:
     """Detect all tags (Apriltags3) found in a folder of PNG files and return (1) a list of tag objects
     for preprocessing and (2) a dictionary containing the frequency that each tag ID appeared
@@ -50,19 +49,7 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
     tag_ids = defaultdict(int)
     at_detector = Detector()
 
-    # Sort by index in.../frame<index>.png
-    all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
-
-    # Deleted last image after out of range error popped up
-    # TODO: but not analyzing last 2 frames?
-    # print(len(all_images))
-    if len(all_images) > 1:
-        all_images = all_images[:-1]
-
-    num_images = len(all_images)
     img_n_total = []
-    # print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
-
     starting_frame = False
     img_n = []
     top_left_corner = []
@@ -75,6 +62,19 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
     norm_bottom_left_corner = []
     norm_bottom_right_corner = []
     norm_center = []
+
+    # Sort by index in.../frame<index>.png
+    all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
+
+    # Deleted last image after out of range error popped up
+    # TODO: but not analyzing last 2 frames?
+    # print(len(all_images))
+    if len(all_images) > 1:
+        all_images = all_images[:-1]
+
+    num_images = len(all_images)
+    # print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
+
     # Iterate thru all PNG images in frames_path
     for i, img_path in enumerate(all_images):
         # Create a grayscale 2D NumPy array for Detector.detect()
@@ -114,8 +114,8 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
             # frame number
             img_n.append(int(''.join(list(filter(str.isdigit, tail)))))
 
-            # create bounding box
-            tl, tr, bl, br, c, norm_tl, norm_tr, norm_bl, norm_br, norm_c = bounding_box(frames_path, frames, img_path, tags)
+            # define surface
+            tl, tr, bl, br, c, norm_tl, norm_tr, norm_bl, norm_br, norm_c = define_surface(frames_path, frames, img_path, tags)
             top_left_corner.append(tl)
             top_right_corner.append(tr)
             bottom_left_corner.append(bl)
@@ -169,7 +169,7 @@ def attribute(frame, feature):
         attributes.append(qr_code[feature])
     return attributes
 
-def bb_coordinates(frame, tag):
+def surface_coordinates(frame, tag):
     for f in frame:
         id = attribute(f, 'id')
 
@@ -230,7 +230,7 @@ def bb_coordinates(frame, tag):
     return top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left
 
 
-def bounding_box(folder, frame, img_path, tag):
+def define_surface(folder, frame, img_path, tag):
     # Create frame path using OS package
     # Define the name of the directory to be created
     bounding_box_frames_path = folder + "/bounding_box_frames"
@@ -243,7 +243,7 @@ def bounding_box(folder, frame, img_path, tag):
     except OSError:
         print("Creation of the directory %s failed" % bounding_box_frames_path)
 
-    top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left = bb_coordinates(frame, tag)
+    top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left = surface_coordinates(frame, tag)
 
     tl = tuple(top_left.astype(int))
     tr = tuple(top_right.astype(int))
@@ -269,13 +269,6 @@ def bounding_box(folder, frame, img_path, tag):
     norm_bl = normalize(bl, width, height)
     norm_br = normalize(br, width, height)
     norm_center = normalize(center, width, height)
-
-    # pts = np.array(coordinates, np.int32)
-        # pts = np.array([top_left, bottom_left, bottom_right, top_right], np.int32)
-
-    # polygon correctly fitted to the surface
-    # pts = pts.reshape((-1, 1, 2))
-    # cv2.polylines(img, [pts], True, (0, 255, 255), 3)
 
     red = (0, 0, 255)
     thickness = 2

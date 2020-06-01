@@ -8,6 +8,7 @@ Created on Fri Apr 20 11:41:34 2018
 import collections
 import collections.abc
 from eye_tracking.preprocessing.functions.manual_detection import extract_frames, detect_tags, print_progress_bar
+
 import numpy as np
 
 from glob import glob
@@ -17,7 +18,7 @@ import os
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules.video_capture import fake_backend
 
 # %%
-def map_surface(folder, markers_per_screen):
+def map_surface(folder):
     if True:
         video_path = folder + "/world.mp4"
         # Create frame path using OS package
@@ -42,22 +43,13 @@ def map_surface(folder, markers_per_screen):
 
     print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
-    frame, tag_ids, coordinates_df = detect_tags(frames_path)
-    coordinates_df.to_csv(os.path.join(frames_path, 'surface_coordinates.csv'), index=False)
-
-    #     # a surface is defined by at least 4 markers.
-    #     # seems like surfaces are already defined in recent_events - not sure, but all markers in 1 frame seem to be stated as 1 surface
-    #     # TODO: we need to predefine surfaces!!
-    #     if len(tracker_online.markers) >= markers_per_screen:
-    #         size = len(tracker_online.markers)
-    #         while size >= markers_per_screen:
-    #             # how do we know which markers are associated with this surface?
-    #             tracker_online.on_add_surface_click()
-    #             size -= markers_per_screen
+    # detect surface coordinates
+    frame, tag_ids, surfaces_df = detect_tags(frames_path)
+    surfaces_df.to_csv(os.path.join(frames_path, 'surface_coordinates.csv'), index=False)
 
     print('success!\n')
 
-    return coordinates_df
+    return surfaces_df
 
 
 def define_event(idx, all_images, fake_gpool):
@@ -73,21 +65,25 @@ def define_event(idx, all_images, fake_gpool):
 
 
 def surface_map_data(surface, gaze):
-
+    # initialize variables
     PLData = collections.namedtuple("PLData", ["data", "timestamps", "topics"])
     data_gaze = []
     data_ts_gaze = []
     topics_gaze = []
 
+    # extract gaze info
     data_dict = gaze._asdict()
     data = [t for t in data_dict['data']]
     time = [t for t in data_dict['timestamps']]
     topics = [t for t in data_dict['topics']]
 
     print('Detecting gaze on surface\n')
+
+    # iterate through gaze data
     i = 0
     n = 0
     while n < len(data):
+        # define gaze position
         try:
             pupil1_pos = data[n]['base_data'][1]['norm_pos']
             pupil0_pos = data[n]['base_data'][0]['norm_pos']
@@ -95,8 +91,11 @@ def surface_map_data(surface, gaze):
         except IndexError:
             gaze_pos = data[n]['base_data'][0]['norm_pos']
 
+        # match gaze timestamp to surface timestamp
         while (i < (len(surface.timestamp)-1)) and (time[n] >= surface.timestamp[i+1]):
             i = i + 1
+
+        #  check whether gaze falls within surface
         if (gaze_pos[0] > surface.norm_top_left[i][0]) and (gaze_pos[0] < surface.norm_bottom_right[i][0]):
             if (gaze_pos[1] > surface.norm_top_left[i][1]) and (gaze_pos[1] < surface.norm_bottom_right[i][1]):
                 data_gaze.append(data[n])

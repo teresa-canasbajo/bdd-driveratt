@@ -26,7 +26,7 @@ naive_diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Naive_Subjects/S
 diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/003_modified'
 
 # surfaceMap False in et_import for testing purposes
-data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations), markers_per_screen = 10)
+data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
 
 # data = preprocess_et(subject='', datapath=demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations), markers_per_screen = 4)
 
