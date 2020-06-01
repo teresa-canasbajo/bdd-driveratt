@@ -30,9 +30,10 @@ def extract_frames(video_path: str, frames_path: str) -> None:
     # Optional print statement
     print(f'Extracted {count} frames from {video_path}.')
 
-def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], aperture=11, visualize=False) -> Tuple[List[List[Dict[str, Any]]], Dict[int, int], pd.DataFrame]:
-    """Detect all tags (Apriltags3) found in a folder of PNG files and return (1) a list of tag objects
-    for preprocessing and (2) a dictionary containing the frequency that each tag ID appeared
+def detect_tags_and_surfaces(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], aperture=11, visualize=False) -> Tuple[List[List[Dict[str, Any]]], Dict[int, int], pd.DataFrame]:
+    """Detect all tags (Apriltags3) & surfaces found in a folder of PNG files and return (1) a list of tag objects
+    for preprocessing, (2) a dictionary containing the frequency that each tag ID appeared, (3) a dataframe
+    consisting of all surface coordinates associated with each frame
     Args:
         frames_path (str): path to the directory containing PNG images
         tags (int):
@@ -57,11 +58,18 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
     bottom_left_corner = []
     bottom_right_corner = []
     center = []
-    norm_top_left_corner = []
-    norm_top_right_corner = []
-    norm_bottom_left_corner = []
-    norm_bottom_right_corner = []
-    norm_center = []
+    norm_top_left_corner_x = []
+    norm_top_right_corner_x = []
+    norm_bottom_left_corner_x = []
+    norm_bottom_right_corner_x = []
+    norm_center_x = []
+    norm_top_left_corner_y = []
+    norm_top_right_corner_y = []
+    norm_bottom_left_corner_y = []
+    norm_bottom_right_corner_y = []
+    norm_center_y = []
+
+    bounding_box_frames_path = frames_path + "/bounding_box_frames"
 
     # Sort by index in.../frame<index>.png
     all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
@@ -115,17 +123,22 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
             img_n.append(int(''.join(list(filter(str.isdigit, tail)))))
 
             # define surface
-            tl, tr, bl, br, c, norm_tl, norm_tr, norm_bl, norm_br, norm_c = define_surface(frames_path, frames, img_path, tags)
+            tl, tr, bl, br, c, norm_tl, norm_tr, norm_bl, norm_br, norm_c = surface_coordinates(frames, img_path, tags, bounding_box_frames_path)
             top_left_corner.append(tl)
             top_right_corner.append(tr)
             bottom_left_corner.append(bl)
             bottom_right_corner.append(br)
             center.append(c)
-            norm_top_left_corner.append(norm_tl)
-            norm_top_right_corner.append(norm_tr)
-            norm_bottom_left_corner.append(norm_bl)
-            norm_bottom_right_corner.append(norm_br)
-            norm_center.append(norm_c)
+            norm_top_left_corner_x.append(norm_tl[0])
+            norm_top_right_corner_x.append(norm_tr[0])
+            norm_bottom_left_corner_x.append(norm_bl[0])
+            norm_bottom_right_corner_x.append(norm_br[0])
+            norm_center_x.append(norm_c[0])
+            norm_top_left_corner_y.append(norm_tl[1])
+            norm_top_right_corner_y.append(norm_tr[1])
+            norm_bottom_left_corner_y.append(norm_bl[1])
+            norm_bottom_right_corner_y.append(norm_br[1])
+            norm_center_y.append(norm_c[1])
 
         time.sleep(0.01)
         print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
@@ -140,18 +153,24 @@ def detect_tags(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9, 11], apertu
         x = t['Image'].index(i)
         timestamp.append(t['Timestamp'][x-1])
 
+    # coordinates dataframe output
     bb_coords = {'image': img_n,
                  'timestamp': timestamp,
-                 'top_left': top_left_corner,
-                 'bottom_left': bottom_left_corner,
-                 'bottom_right': bottom_right_corner,
-                 'top_right': top_right_corner,
-                 'center': center,
-                 'norm_top_left': norm_top_left_corner,
-                 'norm_bottom_left': norm_bottom_left_corner,
-                 'norm_bottom_right': norm_bottom_right_corner,
-                 'norm_top_right': norm_top_right_corner,
-                 'norm_center': norm_center
+                 # 'top_left': top_left_corner,
+                 # 'bottom_left': bottom_left_corner,
+                 # 'bottom_right': bottom_right_corner,
+                 # 'top_right': top_right_corner,
+                 # 'center': center,
+                 'norm_top_left_x': norm_top_left_corner_x,
+                 'norm_bottom_left_x': norm_bottom_left_corner_x,
+                 'norm_bottom_right_x': norm_bottom_right_corner_x,
+                 'norm_top_right_x': norm_top_right_corner_x,
+                 'norm_center_x': norm_center_x,
+                 'norm_top_left_y': norm_top_left_corner_y,
+                 'norm_bottom_left_y': norm_bottom_left_corner_y,
+                 'norm_bottom_right_y': norm_bottom_right_corner_y,
+                 'norm_top_right_y': norm_top_right_corner_y,
+                 'norm_center_y': norm_center_y
                  }
     coordinates_df = pd.DataFrame(bb_coords)
     # coordinates_df.to_csv(os.path.join(frames_path, 'coordinates.csv'), index=False)
@@ -169,7 +188,7 @@ def attribute(frame, feature):
         attributes.append(qr_code[feature])
     return attributes
 
-def surface_coordinates(frame, tag):
+def coordinates(frame, tag):
     for f in frame:
         id = attribute(f, 'id')
 
@@ -229,21 +248,9 @@ def surface_coordinates(frame, tag):
 
     return top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left
 
+def surface_coordinates(frame, img_path, tag, bounding_box_frames_path):
 
-def define_surface(folder, frame, img_path, tag):
-    # Create frame path using OS package
-    # Define the name of the directory to be created
-    bounding_box_frames_path = folder + "/bounding_box_frames"
-    try:
-        if not os.path.exists(bounding_box_frames_path):
-            os.mkdir(bounding_box_frames_path)
-            print("Successfully created the directory %s " % bounding_box_frames_path)
-        # else:
-        #     print("Directory %s already exists." % bounding_box_frames_path)
-    except OSError:
-        print("Creation of the directory %s failed" % bounding_box_frames_path)
-
-    top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left = surface_coordinates(frame, tag)
+    top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left = coordinates(frame, tag)
 
     tl = tuple(top_left.astype(int))
     tr = tuple(top_right.astype(int))

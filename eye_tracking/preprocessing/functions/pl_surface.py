@@ -7,9 +7,10 @@ Created on Fri Apr 20 11:41:34 2018
 """
 import collections
 import collections.abc
-from eye_tracking.preprocessing.functions.manual_detection import extract_frames, detect_tags, print_progress_bar
+from eye_tracking.preprocessing.functions.manual_detection import extract_frames, print_progress_bar, detect_tags_and_surfaces
 
 import numpy as np
+import pandas as pd
 
 from glob import glob
 import cv2
@@ -41,13 +42,27 @@ def map_surface(folder):
 
     print('Finding Markers & Surfaces\n')
 
-    print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
+    bounding_box_frames_path = frames_path + "/bounding_box_frames"
+    try:
+        if not os.path.exists(bounding_box_frames_path):
+            os.mkdir(bounding_box_frames_path)
+            print("Successfully created the directory %s " % bounding_box_frames_path)
 
-    # detect surface coordinates
-    frame, tag_ids, surfaces_df = detect_tags(frames_path)
-    surfaces_df.to_csv(os.path.join(frames_path, 'surface_coordinates.csv'), index=False)
+            print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
-    print('success!\n')
+            # detect surface coordinates
+            frame, tag_ids, surfaces_df = detect_tags_and_surfaces(frames_path)
+            surfaces_df.to_csv(os.path.join(frames_path, 'surface_coordinates.csv'), index=False)
+            print('success!\n')
+        else:
+            print("Directory %s already exists." % bounding_box_frames_path)
+
+            # create surfaces dataframe from existing csv file
+            surfaces_df = pd.read_csv(frames_path + '/surface_coordinates.csv')
+            surfaces_df = surfaces_df.apply(pd.to_numeric, errors='coerce')
+
+    except OSError:
+        print("Creation of the directory %s failed" % bounding_box_frames_path)
 
     return surfaces_df
 
@@ -96,8 +111,8 @@ def surface_map_data(surface, gaze):
             i = i + 1
 
         #  check whether gaze falls within surface
-        if (gaze_pos[0] > surface.norm_top_left[i][0]) and (gaze_pos[0] < surface.norm_bottom_right[i][0]):
-            if (gaze_pos[1] > surface.norm_top_left[i][1]) and (gaze_pos[1] < surface.norm_bottom_right[i][1]):
+        if (gaze_pos[0] > surface.norm_top_left_x[i]) and (gaze_pos[0] < surface.norm_bottom_right_x[i]):
+            if (gaze_pos[1] > surface.norm_top_left_y[i]) and (gaze_pos[1] < surface.norm_bottom_right_y[i]):
                 data_gaze.append(data[n])
                 data_ts_gaze.append(time[n])
                 topics_gaze.append(topics[n])
