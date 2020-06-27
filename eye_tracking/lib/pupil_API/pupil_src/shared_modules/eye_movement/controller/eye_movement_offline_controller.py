@@ -9,10 +9,10 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 import typing as t
-import eye_movement.utils as utils
-import eye_movement.model as model
-import eye_movement.worker as worker
-from tasklib.manager import PluginTaskManager
+from .. import utils as utils
+from .. import model as model
+from .. import worker as worker
+from ...tasklib.manager import PluginTaskManager
 
 
 def nop(*args, **kwargs):

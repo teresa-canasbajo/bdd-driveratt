@@ -10,7 +10,7 @@ See COPYING and COPYING.LESSER for license details.
 """
 import typing as t
 import weakref
-import eye_movement.model as model
+from .. import model as model
 from pyglui import ui as gl_ui
 
 

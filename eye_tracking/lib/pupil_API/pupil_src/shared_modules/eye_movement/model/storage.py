@@ -11,9 +11,9 @@ See COPYING and COPYING.LESSER for license details.
 import typing as t
 import collections
 from .segment import Classified_Segment
-from observable import Observable
-from storage import SingleFileStorage
-import player_methods as pm
+from ...observable import Observable
+from ...storage import SingleFileStorage
+from ... import player_methods as pm
 
 
 class Classified_Segment_Storage(SingleFileStorage, Observable):

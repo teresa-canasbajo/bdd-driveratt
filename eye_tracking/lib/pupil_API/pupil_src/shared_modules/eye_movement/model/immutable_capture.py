@@ -9,8 +9,8 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 import typing as t
-from camera_models import Camera_Model
-from video_capture.base_backend import Base_Source
+from ...camera_models import Camera_Model
+from ...video_capture.base_backend import Base_Source
 import numpy as np
 
 

@@ -5,7 +5,7 @@ import zmq
 import socket
 
 sys.path.append(os.path.abspath("../../lib/pupil_API/pupil_src/shared_modules/"))
-sys.path.append(os.path.abspath("../../lib/nslr-hmm/"))
+sys.path.append(os.path.abspath("../../lib/nslr_hmm/"))
 sys.path.append(os.path.abspath("../"))
 
 import file_methods as pl_file_methods

@@ -10,8 +10,8 @@ See COPYING and COPYING.LESSER for license details.
 """
 import typing as t
 import logging
-import methods as mt
-import file_methods as fm
+from .. import methods as mt
+from .. import file_methods as fm
 import numpy as np
 
 

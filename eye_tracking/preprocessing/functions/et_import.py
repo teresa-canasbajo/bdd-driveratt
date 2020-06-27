@@ -3,17 +3,15 @@
 
 import pandas as pd
 
-import os
 import logging
 
 ##########
-# TODO: next functions will need to be looked at before adding them to the respository. Right now i've deleted them so I need
-# to uncomment the following imports:
 
-from eye_tracking.preprocessing.functions.et_helper import gaze_to_pandas
 import eye_tracking.preprocessing.functions.et_make_df as make_df
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as pl_file_methods
 import eye_tracking.preprocessing.functions.et_parse as parse
+from eye_tracking.preprocessing.functions.pl_detect_fixations import *
+from eye_tracking.preprocessing.functions.et_helper import gaze_to_pandas
 
 ########
 
@@ -42,8 +40,7 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
     return original_pldata, annotations, gaze
 
 
-# surfaceMap False in et_import for testing purposes
-def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=False, parsemsg=True):
+def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=True, parsemsg=True):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
     #           surfaceMap:
@@ -58,9 +55,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         logging.warning(
             'If you want to continue without surface detector, please turn surfaceMap to False')
 
-    if surfaceMap:
-        import eye_tracking.preprocessing.functions.pl_surface as pl_surface
-
     # Get samples df
     # (is still a dictionary here)
     original_pldata, annotations, gaze = raw_pl_data(subject=subject, datapath=datapath)
@@ -70,14 +64,16 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     original_pldata['gaze_positions'] = gaze
 
     if surfaceMap:
+        import eye_tracking.preprocessing.functions.pl_surface as pl_surface
+
         folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
 
         # define surface coordinates per frame
         surfaces_df = pl_surface.map_surface(folder)
+
         # extract gaze data that falls within surface
+        print('Detecting gaze on surface ...')
         gaze_on_srf = pl_surface.surface_map_data(surfaces_df, gaze)
-        logger.warning('Original Data Samples: %s on surface: %s', len(original_pldata['gaze_positions']),
-                       len(gaze_on_srf))
         original_pldata['gaze_positions'] = gaze_on_srf
 
     # use pupilhelper func to make samples df (pt 2)
@@ -103,4 +99,4 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         plmsgs = annotations['data']
 
     plevents = pd.DataFrame()
-    return plsamples, plmsgs, plevents
+    return plsamples, plmsgs, plevents, surfaceMap

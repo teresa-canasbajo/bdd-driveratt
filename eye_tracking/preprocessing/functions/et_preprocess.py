@@ -40,7 +40,7 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     # import pl data
     logger.debug("Importing et data")
     logger.debug('Caution: etevents might be empty')
-    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, surfaceMap=True, parsemsg=True, **kwargs)
+    etsamples, etmsgs, etevents, surfaceMap = import_pl(subject=subject, datapath=datapath, surfaceMap=True, parsemsg=True, **kwargs)
 
     # Mark bad samples
     logger.debug('Marking bad et samples')
@@ -54,7 +54,7 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     logger.debug('Making event df')
     for evtfunc in eventfunctions:
         logger.debug('Events: calling %s', evtfunc.__name__)
-        etsamples, etevents = evtfunc(etsamples, etevents)
+        etsamples, etevents = evtfunc(etsamples, etevents, datapath=datapath, surfaceMap=surfaceMap)
 
     # Make a nice etevent df
     etevents = make_events_df(etevents)

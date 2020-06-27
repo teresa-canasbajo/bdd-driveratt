@@ -10,7 +10,7 @@ See COPYING and COPYING.LESSER for license details.
 """
 
 import abc
-from observable import Observable
+from ..observable import Observable
 
 
 class TaskInterface(Observable, metaclass=abc.ABCMeta):

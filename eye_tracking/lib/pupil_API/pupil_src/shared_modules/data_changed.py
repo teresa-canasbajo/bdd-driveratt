@@ -23,7 +23,7 @@ import os
 import random
 import weakref
 
-from observable import Observable
+from .observable import Observable
 
 
 class Announcer:

@@ -18,6 +18,7 @@ from plotnine.stats.stat_summary import bootstrap_statistics
 
 # %% put PUPIL LABS data into PANDAS DF
 
+
 def gaze_to_pandas(gaze):
     # Input: gaze data as dictionary
     # Output: pandas dataframe with gx, gy, confidence, smpl_time pupillabsdata, diameter and (calculated) pupil area (pa)
@@ -78,8 +79,16 @@ def add_events_to_samples(etsamples, etevents):
     # Also adds blink_id
     logger = logging.getLogger(__name__)
 
-    logger.info(etevents.type.unique())
-    for evt in etevents.type.unique():
+    etevents_type = etevents.type.unique()
+    # classify fixation first, so blink & saccade can override as necessary
+    if 'fixation' in etevents_type:
+        index = np.where(etevents_type=='fixation')[0][0]
+        while index != 0:
+            etevents_type = np.roll(etevents_type, 1)
+            index = np.where(etevents_type == 'fixation')[0][0]
+
+    logger.info(etevents_type)
+    for evt in etevents_type:
         etsamples = append_eventtype_to_sample(etsamples, etevents, eventtype=evt)
 
         # add blink id
@@ -331,7 +340,7 @@ def save_file(data, subject, datapath, outputprefix=''):
     data[2].to_csv(os.path.join(preprocessed_path, filename_msgs), index=False)
     data[3].to_csv(os.path.join(preprocessed_path, filename_events), index=False)
 
-    #save timestamps as csv
+    # save timestamps as csv
     timestamps_path = os.path.join(datapath, subject, 'world_timestamps.npy')
     a = np.load(timestamps_path)
     df_timestamps = pd.DataFrame(a)

@@ -9,4 +9,4 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-from tasklib.observers import raise_exception
+from ..tasklib.observers import raise_exception

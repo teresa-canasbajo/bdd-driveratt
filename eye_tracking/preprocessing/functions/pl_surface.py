@@ -13,10 +13,8 @@ import numpy as np
 import pandas as pd
 
 from glob import glob
-import cv2
 import os
 
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules.video_capture import fake_backend
 
 # %%
 def map_surface(folder):
@@ -38,9 +36,7 @@ def map_surface(folder):
     all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
     all_images = all_images[:-1]
 
-    num_images = len(all_images)
-
-    print('Finding Markers & Surfaces\n')
+    print('Finding markers & surfaces ...')
 
     bounding_box_frames_path = frames_path + "/bounding_box_frames"
     try:
@@ -48,7 +44,7 @@ def map_surface(folder):
             os.mkdir(bounding_box_frames_path)
             print("Successfully created the directory %s " % bounding_box_frames_path)
 
-            print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
+            print_progress_bar(0, len(all_images), prefix='Progress:', suffix='Complete', length=50)
 
             # detect surface coordinates
             frame, tag_ids, surfaces_df = detect_tags_and_surfaces(frames_path)
@@ -67,18 +63,6 @@ def map_surface(folder):
     return surfaces_df
 
 
-def define_event(idx, all_images, fake_gpool):
-    img_path = all_images[idx]
-    # read image:
-    img = cv2.imread(img_path)
-
-    # timestamp is stored in fake_gpool
-    timestamp = fake_gpool.timestamps[idx]
-    index = idx
-    events = {'frame': fake_backend.Frame(timestamp, img, index)}
-    return events
-
-
 def surface_map_data(surface, gaze):
     # initialize variables
     PLData = collections.namedtuple("PLData", ["data", "timestamps", "topics"])
@@ -92,12 +76,12 @@ def surface_map_data(surface, gaze):
     time = [t for t in data_dict['timestamps']]
     topics = [t for t in data_dict['topics']]
 
-    print('Detecting gaze on surface\n')
-
     # iterate through gaze data
     i = 0
     n = 0
+
     while n < len(data):
+
         # define gaze position
         try:
             pupil1_pos = data[n]['base_data'][1]['norm_pos']

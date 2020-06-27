@@ -11,12 +11,12 @@ See COPYING and COPYING.LESSER for license details.
 import logging
 import random
 from .eye_movement_detector_base import Eye_Movement_Detector_Base
-import eye_movement.utils as utils
-import eye_movement.model as model
-import eye_movement.controller as controller
-import eye_movement.ui as ui
-from observable import Observable
-from data_changed import Listener, Announcer
+from . import utils as utils
+from . import model as model
+from . import controller as controller
+from . import ui as ui
+from ..observable import Observable
+from ..data_changed import Listener, Announcer
 
 
 logger = logging.getLogger(__name__)

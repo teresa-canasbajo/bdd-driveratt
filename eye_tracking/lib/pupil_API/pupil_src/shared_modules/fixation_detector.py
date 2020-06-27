@@ -1,7 +1,7 @@
 """
 (*)~---------------------------------------------------------------------------
 Pupil - eye tracking platform
-Copyright (C) 2012-2019 Pupil Labs
+Copyright (C) 2012-2020 Pupil Labs
 
 Distributed under the terms of the GNU
 Lesser General Public License (LGPL v3.0).
@@ -11,24 +11,28 @@ See COPYING and COPYING.LESSER for license details.
 
 """
 Fixations general knowledge from literature review
-    + Goldberg et al. - fixations rarely < 100ms and range between 200ms and 400ms in duration (Irwin, 1992 - fixations dependent on task between 150ms - 600ms)
-    + Very short fixations are considered not meaningful for studying behavior - eye+brain require time for info to be registered (see Munn et al. APGV, 2008)
+    + Goldberg et al. - fixations rarely < 100ms and range between 200ms and 400ms in
+      duration (Irwin, 1992 - fixations dependent on task between 150ms - 600ms)
+    + Very short fixations are considered not meaningful for studying behavior
+        - eye+brain require time for info to be registered (see Munn et al. APGV, 2008)
     + Fixations are rarely longer than 800ms in duration
         + Smooth Pursuit is exception and different motif
-        + If we do not set a maximum duration, we will also detect smooth pursuit (which is acceptable since we compensate for VOR)
+        + If we do not set a maximum duration, we will also detect smooth pursuit (which
+          is acceptable since we compensate for VOR)
 Terms
-    + dispersion (spatial) = how much spatial movement is allowed within one fixation (in visual angular degrees or pixels)
-    + duration (temporal) = what is the minimum time required for gaze data to be within dispersion threshold?
+    + dispersion (spatial) = how much spatial movement is allowed within one fixation
+      (in visual angular degrees or pixels)
+    + duration (temporal) = what is the minimum time required for gaze data to be within
+      dispersion threshold?
 """
 
 import csv
-
-# logging
+import enum
 import logging
 import os
+import typing as T
 from bisect import bisect_left, bisect_right
 from collections import deque
-from itertools import chain
 from types import SimpleNamespace
 
 import cv2
@@ -39,14 +43,20 @@ from pyglui.cygl.utils import RGBA, draw_circle
 from pyglui.pyfontstash import fontstash
 from scipy.spatial.distance import pdist
 
-import background_helper as bh
-import file_methods as fm
-import player_methods as pm
-from methods import denormalize
-from plugin import Analysis_Plugin_Base
-from eye_movement.utils import can_use_3d_gaze_mapping
+from . import background_helper as bh
+from . import data_changed
+from . import file_methods as fm
+from .observable import Observable
+from . import player_methods as pm
+from .methods import denormalize
+from .plugin import Analysis_Plugin_Base
 
 logger = logging.getLogger(__name__)
+
+
+class FixationDetectionMethod(enum.Enum):
+    GAZE_2D = "2d gaze"
+    GAZE_3D = "3d gaze"
 
 
 class Fixation_Detector_Base(Analysis_Plugin_Base):
@@ -58,7 +68,12 @@ class Fixation_Detector_Base(Analysis_Plugin_Base):
         return "Fixation Detector"
 
 
-def fixation_from_data(dispersion, method, base_data, timestamps=None):
+def fixation_from_data(
+    dispersion: float,
+    method: FixationDetectionMethod,
+    base_data: T.Iterable,
+    timestamps=None,
+):
     norm_pos = np.mean([gp["norm_pos"] for gp in base_data], axis=0).tolist()
     dispersion = np.rad2deg(dispersion)  # in degrees
 
@@ -66,13 +81,13 @@ def fixation_from_data(dispersion, method, base_data, timestamps=None):
         "topic": "fixations",
         "norm_pos": norm_pos,
         "dispersion": dispersion,
-        "method": method,
+        "method": method.value,
         "base_data": list(base_data),
         "timestamp": base_data[0]["timestamp"],
         "duration": (base_data[-1]["timestamp"] - base_data[0]["timestamp"]) * 1000,
         "confidence": float(np.mean([gp["confidence"] for gp in base_data])),
     }
-    if method == "pupil":
+    if method == FixationDetectionMethod.GAZE_3D:
         fix["gaze_point_3d"] = np.mean(
             [gp["gaze_point_3d"] for gp in base_data if "gaze_point_3d" in gp], axis=0
         ).tolist()
@@ -97,7 +112,7 @@ class Fixation_Result_Factory(object):
         self._set_fixation_id(datum)
         fixation_start = datum["timestamp"]
         fixation_stop = fixation_start + (datum["duration"] / 1000)
-        datum = self._serialize(datum)
+        # datum = self._serialize(datum)
         return (datum, fixation_start, fixation_stop)
 
     def _set_fixation_id(self, fixation):
@@ -114,41 +129,14 @@ class Fixation_Result_Factory(object):
 
 def vector_dispersion(vectors):
     distances = pdist(vectors, metric="cosine")
-    # use 20% biggest distances, but at least 4, see reasoning at
-    # https://github.com/pupil-labs/pupil/issues/1133#issuecomment-382412175
-    distances.sort()  # sort by distance
-    cut_off = np.max([distances.shape[0] // 5, 4])
-    return np.arccos(1.0 - distances[-cut_off:].mean())
+    dispersion = np.arccos(1.0 - distances.max())
+    return dispersion
 
 
-def gaze_dispersion(capture, gaze_subset, use_pupil=True):
-    if use_pupil:
-        data = [[], []]
-        # for each eye collect gaze positions that contain pp for the given eye
-        data[0] = [
-            gp
-            for gp in gaze_subset
-            if any(("3d" in pp["method"] and pp["id"] == 0) for pp in gp["base_data"])
-        ]
-        data[1] = [
-            gp
-            for gp in gaze_subset
-            if any(("3d" in pp["method"] and pp["id"] == 1) for pp in gp["base_data"])
-        ]
-
-        method = "pupil"
-        # choose eye with more data points. alternatively data that spans longest time range
-        eye_id = 1 if len(data[1]) > len(data[0]) else 0
-        base_data = data[eye_id]
-
-        all_pp = chain.from_iterable((gp["base_data"] for gp in base_data))
-        pp_with_eye_id = (pp for pp in all_pp if pp["id"] == eye_id)
-        vectors = np.array(
-            [pp["circle_3d"]["normal"] for pp in pp_with_eye_id], dtype=np.float32
-        )
-    else:
-        method = "gaze"
-        base_data = gaze_subset
+def gaze_dispersion(capture, gaze_subset, method: FixationDetectionMethod) -> float:
+    if method is FixationDetectionMethod.GAZE_3D:
+        vectors = np.array([gp["gaze_point_3d"] for gp in gaze_subset])
+    elif method is FixationDetectionMethod.GAZE_2D:
         locations = np.array([gp["norm_pos"] for gp in gaze_subset])
 
         # denormalize
@@ -158,103 +146,115 @@ def gaze_dispersion(capture, gaze_subset, use_pupil=True):
 
         # undistort onto 3d plane
         vectors = capture.intrinsics.unprojectPoints(locations)
+    else:
+        raise ValueError(f"Unknown method '{method}'")
 
     dist = vector_dispersion(vectors)
-    return dist, method, base_data
+    return dist
+
+
+def can_use_3d_gaze_mapping(gaze_data) -> bool:
+    return all("gaze_point_3d" in gp for gp in gaze_data)
 
 
 def detect_fixations(
     capture, gaze_data, max_dispersion, min_duration, max_duration, min_data_confidence
 ):
     yield "Detecting fixations...", ()
-    gaze_data = [
+    gaze_data = (
         fm.Serialized_Dict(msgpack_bytes=serialized) for serialized in gaze_data
+    )
+    gaze_data = [
+        datum for datum in gaze_data if datum["confidence"] > min_data_confidence
     ]
     if not gaze_data:
         logger.warning("No data available to find fixations")
-        return "Fixation detection complete", ()
+        return "Fixation detection failed", ()
 
-    use_pupil = can_use_3d_gaze_mapping(gaze_data)
-    logger.info(
-        "Starting fixation detection using {} data...".format(
-            "3d" if use_pupil else "2d"
-        )
+    method = (
+        FixationDetectionMethod.GAZE_3D
+        if can_use_3d_gaze_mapping(gaze_data)
+        else FixationDetectionMethod.GAZE_2D
     )
+    logger.info(f"Starting fixation detection using {method.value} data...")
     fixation_result = Fixation_Result_Factory()
 
-    Q = deque()
-    enum = deque(gaze_data)
-    while enum:
-        # check if Q contains enough data
-        if len(Q) < 2 or Q[-1]["timestamp"] - Q[0]["timestamp"] < min_duration:
-            datum = enum.popleft()
-            Q.append(datum)
+    working_queue = deque()
+    remaining_gaze = deque(gaze_data)
+
+    while remaining_gaze:
+        # check if working_queue contains enough data
+        if (
+            len(working_queue) < 2
+            or (working_queue[-1]["timestamp"] - working_queue[0]["timestamp"])
+            < min_duration
+        ):
+            datum = remaining_gaze.popleft()
+            working_queue.append(datum)
             continue
 
         # min duration reached, check for fixation
-        dispersion, origin, base_data = gaze_dispersion(capture, Q, use_pupil=use_pupil)
+        dispersion = gaze_dispersion(capture, working_queue, method)
         if dispersion > max_dispersion:
             # not a fixation, move forward
-            Q.popleft()
+            working_queue.popleft()
             continue
 
-        left_idx = len(Q)
+        left_idx = len(working_queue)
 
         # minimal fixation found. collect maximal data
         # to perform binary search for fixation end
-        while enum:
-            datum = enum[0]
-            if datum["timestamp"] > Q[0]["timestamp"] + max_duration:
+        while remaining_gaze:
+            datum = remaining_gaze[0]
+            if datum["timestamp"] > working_queue[0]["timestamp"] + max_duration:
                 break  # maximum data found
-            Q.append(enum.popleft())
+            working_queue.append(remaining_gaze.popleft())
 
         # check for fixation with maximum duration
-        dispersion, origin, base_data = gaze_dispersion(capture, Q, use_pupil=use_pupil)
+        dispersion = gaze_dispersion(capture, working_queue, method)
         if dispersion <= max_dispersion:
             fixation = fixation_result.from_data(
-                dispersion, origin, base_data, capture.timestamps
+                dispersion, method, working_queue, capture.timestamps
             )
             yield "Detecting fixations...", fixation
-            Q.clear()  # discard old Q
+            working_queue.clear()  # discard old Q
             continue
 
-        slicable = list(Q)  # deque does not support slicing
-        right_idx = len(Q)
+        slicable = list(working_queue)  # deque does not support slicing
+        right_idx = len(working_queue)
 
         # binary search
-        while left_idx + 1 < right_idx:
-            middle_idx = (left_idx + right_idx) // 2 + 1
-            dispersion, origin, base_data = gaze_dispersion(
-                capture, slicable[:middle_idx], use_pupil=use_pupil
-            )
-
+        while left_idx < right_idx - 1:
+            middle_idx = (left_idx + right_idx) // 2
+            dispersion = gaze_dispersion(capture, slicable[: middle_idx + 1], method,)
             if dispersion <= max_dispersion:
-                left_idx = middle_idx - 1
+                left_idx = middle_idx
             else:
-                right_idx = middle_idx - 1
+                right_idx = middle_idx
 
-        middle_idx = (left_idx + right_idx) // 2
-        dispersion_result = gaze_dispersion(
-            capture, slicable[:middle_idx], use_pupil=use_pupil
+        # left_idx-1 is last valid base datum
+        final_base_data = slicable[:left_idx]
+        to_be_placed_back = slicable[left_idx:]
+        dispersion_result = gaze_dispersion(capture, final_base_data, method)
+
+        fixation = fixation_result.from_data(
+            dispersion_result, method, final_base_data, capture.timestamps
         )
-        fixation = fixation_result.from_data(*dispersion_result, capture.timestamps)
         yield "Detecting fixations...", fixation
-        Q.clear()  # clear queue
-        enum.extendleft(slicable[middle_idx:])
+        working_queue.clear()  # clear queue
+        remaining_gaze.extendleft(reversed(to_be_placed_back))
 
     yield "Fixation detection complete", ()
 
 
-class Offline_Fixation_Detector(Fixation_Detector_Base):
+class Offline_Fixation_Detector(Observable, Fixation_Detector_Base):
     """Dispersion-duration-based fixation detector.
-
     This plugin detects fixations based on a dispersion threshold in terms of
     degrees of visual angle within a given duration window. It tries to maximize
     the length of classified fixations within the duration window, e.g. instead
     of creating two consecutive fixations of length 300 ms it creates a single
     fixation with length 600 ms. Fixations do not overlap. Binary search is used
     to find the correct fixation length within the duration window.
-
     If 3d pupil data is available the fixation dispersion will be calculated
     based on the positional angle of the eye. These fixations have their method
     field set to "pupil". If no 3d pupil data is available the plugin will
@@ -272,7 +272,6 @@ class Offline_Fixation_Detector(Fixation_Detector_Base):
         show_fixations=True,
     ):
         super().__init__(g_pool)
-        # g_pool.min_data_confidence
         self.max_dispersion = max_dispersion
         self.min_duration = min_duration
         self.max_duration = max_duration
@@ -282,11 +281,13 @@ class Offline_Fixation_Detector(Fixation_Detector_Base):
         self.prev_index = -1
         self.bg_task = None
         self.status = ""
-        # we need to uncomment:
-
-        # self.notify_all(
-        #     {"subject": "fixation_detector.should_recalculate", "delay": 0.5}
-        # )
+        self._gaze_changed_listener = data_changed.Listener(
+            "gaze_positions", g_pool.rec_dir, plugin=self
+        )
+        self._gaze_changed_listener.add_observer("on_data_changed", self._classify)
+        self.notify_all(
+            {"subject": "fixation_detector.should_recalculate", "delay": 0.5}
+        )
 
     def init_ui(self):
         self.add_menu()
@@ -433,9 +434,6 @@ class Offline_Fixation_Detector(Fixation_Detector_Base):
         }
 
     def on_notify(self, notification):
-        if notification["subject"] == "gaze_positions_changed":
-            logger.info("Gaze postions changed. Recalculating.")
-            self._classify()
         if notification["subject"] == "min_data_confidence_changed":
             logger.info("Minimal data confidence changed. Recalculating.")
             self._classify()
@@ -619,11 +617,9 @@ class Offline_Fixation_Detector(Fixation_Detector_Base):
     def export_fixations(self, export_window, export_dir):
         """
         between in and out mark
-
             fixation report:
                 - fixation detection method and parameters
                 - fixation count
-
             fixation list:
                 id | start_timestamp | duration | start_frame_index | end_frame_index |
                 norm_pos_x | norm_pos_y | dispersion | confidence | method |
@@ -664,42 +660,42 @@ class Offline_Fixation_Detector(Fixation_Detector_Base):
 
 class Fixation_Detector(Fixation_Detector_Base):
     """Dispersion-duration-based fixation detector.
-
     This plugin detects fixations based on a dispersion threshold in terms of
     degrees of visual angle with a minimal duration. It publishes the fixation
     as soon as it complies with the constraints (dispersion and duration). This
     might result in a series of overlapping fixations. These will have their id
     field set to the same value which can be used to merge overlapping fixations.
-
     If 3d pupil data is available the fixation dispersion will be calculated
     based on the positional angle of the eye. These fixations have their method
     field set to "pupil". If no 3d pupil data is available the plugin will
     assume that the gaze data is calibrated and calculate the dispersion in
     visual angle with in the coordinate system of the world camera. These
     fixations will have their method field set to "gaze".
-
     The Offline Fixation Detector yields fixations that do not overlap.
     """
 
     order = 0.19
 
-    def __init__(
-        self, g_pool, max_dispersion=3.0, min_duration=300, confidence_threshold=0.75
-    ):
+    def __init__(self, g_pool, max_dispersion=3.0, min_duration=300, **kwargs):
         super().__init__(g_pool)
-        self.history = deque()
+        self.history = []
         self.min_duration = min_duration
         self.max_dispersion = max_dispersion
-        self.confidence_threshold = confidence_threshold
         self.id_counter = 0
 
     def recent_events(self, events):
         events["fixations"] = []
         gaze = events["gaze"]
 
-        self.history.extend(
-            (gp for gp in gaze if gp["confidence"] >= self.confidence_threshold)
+        gaze = (
+            gp for gp in gaze if gp["confidence"] >= self.g_pool.min_data_confidence
         )
+        self.history.extend(gaze)
+        self.history.sort(key=lambda gp: gp["timestamp"])
+
+        if not self.history:
+            self.recent_fixation = None
+            return
 
         try:
             ts_oldest = self.history[0]["timestamp"]
@@ -712,30 +708,29 @@ class Fixation_Detector(Fixation_Detector_Base):
             age_threshold = ts_newest - self.min_duration / 1000.0
             # pop elements until only one element below the age threshold remains:
             while self.history[1]["timestamp"] < age_threshold:
-                self.history.popleft()  # remove outdated gaze points
+                del self.history[0]  # remove outdated gaze points
 
         except IndexError:
             pass
 
-        gaze_3d = [gp for gp in self.history if "3d" in gp["base_data"][0]["method"]]
-        use_pupil = can_use_3d_gaze_mapping(self.history)
+        method = (
+            FixationDetectionMethod.GAZE_3D
+            if can_use_3d_gaze_mapping(self.history)
+            else FixationDetectionMethod.GAZE_2D
+        )
+        base_data = self.history
 
-        base_data = gaze_3d if use_pupil else self.history
-
-        if (
-            len(base_data) <= 2
-            or base_data[-1]["timestamp"] - base_data[0]["timestamp"]
+        if len(base_data) <= 2 or (
+            base_data[-1]["timestamp"] - base_data[0]["timestamp"]
             < self.min_duration / 1000.0
         ):
             self.recent_fixation = None
             return
 
-        dispersion, origin, base_data = gaze_dispersion(
-            self.g_pool.capture, base_data, use_pupil
-        )
+        dispersion = gaze_dispersion(self.g_pool.capture, base_data, method)
 
         if dispersion < np.deg2rad(self.max_dispersion):
-            new_fixation = fixation_from_data(dispersion, origin, base_data)
+            new_fixation = fixation_from_data(dispersion, method, base_data)
             if self.recent_fixation:
                 new_fixation["id"] = self.recent_fixation["id"]
             else:
@@ -795,16 +790,6 @@ class Fixation_Detector(Fixation_Detector_Base):
             )
         )
 
-        self.menu.append(
-            ui.Slider(
-                "confidence_threshold",
-                self,
-                min=0.0,
-                max=1.0,
-                label="Confidence Threshold",
-            )
-        )
-
         self.glfont = fontstash.Context()
         self.glfont.add_font("opensans", ui.get_opensans_font_path())
         self.glfont.set_size(22)
@@ -818,5 +803,4 @@ class Fixation_Detector(Fixation_Detector_Base):
         return {
             "max_dispersion": self.max_dispersion,
             "min_duration": self.min_duration,
-            "confidence_threshold": self.confidence_threshold,
         }

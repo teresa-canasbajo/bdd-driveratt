@@ -9,8 +9,8 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-import tasklib.background
-from tasklib.background.patches import IPCLoggingPatch, KeyboardInterruptHandlerPatch
+from ..tasklib import background
+from ..tasklib.background.patches import IPCLoggingPatch, KeyboardInterruptHandlerPatch
 
 
 class PluginTaskManager:

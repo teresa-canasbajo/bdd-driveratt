@@ -8,7 +8,7 @@ Lesser General Public License (LGPL v3.0).
 See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
-from plugin import Analysis_Plugin_Base
+from ..plugin import Analysis_Plugin_Base
 
 
 class Eye_Movement_Detector_Base(Analysis_Plugin_Base):

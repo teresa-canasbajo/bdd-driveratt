@@ -10,13 +10,13 @@ See COPYING and COPYING.LESSER for license details.
 """
 import typing
 
-import nslr_hmm
+from ......nslr_hmm import nslr_hmm
 import numpy as np
 
-import eye_movement.model as model
-import eye_movement.utils as utils
-import file_methods as fm
-from tasklib.background.task import TypedBackgroundGeneratorFunction
+from .. import model as model
+from .. import utils as utils
+from ... import file_methods as fm
+from ...tasklib.background.task import TypedBackgroundGeneratorFunction
 
 # TODO: Replace `str` with `Eye_Movement_Detection_Step`
 Offline_Detection_Task_Yield = typing.Tuple[

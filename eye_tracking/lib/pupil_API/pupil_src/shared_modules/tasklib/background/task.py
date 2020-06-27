@@ -14,9 +14,9 @@ import typing
 import multiprocessing as mp
 from collections import namedtuple
 
-from tasklib.interface import TaskInterface
-from tasklib.background.shared_memory import SharedMemory
-from tasklib.background.patches import Patch
+from ...tasklib.interface import TaskInterface
+from ...tasklib.background.shared_memory import SharedMemory
+from ...tasklib.background.patches import Patch
 
 _TaskYieldSignal = namedtuple("_TaskYieldSignal", "datum")
 _TaskCompletedSignal = namedtuple("_TaskCompletedSignal", "return_value")

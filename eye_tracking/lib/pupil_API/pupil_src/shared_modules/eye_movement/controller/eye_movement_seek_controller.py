@@ -9,8 +9,8 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 import typing as t
-import eye_movement.utils as utils
-import eye_movement.model as model
+from .. import utils as utils
+from .. import model as model
 
 
 class Eye_Movement_Seek_Controller:

@@ -12,13 +12,13 @@ import abc
 import enum
 import typing as t
 from .time_range import Time_Range
-import eye_movement.utils as utils
-from storage import StorageItem
-import methods as mt
-import file_methods as fm
-import player_methods as pm
+from .. import utils as utils
+from ...storage import StorageItem
+from ... import methods as mt
+from ... import file_methods as fm
+from ... import player_methods as pm
 import numpy as np
-import nslr_hmm
+from ......nslr_hmm import nslr_hmm
 
 
 @enum.unique

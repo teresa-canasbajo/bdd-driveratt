@@ -23,7 +23,7 @@ import logging
 # %% MAKE SAMPLES
 
 def make_samples_df(etsamples):
-    fields_to_keep = set(['smpl_time', 'gx', 'gy', 'confidence', 'pa', 'type', 'gx_vel', 'gy_vel'])
+    fields_to_keep = set(['smpl_time', 'gx', 'gy', 'confidence', 'pa', 'type', 'diameter', 'gx_vel', 'gy_vel'])
 
     fields_to_fillin = fields_to_keep - set(etsamples.columns)
     fields_to_copy = fields_to_keep - fields_to_fillin
@@ -40,7 +40,7 @@ def make_samples_df(etsamples):
 def make_events_df(etevents):
     # why do we have an end_point column?
     fields_to_keep = {'blink_id', 'start_gx', 'start_gy', 'end_gx', 'end_gy', 'end_time', 'start_time', 'type',
-                      'amplitude', 'duration', 'end_point', 'peak_velocity', 'mean_gx', 'mean_gy', 'rms', 'sd'}
+                      'amplitude', 'duration', 'dispersion', 'end_point', 'peak_velocity', 'mean_gx', 'mean_gy', 'rms'}
 
     fields_to_fill_in = fields_to_keep - set(etevents.columns)
     fields_to_copy = fields_to_keep - fields_to_fill_in

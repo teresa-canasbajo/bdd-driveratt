@@ -97,7 +97,7 @@ def apply_engbert_mergenthaler(xy_data=None, is_blink=None, vel_data=None, l=5, 
     # get a logger
     logger = logging.getLogger(__name__)
 
-    logger.debug('Start.... Detecting Saccades')
+    print('Detecting saccades ...')
 
     # If xy_data and vel_data are both None, function can't continue
     if xy_data is None and vel_data is None:
@@ -284,7 +284,7 @@ def apply_engbert_mergenthaler(xy_data=None, is_blink=None, vel_data=None, l=5, 
         lambda localrow: make_df.calc_3d_angle_points(localrow.raw_start_gx, localrow.raw_start_gy, localrow.raw_end_gx,
                                                       localrow.raw_end_gy), axis=1)
 
-    logger.debug('Done... Detecting Saccades')
+    print('Done... detecting saccades')
 
     return saccade_df
 

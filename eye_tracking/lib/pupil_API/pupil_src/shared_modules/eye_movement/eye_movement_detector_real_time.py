@@ -9,10 +9,10 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 from .eye_movement_detector_base import Eye_Movement_Detector_Base
-import eye_movement.utils as utils
-import eye_movement.model as model
-import eye_movement.worker as worker
-import eye_movement.ui as ui
+from . import utils as utils
+from . import model as model
+from . import worker as worker
+from . import ui as ui
 from pyglui import ui as gl_ui
 from pyglui.pyfontstash import fontstash
 

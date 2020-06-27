@@ -10,11 +10,11 @@ See COPYING and COPYING.LESSER for license details.
 """
 import typing as t
 import bisect
-import eye_movement.utils as utils
-import eye_movement.model as model
-import stdlib_utils
+from .. import utils as utils
+from .. import model as model
+from ... import stdlib_utils
 import numpy as np
-import nslr_hmm
+from ......nslr_hmm import nslr_hmm
 
 
 class Real_Time_Buffered_Detector:

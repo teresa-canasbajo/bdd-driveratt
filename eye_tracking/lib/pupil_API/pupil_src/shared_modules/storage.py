@@ -15,7 +15,7 @@ import random
 import re
 import uuid
 
-import file_methods as fm
+from . import file_methods as fm
 
 logger = logging.getLogger(__name__)
 

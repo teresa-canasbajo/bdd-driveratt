@@ -10,8 +10,8 @@ See COPYING and COPYING.LESSER for license details.
 """
 import abc
 import typing as t
-import eye_movement.model as model
-import player_methods as pm
+from .. import model as model
+from ... import player_methods as pm
 import pyglui.cygl.utils as gl_utils
 from pyglui.pyfontstash.fontstash import Context as GL_Font
 import numpy as np
