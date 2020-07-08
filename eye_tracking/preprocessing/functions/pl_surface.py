@@ -7,7 +7,8 @@ Created on Fri Apr 20 11:41:34 2018
 """
 import collections
 import collections.abc
-from eye_tracking.preprocessing.functions.manual_detection import extract_frames, print_progress_bar, detect_tags_and_surfaces
+from eye_tracking.preprocessing.functions.manual_detection import extract_frames, print_progress_bar, \
+    detect_tags_and_surfaces
 
 import numpy as np
 import pandas as pd
@@ -91,7 +92,7 @@ def surface_map_data(surface, gaze):
             gaze_pos = data[n]['base_data'][0]['norm_pos']
 
         # match gaze timestamp to surface timestamp
-        while (i < (len(surface.timestamp)-1)) and (time[n] >= surface.timestamp[i+1]):
+        while (i < (len(surface.timestamp) - 1)) and (time[n] >= surface.timestamp[i + 1]):
             i = i + 1
 
         #  check whether gaze falls within surface
@@ -106,3 +107,24 @@ def surface_map_data(surface, gaze):
 
     gaze_on_srf = PLData(collections.deque(data_gaze), np.asarray(data_ts_gaze), collections.deque(topics_gaze))
     return gaze_on_srf
+
+
+def annotate_surface(etsamples, gaze_on_srf):
+    # create df to store index of marked samples
+    marked_samples = pd.DataFrame()
+
+    ix_surface = []
+    for p in etsamples.smpl_time:
+        # check if sample is in surface
+        if p in gaze_on_srf.timestamps:
+            ix_surface.append(True)
+        else:
+            ix_surface.append(False)
+    ix_surface = pd.Series(ix_surface)
+    marked_samples['surface'] = ix_surface
+
+    # concatenate surface column
+    marked_samples.index = etsamples.index
+    annotated_samples = pd.concat([etsamples, marked_samples], axis=1)
+
+    return annotated_samples

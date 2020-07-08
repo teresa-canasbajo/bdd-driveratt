@@ -76,27 +76,19 @@ def add_msg_to_event(etevents, etmsgs, timefield='start_time', direction='backwa
 
 def add_events_to_samples(etsamples, etevents):
     # Calls append_eventtype_to_sample for each event
-    # Also adds blink_id
     logger = logging.getLogger(__name__)
 
     etevents_type = etevents.type.unique()
     # classify fixation first, so blink & saccade can override as necessary
-    if 'fixation' in etevents_type:
-        index = np.where(etevents_type=='fixation')[0][0]
+    if 'fixations' in etevents_type:
+        index = np.where(etevents_type=='fixations')[0][0]
         while index != 0:
             etevents_type = np.roll(etevents_type, 1)
-            index = np.where(etevents_type == 'fixation')[0][0]
+            index = np.where(etevents_type == 'fixations')[0][0]
 
     logger.info(etevents_type)
     for evt in etevents_type:
         etsamples = append_eventtype_to_sample(etsamples, etevents, eventtype=evt)
-
-        # add blink id
-        if evt == 'blink':
-            # counts up the blink_id
-            # Pure Magic
-            etsamples.loc[:, 'blink_id'] = (1 * (etsamples['type'] == 'blink')) * (
-                        (1 * (etsamples['type'] == 'blink')).diff() == 1).cumsum()
 
     return (etsamples)
 
@@ -107,13 +99,8 @@ def append_eventtype_to_sample(etsamples, etevents, eventtype, timemargin=None):
 
     logger.debug('Appending eventtype: %s to samples', eventtype)
     if timemargin is None:
-
-        if eventtype == 'blink':
-            logger.info('Taking Default value for timemargin (blink = -0.1s/0.1s)')
-            timemargin = [-.1, .1]
-        else:
-            logger.info('Taking Default value for timemargin (fix/saccade = 0s)')
-            timemargin = [0, 0]
+        logger.info('Taking Default value for timemargin (0s)')
+        timemargin = [0, 0]
 
     # get index of the rows that have that eventtype
     ix_event = etevents['type'] == eventtype

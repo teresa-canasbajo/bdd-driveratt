@@ -85,3 +85,25 @@ def pl_data_fixation(data_lst):
     # return PLData object
     pl_fixation = PLData(collections.deque(data_gaze), np.asarray(data_ts_gaze), collections.deque(topics_gaze))
     return pl_fixation
+
+def fixationevent(data, surface):
+    # define variables
+    base_data = list(data['base_data'])
+    norm_pos = np.mean([gp["norm_pos"] for gp in base_data], axis=0).tolist()
+    start_time = base_data[0]["timestamp"]
+    duration = (base_data[-1]["timestamp"] - base_data[0]["timestamp"]) * 1000
+    end_time = start_time + duration
+
+    # fixation event creation
+    fixation = {"start_time": start_time,
+                "duration": data['duration'],
+                "end_time": end_time,
+                "start_gx": norm_pos[0],
+                "start_gy": norm_pos[1],
+                "mean_gx": data['norm_pos'][0],
+                "mean_gy": data['norm_pos'][1],
+                "dispersion": data['dispersion'],
+                "type": data['topic'],
+                "surface": surface}
+
+    return fixation

@@ -737,7 +737,7 @@ axarr[0, 1].plot(reduced_elepochs.gx, reduced_elepochs.gy,'o')
 plevents = events.pl_make_events(cleaned_plsamples)
 
 # or
-plblinkevents = events.pl_make_blink_events(cleaned_plsamples)
+# plblinkevents = events.pl_make_blink_events(cleaned_plsamples)
 plsaccades = events.detect_saccades_engbert_mergenthaler(cleaned_plsamples,fs=240)
 
 

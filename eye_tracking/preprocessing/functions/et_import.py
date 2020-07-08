@@ -12,6 +12,7 @@ from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as 
 import eye_tracking.preprocessing.functions.et_parse as parse
 from eye_tracking.preprocessing.functions.pl_detect_fixations import *
 from eye_tracking.preprocessing.functions.et_helper import gaze_to_pandas
+import eye_tracking.preprocessing.functions.pl_surface as pl_surface
 
 ########
 
@@ -62,10 +63,9 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     # use pupilhelper func to make samples df (confidence, gx, gy, smpl_time, diameter)
     original_pldata = original_pldata._asdict()
     original_pldata['gaze_positions'] = gaze
+    pldata = gaze_to_pandas(original_pldata['gaze_positions'])
 
     if surfaceMap:
-        import eye_tracking.preprocessing.functions.pl_surface as pl_surface
-
         folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
 
         # define surface coordinates per frame
@@ -74,10 +74,10 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         # extract gaze data that falls within surface
         print('Detecting gaze on surface ...')
         gaze_on_srf = pl_surface.surface_map_data(surfaces_df, gaze)
-        original_pldata['gaze_positions'] = gaze_on_srf
 
-    # use pupilhelper func to make samples df (pt 2)
-    pldata = gaze_to_pandas(original_pldata['gaze_positions'])
+        # mark which samples fall within the surface
+        pldata = pl_surface.annotate_surface(pldata, gaze_on_srf)
+
     print('pldata', pldata)
 
     # sort according to smpl_time

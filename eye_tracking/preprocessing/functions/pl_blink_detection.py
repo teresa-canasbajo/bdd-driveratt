@@ -1,7 +1,10 @@
 """
 (*)~---------------------------------------------------------------------------
+@author: pupil-labs/pupil
+https://github.com/pupil-labs/pupil/blob/41161623249e5b44a74eeb605677486470d02619/pupil_src/shared_modules/blink_detection.py
+
 Pupil - eye tracking platform
-Copyright (C) 2012-2019 Pupil Labs
+Copyright (C) 2012-2020 Pupil Labs
 Distributed under the terms of the GNU
 Lesser General Public License (LGPL v3.0).
 See COPYING and COPYING.LESSER for license details.
@@ -20,13 +23,13 @@ from pyglui import ui
 from pyglui.pyfontstash import fontstash as fs
 from scipy.signal import fftconvolve
 
-from . import csv_utils
-from . import data_changed
-from . import file_methods as fm
-from . import gl_utils
-from . import player_methods as pm
-from .observable import Observable
-from .plugin import Analysis_Plugin_Base
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules import csv_utils
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules import data_changed
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as fm
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules import gl_utils
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules import player_methods as pm
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.observable import Observable
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules.plugin import Analysis_Plugin_Base
 
 logger = logging.getLogger(__name__)
 
@@ -56,10 +59,8 @@ class Blink_Detection(Analysis_Plugin_Base):
         history_length=0.2,
         onset_confidence_threshold=0.5,
         offset_confidence_threshold=0.5,
-        visualize=True,
     ):
         super().__init__(g_pool)
-        self.visualize = visualize
         self.history_length = history_length  # unit: seconds
         self.onset_confidence_threshold = onset_confidence_threshold
         self.offset_confidence_threshold = offset_confidence_threshold
@@ -73,10 +74,10 @@ class Blink_Detection(Analysis_Plugin_Base):
         self.menu.label = "Blink Detector"
         self.menu.append(
             ui.Info_Text(
-                "This plugin detects blink onsets and offsets based on confidence drops."
+                "This plugin detects blink onsets and "
+                "offsets based on confidence drops."
             )
         )
-        self.menu.append(ui.Switch("visualize", self, label="Visualize"))
         self.menu.append(
             ui.Slider(
                 "history_length",
@@ -114,7 +115,10 @@ class Blink_Detection(Analysis_Plugin_Base):
     def recent_events(self, events={}):
         events["blinks"] = []
         self._recent_blink = None
-        self.history.extend(events.get("pupil", []))
+
+        pupil = events.get("pupil", [])
+        pupil = filter(lambda p: "2d" in p["topic"], pupil)
+        self.history.extend(pupil)
 
         try:
             ts_oldest = self.history[0]["timestamp"]
@@ -177,20 +181,9 @@ class Blink_Detection(Analysis_Plugin_Base):
         logger.debug("Resetting history")
         self.history.clear()
 
-    def gl_display(self):
-        if self._recent_blink and self.visualize:
-            if self._recent_blink["type"] == "onset":
-                cygl_utils.push_ortho(1, 1)
-                cygl_utils.draw_gl_texture(
-                    np.zeros((1, 1, 3), dtype=np.uint8),
-                    alpha=self._recent_blink["confidence"] * 0.5,
-                )
-                cygl_utils.pop_ortho()
-
     def get_init_dict(self):
         return {
             "history_length": self.history_length,
-            "visualize": self.visualize,
             "onset_confidence_threshold": self.onset_confidence_threshold,
             "offset_confidence_threshold": self.offset_confidence_threshold,
         }
@@ -203,7 +196,6 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
         history_length=0.2,
         onset_confidence_threshold=0.5,
         offset_confidence_threshold=0.5,
-        visualize=True,
     ):
         self._history_length = None
         self._onset_confidence_threshold = None
@@ -214,7 +206,6 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             history_length,
             onset_confidence_threshold,
             offset_confidence_threshold,
-            visualize,
         )
         self.filter_response = []
         self.response_classification = []
@@ -228,6 +219,13 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
         self.pupil_positions_listener.add_observer(
             "on_data_changed", self._on_pupil_positions_changed
         )
+
+    def _pupil_data(self):
+        data = self.g_pool.pupil_positions[..., "2d"]
+        if not data:
+            # Fall back to 3d data
+            data = self.g_pool.pupil_positions[..., "3d"]
+        return data
 
     def init_ui(self):
         super().init_ui()
@@ -323,25 +321,29 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             )
             logger.info("Created 'blink_detection_report.csv' file.")
 
-    def recalculate(self):
+    def recalculate(self, pupil_positions, datapath):
         import time
 
         t0 = time.time()
-        all_pp = self.g_pool.pupil_positions
+        all_pp = pupil_positions.data
         if not all_pp:
-            self.filter_response = []
-            self.response_classification = []
-            self.timestamps = []
-            self.consolidate_classifications()
-            return
+            filter_response = []
+            response_classification = []
+            timestamps = []
+            blinks = self.consolidate_classifications(pupil_positions.data, pupil_positions.timestamps, filter_response,
+                                                      response_classification, datapath)
 
-        self.timestamps = all_pp.timestamps
-        total_time = self.timestamps[-1] - self.timestamps[0]
+            return blinks
 
-        conf_iter = (pp["confidence"] for pp in all_pp)
+        # self.timestamps = all_pp.timestamps
+        total_time = pupil_positions.timestamps[-1] - pupil_positions.timestamps[0]
+        conf_iter = [pp["confidence"] for pp in all_pp]
+        # for pp in all_pp:
+        #     conf_iter.append(pp["confidence"])
         activity = np.fromiter(conf_iter, dtype=float, count=len(all_pp))
         total_time = all_pp[-1]["timestamp"] - all_pp[0]["timestamp"]
-        filter_size = 2 * round(len(all_pp) * self.history_length / total_time / 2.0)
+        history_length = 0.2
+        filter_size = 2 * round(len(all_pp) * history_length / total_time / 2.0)
         blink_filter = np.ones(filter_size) / filter_size
 
         # This is different from the online filter. Convolution will flip
@@ -352,16 +354,18 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
 
         # The theoretical response maximum is +-0.5
         # Response of +-0.45 seems sufficient for a confidence of 1.
-        self.filter_response = fftconvolve(activity, blink_filter, "same") / 0.45
+        filter_response = fftconvolve(activity, blink_filter, "same") / 0.45
 
-        onsets = self.filter_response > self.onset_confidence_threshold
-        offsets = self.filter_response < -self.offset_confidence_threshold
+        onset_confidence_threshold = 0.5
+        offset_confidence_threshold = 0.5
+        onsets = filter_response > onset_confidence_threshold
+        offsets = filter_response < -offset_confidence_threshold
 
-        self.response_classification = np.zeros(self.filter_response.shape)
-        self.response_classification[onsets] = 1.0
-        self.response_classification[offsets] = -1.0
+        response_classification = np.zeros(filter_response.shape)
+        response_classification[onsets] = 1.0
+        response_classification[offsets] = -1.0
 
-        self.consolidate_classifications()
+        blinks = self.consolidate_classifications(pupil_positions.data, pupil_positions.timestamps, filter_response, response_classification, datapath)
 
         tm1 = time.time()
         logger.debug(
@@ -369,14 +373,19 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
                 tm1 - t0, len(all_pp), len(all_pp) / (tm1 - t0), filter_size
             )
         )
+        return blinks
 
-    def consolidate_classifications(self):
+    def consolidate_classifications(pupil_data, timestamps, filter_response, response_classification, datapath):
+
         blink = None
         state = "no blink"  # others: 'blink started' | 'blink ending'
         blink_data = deque()
         blink_start_ts = deque()
         blink_stop_ts = deque()
         counter = 1
+
+        # NOTE: Cache result for performance reasons
+        # pupil_data = self._pupil_data()
 
         def start_blink(idx):
             nonlocal blink
@@ -385,7 +394,7 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             blink = {
                 "topic": "blink",
                 "__start_response_index__": idx,
-                "start_timestamp": self.timestamps[idx],
+                "start_timestamp": timestamps[idx],
                 "id": counter,
             }
             state = "blink started"
@@ -398,11 +407,13 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             start_idx = blink["__start_response_index__"]
             del blink["__start_response_index__"]
 
-            blink["end_timestamp"] = self.timestamps[idx]
+            blink["end_timestamp"] = timestamps[idx]
             blink["timestamp"] = (blink["end_timestamp"] + blink["start_timestamp"]) / 2
             blink["duration"] = blink["end_timestamp"] - blink["start_timestamp"]
-            blink["base_data"] = self.g_pool.pupil_positions[start_idx:idx]
-            blink["filter_response"] = self.filter_response[start_idx:idx].tolist()
+            pupil_data_list = list(pupil_data)
+            blink["base_data"] = pupil_data_list[start_idx:idx]
+            blink["filter_response"] = filter_response[start_idx:idx].tolist()
+
             # blink confidence is the mean of the absolute filter response
             # during the blink event, clamped at 1.
             blink["confidence"] = min(
@@ -412,20 +423,23 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             # correlate world indices
             ts_start, ts_end = blink["start_timestamp"], blink["end_timestamp"]
 
+            g_pool_timestamp = np.load(os.path.join(datapath, 'world_timestamps.npy'))
             idx_start, idx_end = np.searchsorted(
-                self.g_pool.timestamps, [ts_start, ts_end]
+                g_pool_timestamp, [ts_start, ts_end]
             )
             # fix `list index out of range` error
-            idx_end = min(idx_end, len(self.g_pool.timestamps) - 1)
+            idx_end = min(idx_end, len(g_pool_timestamp) - 1)
             blink["start_frame_index"] = int(idx_start)
             blink["end_frame_index"] = int(idx_end)
             blink["index"] = int((idx_start + idx_end) // 2)
 
-            blink_data.append(fm.Serialized_Dict(python_dict=blink))
+            # blink_data.append(fm.Serialized_Dict(python_dict=blink))
+            blink_data.append(blink)
             blink_start_ts.append(ts_start)
             blink_stop_ts.append(ts_end)
 
-        for idx, classification in enumerate(self.response_classification):
+
+        for idx, classification in enumerate(response_classification):
             if state == "no blink" and classification > 0:
                 start_blink(idx)
             elif state == "blink started" and classification == -1:
@@ -442,8 +456,10 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             # only finish blink if it was already ending
             blink_finished(idx)  # idx is the last possible idx
 
-        self.g_pool.blinks = pm.Affiliator(blink_data, blink_start_ts, blink_stop_ts)
-        self.notify_all({"subject": "blinks_changed", "delay": 0.2})
+        # self.g_pool.blinks = pm.Affiliator(blink_data, blink_start_ts, blink_stop_ts)
+        blinks = pm.Affiliator(blink_data, blink_start_ts, blink_stop_ts)
+        # self.notify_all({"subject": "blinks_changed", "delay": 0.2})
+        return blinks
 
     def cache_activation(self):
         t0, t1 = self.g_pool.timestamps[0], self.g_pool.timestamps[-1]

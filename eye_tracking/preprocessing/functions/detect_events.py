@@ -1,45 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue May  8 16:42:55 2018
+Created on Tue May 8 16:42:55 2018
 
 
 """
 import eye_tracking.preprocessing.functions.detect_saccades as saccades
 import pandas as pd
-import numpy as np
-import os
-import logging
-from eye_tracking.preprocessing.functions.pl_detect_fixations import detect_fixations, pl_data_fixation
+from eye_tracking.preprocessing.functions.pl_detect_fixations import *
 
 # parses SR research EDF data files into pandas df
-from eye_tracking.preprocessing.functions.pl_detect_blinks import pl_detect_blinks
 
 
 # from sklearn.metrics import mean_squared_error
 
 # %% PL Events df
-
-# unecessary datapath, surfaceMap in parameter
-def make_blinks(etsamples, etevents, datapath, surfaceMap):
-    # get a logger
-    logger = logging.getLogger(__name__)
-
-    logger.debug('Detecting Pupillabs Blinks')
-
-    # add Blink information to pldata
-    etsamples = pl_detect_blinks(etsamples)
-    etsamples['blink_id'] = (1 * (etsamples['is_blink'] == 1)) * (
-            (1 * (etsamples['is_blink'] == 1)).diff() == 1).cumsum()
-
-    blinkevents = pl_make_blink_events(etsamples)
-    etsamples = etsamples.drop('is_blink', axis=1)
-
-    # etevents is empty
-    etevents = pd.concat([etevents, blinkevents], axis=0, sort=False)
-
-    return etsamples, etevents
-
 
 # unnecessary et in parameter but linked to next function which also is unnecessary
 # unecessary datapath, surfaceMap in parameter
@@ -93,10 +68,7 @@ def make_fixations(etsamples, etevents, datapath, surfaceMap):
     for data in fixations_data:
         # define variables
         base_data = list(data['base_data'])
-        norm_pos = np.mean([gp["norm_pos"] for gp in base_data], axis=0).tolist()
         start_time = base_data[0]["timestamp"]
-        duration = (base_data[-1]["timestamp"] - base_data[0]["timestamp"]) * 1000
-        end_time = start_time + duration
 
         # match fixation timestamp to surface timestamp, if applicable
         while ((i < len(fixation_match_check) - 1) and (start_time > fixation_match_check[i + 1]['timestamp'])):
@@ -104,16 +76,18 @@ def make_fixations(etsamples, etevents, datapath, surfaceMap):
 
         # match fixation timestamp to surface timestamp, if applicable (pt 2)
         if start_time >= fixation_match_check[i]['timestamp']:
-            fixation = {"start_time": start_time,
-                        "duration": data['duration'],
-                        "end_time": end_time,
-                        "start_gx": norm_pos[0],
-                        "start_gy": norm_pos[1],
-                        "mean_gx": data['norm_pos'][0],
-                        "mean_gy": data['norm_pos'][1],
-                        "dispersion": data['dispersion'],
-                        "type": 'fixation'}
-            fixationevents.append(fixation)
+            if not surfaceMap:
+                surface = "unknown"
+            else:
+                surface = True
+            fixation = fixationevent(data, surface)
+        else:
+            if not surfaceMap:
+                surface = "unknown"
+            else:
+                surface = False
+            fixation = fixationevent(data, surface)
+        fixationevents.append(fixation)
 
     # convert into pandas df
     fixationevents = pd.DataFrame(fixationevents)
@@ -125,40 +99,48 @@ def make_fixations(etsamples, etevents, datapath, surfaceMap):
 
     return etsamples, etevents
 
+# # unecessary surfaceMap in parameter
+def make_blinks(etsamples, etevents, datapath, surfaceMap):
+    from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods
+    from eye_tracking.preprocessing.functions import pl_blink_detection
 
-# %%
+    print('Detecting blinks ...')
+    pupil_positions = file_methods.load_pldata_file(datapath, 'pupil')
+    blinks = pl_blink_detection.Offline_Blink_Detection.recalculate(pl_blink_detection.Offline_Blink_Detection, pupil_positions, datapath)
 
-def pl_make_blink_events(pl_extended_samples):
-    # detects Blink events for pupillabs
+    # filepath for preprocessed folder
+    preprocessed_path = os.path.join(datapath, 'preprocessed')
 
-    assert ('is_blink' in pl_extended_samples)
-    assert ('blink_id' in pl_extended_samples)
+    # create new folder if there is none
+    if not os.path.exists(preprocessed_path):
+        os.makedirs(preprocessed_path)
 
-    # init lists to store info
-    blink_id = []
-    start = []
-    end = []
-    # is_blink = []
-    event_type = []
+    # create csv file of fixations
+    csv_file = preprocessed_path + '/blinks.csv'
+    csv_columns = ['topic', 'start_timestamp', 'id', 'end_timestamp', 'timestamp', 'duration', 'base_data',
+                   'filter_response', 'confidence', 'start_frame_index', 'end_frame_index', 'index']
+    try:
+        import csv
+        with open(csv_file, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, csv_columns)
+            writer.writeheader()
+            for data in list(blinks.data):
+                writer.writerow(data)
+    except IOError:
+        print("I/O error")
 
-    # for each sample look at the blink_id
-    for int_blink_id in pl_extended_samples.blink_id.unique():
-        # if it is a blink (then the id is not zero)
-        if int_blink_id != 0:
-            # take all samples that the current unique blink_id
-            query = 'blink_id == ' + str(int_blink_id)
-            blink_samples = pl_extended_samples.query(query)
+    blinkevents = []
+    # iterate through blink data
+    for data in list(blinks.data):
+        blink = {"start_time": data['start_timestamp'], "duration": data['duration'], "end_time": data['end_timestamp'], "type": data['topic']}
+        blinkevents.append(blink)
 
-            # append infos from queried samples to lists 
-            # is_blink.append(True)
-            blink_id.append(int_blink_id)
-            # blink starts with first marked sample
-            start.append(blink_samples.iloc[0]['smpl_time'])
-            # blink ends with last marked sample
-            end.append(blink_samples.iloc[-1]['smpl_time'])
-            event_type.append("blink")
+    # convert into pandas df
+    blinkevents = pd.DataFrame(blinkevents)
 
-    # create df and store collected infos there
-    pl_blink_events = pd.DataFrame({'blink_id': blink_id, 'start_time': start, 'end_time': end, 'type': event_type})
+    # etevents is empty
+    etevents = pd.concat([etevents, blinkevents], axis=0, sort=False)
 
-    return pl_blink_events
+    print("Done ... detecting blinks")
+
+    return etsamples, etevents

@@ -151,7 +151,7 @@ def detect_tags_and_surfaces(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9
     timestamp = []
     for i in img_n:
         x = t['Image'].index(i)
-        timestamp.append(t['Timestamp'][x-1])
+        timestamp.append(t['Timestamp'][x])
 
     # coordinates dataframe output
     bb_coords = {'image': img_n,
