@@ -90,8 +90,8 @@ def fixationevent(data, surface):
     # define variables
     base_data = list(data['base_data'])
     norm_pos = np.mean([gp["norm_pos"] for gp in base_data], axis=0).tolist()
-    start_time = base_data[0]["timestamp"]
-    duration = (base_data[-1]["timestamp"] - base_data[0]["timestamp"]) * 1000
+    start_time = data['timestamp']
+    duration = data['duration'] / 1000
     end_time = start_time + duration
 
     # fixation event creation

@@ -47,9 +47,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     #           surfaceMap:
     # Output:   Returns 2 dfs (plsamples and plmsgs)
 
-    # get a logger
-    logger = logging.getLogger(__name__)
-
     assert (not surfaceMap, 'If you want to continue without surface detector, please turn '
                             'surfaceMap to False')
     if surfaceMap:
@@ -61,9 +58,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     original_pldata, annotations, gaze = raw_pl_data(subject=subject, datapath=datapath)
 
     # use pupilhelper func to make samples df (confidence, gx, gy, smpl_time, diameter)
-    original_pldata = original_pldata._asdict()
-    original_pldata['gaze_positions'] = gaze
-    pldata = gaze_to_pandas(original_pldata['gaze_positions'])
+    pldata = gaze_to_pandas(gaze)
 
     if surfaceMap:
         folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args

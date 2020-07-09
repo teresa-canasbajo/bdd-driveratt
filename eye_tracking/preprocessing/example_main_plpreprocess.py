@@ -28,4 +28,4 @@ diff_demo = '/media/whitney/New Volume/Teresa/000'
 
 data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
 
-print('done!')
+print('preprocessing complete!')

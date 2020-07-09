@@ -42,7 +42,8 @@ def detect_saccades_engbert_mergenthaler(etsamples, etevents=None, engbert_lambd
     logger.debug('eyetracker: %s', 'pl')
     if etevents is not None:
         logger.debug('Setting Eyeblink Data to 0')
-        etsamples = append_eventtype_to_sample(etsamples, etevents, eventtype='blink')
+        # commented out for testing purposes - causing issues when make_blink is not a parameter
+        # etsamples = append_eventtype_to_sample(etsamples, etevents, eventtype='blink')
         etsamples.loc[etsamples.type == 'blink', ['gx', 'gy']] = np.nan
 
     if 'outside' in etsamples:

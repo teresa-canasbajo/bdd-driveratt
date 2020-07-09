@@ -66,9 +66,7 @@ def make_fixations(etsamples, etevents, datapath, surfaceMap):
     i = 0
     # iterate through original fixation data
     for data in fixations_data:
-        # define variables
-        base_data = list(data['base_data'])
-        start_time = base_data[0]["timestamp"]
+        start_time = data['timestamp']
 
         # match fixation timestamp to surface timestamp, if applicable
         while ((i < len(fixation_match_check) - 1) and (start_time > fixation_match_check[i + 1]['timestamp'])):
