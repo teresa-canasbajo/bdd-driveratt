@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-
+import os
 import logging
 
 ##########
 
-import eye_tracking.preprocessing.functions.et_make_df as make_df
+from . import et_make_df as make_df
+from . import et_parse as parse
+from . import surface_detection as pl_surface
+from .et_helper import gaze_to_pandas
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as pl_file_methods
-import eye_tracking.preprocessing.functions.et_parse as parse
-from eye_tracking.preprocessing.functions.pl_detect_fixations import *
-from eye_tracking.preprocessing.functions.et_helper import gaze_to_pandas
-import eye_tracking.preprocessing.functions.pl_surface as pl_surface
 
 ########
 
@@ -61,7 +60,7 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     pldata = gaze_to_pandas(gaze)
 
     if surfaceMap:
-        folder = os.path.join(datapath)  # before it was taking subject, 'raw' as args
+        folder = os.path.join(datapath, subject)  # before it was taking subject, 'raw' as args
 
         # define surface coordinates per frame
         surfaces_df = pl_surface.map_surface(folder)

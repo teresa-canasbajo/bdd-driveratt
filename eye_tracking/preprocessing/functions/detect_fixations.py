@@ -8,22 +8,23 @@ Created on June 23 2020
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import fixation_detector
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods
+from . import detect_events
 from types import SimpleNamespace
 import numpy as np
 import os
 import collections
 
 
-def detect_fixations(datapath):
+def fixation_detection(directory):
     # gaze_data parameter
-    gaze = file_methods.load_pldata_file(datapath, 'gaze')
+    gaze = file_methods.load_pldata_file(directory, 'gaze')
     gaze_data = [gp.serialized for gp in gaze.data]
 
     # capture parameter
     cap = SimpleNamespace()
     cap.frame_size = (1280, 960)
     cap.intrinsics = load_intrinsics('', 'Pupil Cam1 ID2', (1280, 720))
-    cap.timestamps = np.load(os.path.join(datapath, 'world_timestamps.npy'))
+    cap.timestamps = np.load(os.path.join(directory, 'world_timestamps.npy'))
 
     # define other parameters
     max_dispersion = 1.50
@@ -36,7 +37,7 @@ def detect_fixations(datapath):
                                                         max_duration / 1000, confidence))
 
     # filepath for preprocessed folder
-    preprocessed_path = os.path.join(datapath, 'preprocessed')
+    preprocessed_path = os.path.join(directory, 'preprocessed')
 
     # create new folder if there is none
     if not os.path.exists(preprocessed_path):
@@ -56,15 +57,7 @@ def detect_fixations(datapath):
     csv_file = preprocessed_path + '/fixations.csv'
     csv_columns = ['topic', 'norm_pos', 'dispersion', 'method', 'base_data', 'timestamp', 'duration', 'confidence',
                    'gaze_point_3d', 'start_frame_index', 'end_frame_index', 'mid_frame_index', 'id']
-    try:
-        import csv
-        with open(csv_file, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, csv_columns)
-            writer.writeheader()
-            for data in fixations_data:
-                writer.writerow(data)
-    except IOError:
-        print("I/O error")
+    detect_events.event_csv(csv_file, csv_columns, fixations_data)
 
     return fixations_base_data, fixations_data
 

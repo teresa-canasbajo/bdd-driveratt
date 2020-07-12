@@ -4,10 +4,10 @@ from typing import List, Dict, Tuple, Any
 from glob import glob
 import os
 import time
-import sys
 import numpy as np
 import cv2
 import pandas as pd
+from .utils import normalize, intersection, print_progress_bar
 
 
 def extract_frames(video_path: str, frames_path: str) -> None:
@@ -76,12 +76,8 @@ def detect_tags_and_surfaces(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9
 
     # Deleted last image after out of range error popped up
     # TODO: but not analyzing last 2 frames?
-    # print(len(all_images))
     if len(all_images) > 1:
         all_images = all_images[:-1]
-
-    num_images = len(all_images)
-    # print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
 
     # Iterate thru all PNG images in frames_path
     for i, img_path in enumerate(all_images):
@@ -141,13 +137,12 @@ def detect_tags_and_surfaces(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9
             norm_center_y.append(norm_c[1])
 
         time.sleep(0.01)
-        print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
+        print_progress_bar(i + 1, len(all_images), prefix='Progress:', suffix='Complete', length=50)
 
     # match world timestamps to appropriate frame
     head, tail = os.path.split(frames_path)
     timestamps_path = os.path.join(head, 'world_timestamps.npy')
-    a = np.load(timestamps_path)
-    t = {'Image': img_n_total, 'Timestamp': a}
+    t = {'Image': img_n_total, 'Timestamp': np.load(timestamps_path)}
     timestamp = []
     for i in img_n:
         x = t['Image'].index(i)
@@ -173,7 +168,6 @@ def detect_tags_and_surfaces(frames_path: str, tags = [0, 1, 2, 3, 5, 6, 7, 8, 9
                  'norm_center_y': norm_center_y
                  }
     coordinates_df = pd.DataFrame(bb_coords)
-    # coordinates_df.to_csv(os.path.join(frames_path, 'coordinates.csv'), index=False)
 
     return frames, dict(tag_ids), coordinates_df
 
@@ -279,9 +273,7 @@ def surface_coordinates(frame, img_path, tag, bounding_box_frames_path):
 
     red = (0, 0, 255)
     thickness = 2
-
     cv2.rectangle(img, tl, br, red, thickness) # rectangle
-
     cv2.line(img, l, r, red, thickness) # horizontal line
     cv2.line(img, bottom_midpoint, top_midpoint, red, thickness) # vertical line
     cv2.circle(img, center, 2, (0, 255, 255), 8)  # point in the center of the screen
@@ -290,46 +282,3 @@ def surface_coordinates(frame, img_path, tag, bounding_box_frames_path):
     cv2.imwrite(bounding_box_frames_path + "/" + tail, img)
 
     return tl, tr, bl, br, center, norm_tl, norm_tr, norm_bl, norm_br, norm_center
-
-def normalize(coord, width, height):
-    x = coord[0]/width
-    y = coord[1]/height
-    return (x, y)
-
-def intersection(L1, L2):
-    xdiff = (L1[0][0] - L1[1][0], L2[0][0] - L2[1][0])
-    ydiff = (L1[0][1] - L1[1][1], L2[0][1] - L2[1][1])
-
-    def det(a, b):
-        return a[0] * b[1] - a[1] * b[0]
-
-    div = det(xdiff, ydiff)
-    if div != 0:
-        d = (det(*L1), det(*L2))
-        x = det(d, xdiff) / div
-        y = det(d, ydiff) / div
-        return int(x), int(y)
-    else:
-        return False
-
-
-def print_progress_bar (iteration, total, prefix ='', suffix ='', decimals = 1, length = 100, fill ='█', printEnd ="\r"):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    sys.stdout.write('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix))
-    # Print New Line on Complete
-    if iteration == total:
-        print()

@@ -5,9 +5,14 @@ Created on Tue May 8 16:42:55 2018
 
 
 """
-import eye_tracking.preprocessing.functions.detect_saccades as saccades
 import pandas as pd
-from eye_tracking.preprocessing.functions.pl_detect_fixations import *
+import os
+from . import detect_fixations
+from . import surface_detection as pl_surface
+from . import detect_saccades as saccades
+from . import detect_blinks
+from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods
+
 
 # parses SR research EDF data files into pandas df
 
@@ -18,7 +23,7 @@ from eye_tracking.preprocessing.functions.pl_detect_fixations import *
 
 # unnecessary et in parameter but linked to next function which also is unnecessary
 # unecessary datapath, surfaceMap in parameter
-def make_saccades(etsamples, etevents, datapath, surfaceMap, engbert_lambda=5):
+def make_saccades(etsamples, etevents, subject, datapath, surfaceMap, engbert_lambda=5):
     saccadeevents = saccades.detect_saccades_engbert_mergenthaler(etsamples, etevents,
                                                                   engbert_lambda=engbert_lambda)
 
@@ -39,18 +44,18 @@ def make_saccades(etsamples, etevents, datapath, surfaceMap, engbert_lambda=5):
 
     return etsamples, etevents
 
+
 # unnecessary et in parameter
-def make_fixations(etsamples, etevents, datapath, surfaceMap):
+def make_fixations(etsamples, etevents, subject, datapath, surfaceMap):
     # detect fixations calling pupil lab's api
-    fixations_base_data, fixations_data = detect_fixations(datapath)
+    directory = os.path.join(datapath, subject)
+    fixations_base_data, fixations_data = detect_fixations.fixation_detection(directory)
     # reformat into PLData object
-    fixations = pl_data_fixation(fixations_base_data)
+    fixations = detect_fixations.pl_data_fixation(fixations_base_data)
 
     if surfaceMap:
-        import eye_tracking.preprocessing.functions.pl_surface as pl_surface
-
         # create surfaces dataframe from existing csv file
-        frames_path = datapath + "/frames"
+        frames_path = os.path.join(datapath, subject, 'frames')
         surfaces_df = pd.read_csv(frames_path + '/surface_coordinates.csv')
         surfaces_df = surfaces_df.apply(pd.to_numeric, errors='coerce')
 
@@ -69,22 +74,15 @@ def make_fixations(etsamples, etevents, datapath, surfaceMap):
         start_time = data['timestamp']
 
         # match fixation timestamp to surface timestamp, if applicable
-        while ((i < len(fixation_match_check) - 1) and (start_time > fixation_match_check[i + 1]['timestamp'])):
+        while (i < len(fixation_match_check) - 1) and (start_time > fixation_match_check[i + 1]['timestamp']):
             i = i + 1
 
         # match fixation timestamp to surface timestamp, if applicable (pt 2)
         if start_time >= fixation_match_check[i]['timestamp']:
-            if not surfaceMap:
-                surface = "unknown"
-            else:
-                surface = True
-            fixation = fixationevent(data, surface)
+            surface = "unknown" if not surfaceMap else True
         else:
-            if not surfaceMap:
-                surface = "unknown"
-            else:
-                surface = False
-            fixation = fixationevent(data, surface)
+            surface = "unknown" if not surfaceMap else False
+        fixation = detect_fixations.fixationevent(data, surface)
         fixationevents.append(fixation)
 
     # convert into pandas df
@@ -97,40 +95,35 @@ def make_fixations(etsamples, etevents, datapath, surfaceMap):
 
     return etsamples, etevents
 
-# # unecessary surfaceMap in parameter
-def make_blinks(etsamples, etevents, datapath, surfaceMap):
-    from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods
-    from eye_tracking.preprocessing.functions import pl_blink_detection
 
+# unecessary et, surfaceMap in parameter
+def make_blinks(etsamples, etevents, subject, datapath, surfaceMap):
     print('Detecting blinks ...')
-    pupil_positions = file_methods.load_pldata_file(datapath, 'pupil')
-    blinks = pl_blink_detection.Offline_Blink_Detection.recalculate(pl_blink_detection.Offline_Blink_Detection, pupil_positions, datapath)
+    directory = os.path.join(datapath, subject)
+    pupil_positions = file_methods.load_pldata_file(directory, 'pupil')
+    blinks = detect_blinks.Offline_Blink_Detection.recalculate(detect_blinks.Offline_Blink_Detection, pupil_positions,
+                                                               directory)
 
     # filepath for preprocessed folder
-    preprocessed_path = os.path.join(datapath, 'preprocessed')
+    preprocessed_path = os.path.join(datapath, subject, 'preprocessed')
 
     # create new folder if there is none
     if not os.path.exists(preprocessed_path):
         os.makedirs(preprocessed_path)
 
-    # create csv file of fixations
+    # create csv file of blinks
     csv_file = preprocessed_path + '/blinks.csv'
     csv_columns = ['topic', 'start_timestamp', 'id', 'end_timestamp', 'timestamp', 'duration', 'base_data',
                    'filter_response', 'confidence', 'start_frame_index', 'end_frame_index', 'index']
-    try:
-        import csv
-        with open(csv_file, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, csv_columns)
-            writer.writeheader()
-            for data in list(blinks.data):
-                writer.writerow(data)
-    except IOError:
-        print("I/O error")
+    event_csv(csv_file, csv_columns, blinks.data)
 
+    # iterate through blink data to append to events
     blinkevents = []
-    # iterate through blink data
     for data in list(blinks.data):
-        blink = {"start_time": data['start_timestamp'], "duration": data['duration'], "end_time": data['end_timestamp'], "type": data['topic']}
+        blink = {"start_time": data['start_timestamp'],
+                 "duration": data['duration'],
+                 "end_time": data['end_timestamp'],
+                 "type": data['topic']}
         blinkevents.append(blink)
 
     # convert into pandas df
@@ -142,3 +135,15 @@ def make_blinks(etsamples, etevents, datapath, surfaceMap):
     print("Done ... detecting blinks")
 
     return etsamples, etevents
+
+
+def event_csv(filepath, csv_columns, eventdata):
+    try:
+        import csv
+        with open(filepath, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, csv_columns)
+            writer.writeheader()
+            for data in list(eventdata):
+                writer.writerow(data)
+    except IOError:
+        print("I/O error")

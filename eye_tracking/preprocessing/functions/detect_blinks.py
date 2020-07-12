@@ -1,6 +1,6 @@
 """
 (*)~---------------------------------------------------------------------------
-@author: pupil-labs/pupil
+@author: pupil-labs/pupil with modifications
 https://github.com/pupil-labs/pupil/blob/41161623249e5b44a74eeb605677486470d02619/pupil_src/shared_modules/blink_detection.py
 
 Pupil - eye tracking platform
@@ -321,7 +321,7 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             )
             logger.info("Created 'blink_detection_report.csv' file.")
 
-    def recalculate(self, pupil_positions, datapath):
+    def recalculate(self, pupil_positions, directory):
         import time
 
         t0 = time.time()
@@ -331,7 +331,7 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             response_classification = []
             timestamps = []
             blinks = self.consolidate_classifications(pupil_positions.data, pupil_positions.timestamps, filter_response,
-                                                      response_classification, datapath)
+                                                      response_classification, directory)
 
             return blinks
 
@@ -365,7 +365,7 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
         response_classification[onsets] = 1.0
         response_classification[offsets] = -1.0
 
-        blinks = self.consolidate_classifications(pupil_positions.data, pupil_positions.timestamps, filter_response, response_classification, datapath)
+        blinks = self.consolidate_classifications(pupil_positions.data, pupil_positions.timestamps, filter_response, response_classification, directory)
 
         tm1 = time.time()
         logger.debug(
@@ -375,7 +375,7 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
         )
         return blinks
 
-    def consolidate_classifications(pupil_data, timestamps, filter_response, response_classification, datapath):
+    def consolidate_classifications(pupil_data, timestamps, filter_response, response_classification, directory):
 
         blink = None
         state = "no blink"  # others: 'blink started' | 'blink ending'
@@ -423,7 +423,7 @@ class Offline_Blink_Detection(Observable, Blink_Detection):
             # correlate world indices
             ts_start, ts_end = blink["start_timestamp"], blink["end_timestamp"]
 
-            g_pool_timestamp = np.load(os.path.join(datapath, 'world_timestamps.npy'))
+            g_pool_timestamp = np.load(os.path.join(directory, 'world_timestamps.npy'))
             idx_start, idx_end = np.searchsorted(
                 g_pool_timestamp, [ts_start, ts_end]
             )

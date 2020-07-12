@@ -8,7 +8,7 @@ Created on Fri May 18 19:01:13 2018
 import pandas as pd
 import numpy as np
 import logging
-from eye_tracking.preprocessing.functions import et_helper as helper
+from . import et_helper as helper
 
 
 # %% Detect bad samples

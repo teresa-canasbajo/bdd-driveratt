@@ -7,8 +7,8 @@ Created on Fri Apr 20 11:41:34 2018
 """
 import collections
 import collections.abc
-from eye_tracking.preprocessing.functions.manual_detection import extract_frames, print_progress_bar, \
-    detect_tags_and_surfaces
+from .manual_detection import extract_frames, detect_tags_and_surfaces
+from .utils import print_progress_bar
 
 import numpy as np
 import pandas as pd
@@ -44,8 +44,6 @@ def map_surface(folder):
         if not os.path.exists(bounding_box_frames_path):
             os.mkdir(bounding_box_frames_path)
             print("Successfully created the directory %s " % bounding_box_frames_path)
-
-            print_progress_bar(0, len(all_images), prefix='Progress:', suffix='Complete', length=50)
 
             # detect surface coordinates
             frame, tag_ids, surfaces_df = detect_tags_and_surfaces(frames_path)

@@ -10,12 +10,12 @@ Modified: Saturday Fri Feb 15
 @author: tere93
 """
 
-from eye_tracking.preprocessing.functions.et_import import import_pl
-from eye_tracking.preprocessing.functions.detect_events import make_blinks, make_saccades, make_fixations
-from eye_tracking.preprocessing.functions.detect_bad_samples import detect_bad_samples, remove_bad_samples
-from eye_tracking.preprocessing.functions.et_helper import add_events_to_samples
-from eye_tracking.preprocessing.functions.et_helper import load_file, save_file
-from eye_tracking.preprocessing.functions.et_make_df import make_events_df
+from .et_import import import_pl
+from .detect_events import make_blinks, make_saccades, make_fixations
+from .detect_bad_samples import detect_bad_samples, remove_bad_samples
+from .et_helper import add_events_to_samples
+from .et_helper import load_file, save_file
+from .et_make_df import make_events_df
 
 import logging
 
@@ -46,7 +46,7 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     logger.debug('Marking bad et samples')
     etsamples = detect_bad_samples(etsamples)
 
-    if(datapath == '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001'):
+    if datapath == '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001':
         etsamples = etsamples[20:]
 
     # Detect events
@@ -54,7 +54,7 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     logger.debug('Making event df')
     for evtfunc in eventfunctions:
         logger.debug('Events: calling %s', evtfunc.__name__)
-        etsamples, etevents = evtfunc(etsamples, etevents, datapath=datapath, surfaceMap=surfaceMap)
+        etsamples, etevents = evtfunc(etsamples, etevents, subject=subject, datapath=datapath, surfaceMap=surfaceMap)
 
     # Make a nice etevent df
     etevents = make_events_df(etevents)
