@@ -1,11 +1,14 @@
 import os
 import numpy as np
+import logging
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
 
 class global_container():
     pass
 
 def notify_all(self, notification=''):
+    # get a logger
+    logger = logging.getLogger(__name__)
     logger.info(notification)
 
 def gen_fakepool(inp_gaze=[], surface_dir = '', calibration_mode='2d'):

@@ -5,15 +5,8 @@ import math
 import os
 import numpy as np
 from numpy import pi, cos, sin
-
 import pandas as pd
-
 import logging
-
-from plotnine import *
-
-from scipy.stats.mstats import winsorize
-from plotnine.stats.stat_summary import bootstrap_statistics
 
 
 # %% put PUPIL LABS data into PANDAS DF
@@ -63,15 +56,6 @@ def convert_diam_to_pa(axes1, axes2):
 
 
 # %% adding information to dfs
-
-def add_msg_to_event(etevents, etmsgs, timefield='start_time', direction='backward'):
-    # combine the event df with the msg df          
-    etevents = etevents.sort_values('start_time')
-    etmsgs = etmsgs.sort_values('msg_time')
-    # make a merge on the msg time and the start time of the events
-    merged_etevents = pd.merge_asof(etevents, etmsgs, left_on='start_time', right_on='msg_time', direction=direction)
-
-    return merged_etevents
 
 
 def add_events_to_samples(etsamples, etevents):
@@ -138,117 +122,7 @@ def eventtime_to_sampletime(etsamples, eventstart, eventend):
     flat_ranges = [item for sublist in ranges for item in sublist]
 
     flat_ranges = np.intersect1d(flat_ranges, range(etsamples.shape[0]))
-    return (flat_ranges)
-
-
-# %% last fixation (e.g. for large GRID)
-
-def only_last_fix(merged_etevents, next_stim=['condition', 'block', 'element']):
-    # we group by  block and element and then take the last fixation
-
-    # TODO commented out cause it raises weird error
-    # for HMM we define alle smooth pursuit as fixations
-    # merged_etevents.type[merged_etevents.type == 'smoothpursuit'] = 'fixation'
-
-    # use only fixation events and group by block and element and then take the last one of it
-    large_grid_df = merged_etevents[merged_etevents.type == 'fixation'].groupby(next_stim).last()
-    large_grid_df.reset_index(level=next_stim, inplace=True)
-
-    return large_grid_df
-
-
-# %% function to make groupby easier
-
-
-def group_to_level_and_take_mean(raw_condition_df, lowestlevel):
-    """
-    make a groupby
-    """
-
-    if lowestlevel == 'subject':
-        # get df grouped by et and subject 
-        # --> takes the mean of the accuracy and precision measures over all blocks
-        grouped_df = raw_condition_df.groupby(['et', 'subject']).mean().reset_index(level=['et', 'subject'])
-
-
-    elif lowestlevel == 'block':
-        # get df grouped by et, subject and block
-        # --> makes a mean for each block of the subject
-        grouped_df = raw_condition_df.groupby(['et', 'subject', 'block']).mean().reset_index(
-            level=['et', 'subject', 'block'])
-
-
-    elif lowestlevel == 'element_positions':
-        # get df grouped by et, subject and block
-        # --> makes a mean for each block of the subject
-        grouped_df = raw_condition_df.groupby(['et', 'subject', 'block', 'posx', 'posy']).mean().reset_index(
-            level=['et', 'subject', 'block', 'posx', 'posy'])
-
-
-    elif lowestlevel == 'condition':
-        # get df grouped by et, subject and GRID condition
-        # --> makes a mean for each Gridcondition of the subject
-        grouped_df = raw_condition_df.groupby(['et', 'subject', 'condition']).mean().reset_index(
-            level=['et', 'subject', 'condition'])
-
-
-    else:
-        raise ValueError('This level is unknown / not implemented')
-
-    return grouped_df
-
-
-# %% set dtypes of dataframe and make the labes ready to get plotted
-
-def set_dtypes(df):
-    """
-    Set the dtype of the categories, so that plotting is easier and more pretty.
-    E.g. set column 'et' from object to categorical
-    """
-
-    # make all object variables categorical
-    df[df.select_dtypes(['object']).columns] = df.select_dtypes(['object']).apply(lambda x: x.astype('category'))
-
-    # list of categorical variables that have to be treated separately as they were not object dtypes
-    categorial_var = ["block", "trial", "pic_id"]
-
-    # set columns to correct dtype
-    for column in categorial_var:
-
-        if column in df:
-            # fill none values to not have problems with integers
-            df[column] = df[column].fillna(-1)
-
-            # convert ids to interger and round them to make them look nicely
-            df[column] = pd.to_numeric(df[column], downcast='integer')
-            df[column] = df[column].round(0).astype(int)
-
-            # convert -1 back to None
-            df[column] = df[column].astype(str)
-            df[column] = df[column].replace('-1', np.nan)
-
-            # old version
-            # df[column] = df[column].astype('category')
-
-    # logging.debug('dtypes of the df after: %s', df.dtypes)    
-    return df
-
-
-def set_to_full_names(df):
-    """
-    rename columns and values to their full name
-    e.g. et --> Eye-Tracker
-    """
-    # TODO maybe more renaming?
-
-    # maybe dont do this but rather use xaxis relabeling
-    # rename columnnames
-    # df = df.rename(index=str, columns={"et": "Eye-Tracker", "pic_id": "picture id", "fix_count": "number of fixations"})
-
-    # rename values
-    df.loc[:, 'et'] = df['et'].map({'el': 'EyeLink', 'pl': 'Pupil Labs'})
-
-    return df
+    return flat_ranges
 
 
 # %% everything related to VISUAL DEGREES
@@ -333,15 +207,6 @@ def save_file(data, subject, datapath, outputprefix=''):
     df_timestamps = pd.DataFrame(a)
     df_timestamps.to_csv(os.path.join(preprocessed_path, filename_timestamps), index=False)
 
-def findFile(path, ftype):
-    # finds file for el edf
-    out = [edf for edf in os.listdir(path) if edf.endswith(ftype)]
-    return (out)
-
-
-def get_subjectnames(datapath='/media/whitney/New Volume/Teresa/bdd-driveratt'):
-    return os.listdir(datapath)
-
 
 # %% Tic Toc Matlab equivalent to time things
 import time
@@ -368,77 +233,9 @@ def toc(tempBool=True):
         print("Elapsed time: %f seconds.\n" % tempTimeInterval)
 
 
-def tic():
-    # Records a time in TicToc, marks the beginning of a time interval
-    toc(False)
 
 
-def plot_around_event(etsamples, etmsgs, etevents, single_eventormsg, plusminus=(-1, 1), bothET=True, plotevents=True):
-    import re
-    assert (type(single_eventormsg) == pd.Series)
-    try:
-        t0 = single_eventormsg.start_time
-        eventtype = 'event'
-    except:
-        t0 = single_eventormsg.msg_time
-        eventtype = 'msg'
-
-    tstart = t0 + plusminus[0]
-    tend = t0 + plusminus[1]
-    query = '1==1'
-    if ("subject" in etsamples.columns) & ("subject" in single_eventormsg.index):
-        query = query + "& subject == @single_eventormsg.subject"
-    if not bothET:
-        query = query + "& eyetracker==@single_eventormsg.eyetracker"
-    samples_query = "smpl_time>=@tstart & smpl_time   <=@tend & " + query
-    msg_query = "msg_time >=@tstart & msg_time    <=@tend & " + query
-    event_query = "end_time >=@tstart & start_time  <=@tend & " + query
-    etmsgs = etmsgs.query(msg_query)
-    longstring = etmsgs.to_string(columns=['exp_event'], na_rep='', float_format='%.1f', index=False, header=False,
-                                  col_space=0)
-    longstring = re.sub(' +', ' ', longstring)
-    splitstring = longstring.split(sep="\n")
-    if len(splitstring) == etmsgs.shape[0] - 1:
-        # last element was a Nan blank and got removed
-        splitstring.append(' ')
-    etmsgs.loc[:, 'label'] = splitstring
-
-    p = (ggplot()
-         + geom_point(aes(x='smpl_time', y='gx', color='type', shape='eyetracker'),
-                      data=etsamples.query(samples_query))  # samples
-         + geom_text(aes(x='msg_time', y=2, label="label"), color='black', position=position_jitter(width=0),
-                     data=etmsgs)  # label msg/trigger
-         + geom_vline(aes(xintercept='msg_time'), color='black', data=etmsgs)  # triggers/msgs
-         )
-
-    if etevents.query(event_query).shape[0] > 0:
-        pass
-    if plotevents:
-        p = p + geom_segment(aes(x="start_time", y=0, xend="end_time", yend=0, color='type'), alpha=0.5, size=2,
-                             data=etevents.query(event_query))
-    if eventtype == 'event':
-        p = (p + annotate("line", x=[single_eventormsg.start_time, single_eventormsg.end_time], y=0, color='black')
-             + annotate("point", x=[single_eventormsg.start_time, single_eventormsg.end_time], y=0, color='black'))
-    if eventtype == 'msg':
-        if single_eventormsg.condition == 'GRID':
-            p = (p + annotate("text", x=single_eventormsg.end_time, y=single_eventormsg.posx + 5,
-                              label=single_eventormsg.accuracy)
-                 + geom_hline(yintercept=single_eventormsg.posx))
-    return (p)
-
-
-# define 20% winsorized means 
-
-def winmean(x, perc=0.2, axis=0):
-    return np.mean(winsorize(x, perc, axis=axis), axis=axis)
-
-
-def winmean_cl_boot(series, n_samples=10000, confidence_interval=0.95,
-                    random_state=None):
-    return bootstrap_statistics(series, winmean,
-                                n_samples=n_samples,
-                                confidence_interval=confidence_interval,
-                                random_state=random_state)
+# define 20% winsorized means
 
 
 def mad(arr):

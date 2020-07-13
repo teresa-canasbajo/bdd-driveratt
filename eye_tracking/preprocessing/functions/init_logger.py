@@ -55,29 +55,3 @@ else:
 #[h.close() for h in logger.handlers]
 #[logger.removeHandler(h) for h in logger.handlers]
 
-
-def update_logger_filepath(newpath):
-    # delete old filehandler
-    logger = logging.getLogger()
-    for hdlr in logger.handlers[:]:  # remove all old handlers
-        if isinstance(hdlr,logging.FileHandler):
-            logger.removeHandler(hdlr)
-    
-    # delete file if it already exists
-    try:
-        os.remove(logfile)       
-    except FileNotFoundError:
-        pass
-     
-    # define handlers    
-    logging_file = logging.FileHandler(filename=newpath)
-    
-    # set handler level
-    logging_file.setLevel(logging.WARNING)
-    
-    # create a logging format
-    formatter = logging.Formatter("%(asctime)s - %(name)-65s - %(levelname)-8s - %(message)s", "%Y-%m-%d %H:%M:%S")
-    logging_file.setFormatter(formatter)
-    
-    # add the handlers to the logger
-    logger.addHandler(logging_file)
