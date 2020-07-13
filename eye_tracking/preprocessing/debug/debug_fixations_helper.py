@@ -4,29 +4,17 @@ import os
 from glob import glob
 from eye_tracking.preprocessing.functions.manual_detection import print_progress_bar
 
-def preprocessing_data(preprocessing_fixations_df, preprocessing_fixations_num_df):
-    preprocessing_type = preprocessing_fixations_df.type
-    n_preprocessing_time = preprocessing_fixations_num_df.smpl_time
-    n_preprocessing_x = preprocessing_fixations_num_df.gx
-    n_preprocessing_y = preprocessing_fixations_num_df.gy
 
-    preprocessing_time = []
-    preprocessing_x = []
-    preprocessing_y = []
-    index = 0
-    for t in preprocessing_type:
-        if t == 'fixation':
-            preprocessing_time.append(n_preprocessing_time[index])
-            preprocessing_x.append(n_preprocessing_x[index])
-            preprocessing_y.append(n_preprocessing_y[index])
-        index = index + 1
-    return preprocessing_time, preprocessing_x, preprocessing_y
-
-def exports_data(exports_fixations_df):
+def exports_data(exports_fixations_df, outputfile_name):
     exports_time = exports_fixations_df.start_timestamp
     exports_duration = exports_fixations_df.duration
-    exports_x = exports_fixations_df.norm_pos_x
-    exports_y = exports_fixations_df.norm_pos_y
+    if outputfile_name == '/compare_fixations.csv':
+        exports_x = exports_fixations_df.norm_pos_x
+        exports_y = exports_fixations_df.norm_pos_y
+    else:
+        # this is for blinks
+        exports_x = exports_fixations_df.start_timestamp
+        exports_y = exports_fixations_df.start_timestamp
     return exports_x, exports_y, exports_time, exports_duration
 
 def fixations_preprocessing_data(preprocessing_fixations_df):
@@ -42,22 +30,20 @@ def fixations_preprocessing_data(preprocessing_fixations_df):
     # norm_y = preprocessing_fixations_df.norm_pos
     return norm_x, norm_y, time, duration
 
-def compare_fixations(export_path, preprocessing_path):
+def compare_fixations(export_path, preprocessing_path, outputfile_name = '/compare_fixations.csv'):
 
     # create fixations dataframe from existing csv file & extract relevant info
     exports_fixations_df = pd.read_csv(export_path)
     exports_fixations_df = exports_fixations_df.apply(pd.to_numeric, errors='coerce')
     preprocessing_fixations_df = pd.read_csv(preprocessing_path)
-    # preprocessing_fixations_df = preprocessing_fixations_df.apply(pd.to_numeric, errors='coerce')
-    # preprocessing_fixations_num_df = preprocessing_fixations_df.apply(pd.to_numeric, errors='coerce')
 
-    exports_x, exports_y, exports_time, exports_duration = exports_data(exports_fixations_df)
-    fixations_x, fixations_y, fixations_time, fixations_duration = fixations_preprocessing_data(preprocessing_fixations_df)
-    # preprocessing_time, preprocessing_x, preprocessing_y = preprocessing_data(preprocessing_fixations_df,
-    #                                                                           preprocessing_fixations_num_df)
+    exports_x, exports_y, exports_time, exports_duration = exports_data(exports_fixations_df, outputfile_name)
+    if outputfile_name == '/compare_fixations.csv':
+        fixations_x, fixations_y, fixations_time, fixations_duration = fixations_preprocessing_data(preprocessing_fixations_df)
+    else:
+        # this is for blinks
+        fixations_x, fixations_y, fixations_time, fixations_duration = exports_data(preprocessing_fixations_df, outputfile_name)
 
-    # x_preprocessed = exports_x.to_list()
-    # y_preprocessed = exports_y.to_list()
     preprocessed_x = []
     preprocessed_y = []
     preprocessed_time = []
@@ -117,7 +103,7 @@ def compare_fixations(export_path, preprocessing_path):
     compare_fixations_df = pd.DataFrame(coords)
 
     head, tail = os.path.split(preprocessing_path)
-    compare_fixations_df.to_csv(os.path.join(head + '/compare_fixations.csv'), index=False)
+    compare_fixations_df.to_csv(os.path.join(head + outputfile_name), index=False)
 
     return compare_fixations_df
 

@@ -14,15 +14,8 @@ from . import detect_blinks
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods
 
 
-# parses SR research EDF data files into pandas df
-
-
-# from sklearn.metrics import mean_squared_error
-
-# %% PL Events df
-
 # unnecessary et in parameter but linked to next function which also is unnecessary
-# unecessary datapath, surfaceMap in parameter
+# unecessary subject, datapath, surfaceMap in parameter
 def make_saccades(etsamples, etevents, subject, datapath, surfaceMap, engbert_lambda=5):
     saccadeevents = saccades.detect_saccades_engbert_mergenthaler(etsamples, etevents,
                                                                   engbert_lambda=engbert_lambda)
@@ -36,7 +29,7 @@ def make_saccades(etsamples, etevents, subject, datapath, surfaceMap, engbert_la
 
     saccadeevents = saccadeevents.rename(columns=dict(zip(keepcolumns, newname)))
 
-    # add the type    
+    # add the type
     saccadeevents['type'] = 'saccade'
 
     # concatenate to original event df

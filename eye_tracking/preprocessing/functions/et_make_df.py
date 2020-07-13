@@ -15,7 +15,7 @@ import numpy as np
 from numpy import pi
 from scipy.spatial import distance
 
-import eye_tracking.preprocessing.functions.et_helper as helper
+from . import et_helper as helper
 
 import logging
 
@@ -23,7 +23,8 @@ import logging
 # %% MAKE SAMPLES
 
 def make_samples_df(etsamples):
-    fields_to_keep = set(['smpl_time', 'gx', 'gy', 'confidence', 'pa', 'type', 'diameter', 'gx_vel', 'gy_vel', 'surface'])
+    # why do we have gx_vel, gy_vel column?
+    fields_to_keep = {'smpl_time', 'gx', 'gy', 'confidence', 'pa', 'type', 'diameter', 'surface'}
 
     fields_to_fillin = fields_to_keep - set(etsamples.columns)
     fields_to_copy = fields_to_keep - fields_to_fillin
@@ -34,13 +35,13 @@ def make_samples_df(etsamples):
         # error: cannot set a frame with no defined index and a scalar
         etsamples_reduced.loc[:, fieldname] = np.nan
 
-    return (etsamples_reduced)
+    return etsamples_reduced
 
 
 def make_events_df(etevents):
-    # why do we have an end_point column?
+    # why do we have an rms, end_point column?
     fields_to_keep = {'surface', 'start_gx', 'start_gy', 'end_gx', 'end_gy', 'end_time', 'start_time', 'type',
-                      'amplitude', 'duration', 'dispersion', 'end_point', 'peak_velocity', 'mean_gx', 'mean_gy', 'rms'}
+                      'amplitude', 'duration', 'dispersion', 'peak_velocity', 'mean_gx', 'mean_gy'}
 
     fields_to_fill_in = fields_to_keep - set(etevents.columns)
     fields_to_copy = fields_to_keep - fields_to_fill_in

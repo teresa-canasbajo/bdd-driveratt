@@ -16,11 +16,8 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 import pandas as pd
 import numpy.linalg as LA
-from eye_tracking.preprocessing.functions.et_helper import append_eventtype_to_sample
+from .et_helper import append_eventtype_to_sample
 import eye_tracking.preprocessing.functions.et_make_df as make_df
-from matplotlib import pyplot as plt
-from IPython.core.debugger import set_trace
-
 import logging
 
 
@@ -42,8 +39,7 @@ def detect_saccades_engbert_mergenthaler(etsamples, etevents=None, engbert_lambd
     logger.debug('eyetracker: %s', 'pl')
     if etevents is not None:
         logger.debug('Setting Eyeblink Data to 0')
-        # commented out for testing purposes - causing issues when make_blink is not a parameter
-        # etsamples = append_eventtype_to_sample(etsamples, etevents, eventtype='blink')
+        etsamples = append_eventtype_to_sample(etsamples, etevents, eventtype='blink')
         etsamples.loc[etsamples.type == 'blink', ['gx', 'gy']] = np.nan
 
     if 'outside' in etsamples:
@@ -52,7 +48,7 @@ def detect_saccades_engbert_mergenthaler(etsamples, etevents=None, engbert_lambd
 
     # for pl the gaze needs to be interpolated first
     fs = 240
-    etsamples.to_csv('etsamplesbeforeinterpolation.csv')
+    # etsamples.to_csv('etsamplesbeforeinterpolation.csv')
     interpgaze = interpolate_gaze(etsamples, fs=fs)
 
     # apply the saccade detection algorithm     
