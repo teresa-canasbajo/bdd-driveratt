@@ -94,8 +94,24 @@ def surface_map_data(surface, gaze):
             i = i + 1
 
         #  check whether gaze falls within surface
-        if (gaze_pos[0] > surface.norm_top_left_x[i]) and (gaze_pos[0] < surface.norm_bottom_right_x[i]):
-            if (gaze_pos[1] > surface.norm_top_left_y[i]) and (gaze_pos[1] < surface.norm_bottom_right_y[i]):
+        tl_x = surface.norm_top_left_x[i]
+        bl_x = surface.norm_bottom_left_x[i]
+        br_x = surface.norm_bottom_right_x[i]
+        tr_x = surface.norm_top_right_x[i]
+
+        left = tl_x if tl_x < bl_x else bl_x
+        right = br_x if br_x > tr_x else tr_x
+
+        if (gaze_pos[0] > left) and (gaze_pos[0] < right):
+            tl_y = surface.norm_top_left_y[i]
+            bl_y = surface.norm_bottom_left_y[i]
+            br_y = surface.norm_bottom_right_y[i]
+            tr_y = surface.norm_top_right_y[i]
+
+            top = tl_y if tl_y < tr_y else tr_y
+            bottom = br_y if br_y > bl_y else bl_y
+
+            if (gaze_pos[1] > top) and (gaze_pos[1] < bottom):
                 data_gaze.append(data[n])
                 data_ts_gaze.append(time[n])
                 topics_gaze.append(topics[n])

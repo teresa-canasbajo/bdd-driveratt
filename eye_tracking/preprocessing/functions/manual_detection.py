@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import List, Dict, Tuple, Any
 from glob import glob
 import os
+import logging
 import time
 import numpy as np
 import cv2
@@ -38,15 +39,20 @@ def detect_tags_and_surfaces(frames_path: str, tags=[0, 1, 2, 3, 5, 6, 7, 8, 9, 
     consisting of all surface coordinates associated with each frame
     Args:
         frames_path (str): path to the directory containing PNG images
-        tags (int): ids from top-left corner, counter-clockwise
+        tags (int): ids from top-left corner, counter-clockwise - 1 surface, 10 tags
         aperture (int):
         visualize (bool):
-
     Returns:
         frames (List[Dict[str, Any]]): list of objects containing id (int), centroid (np.array[int]) and corners (np.array[int])
         tag_ids (Dict[int, int]): dictionary mapping tag IDs to frequency of tag across all images
         coordinates_df (DataFrame): dataframe that lists the coordinates of the corners & center
     """
+    if len(tags) != 10:
+        logging.warning(
+            'Surface detection currently designed for 1 surface with 10 tags.'
+            'Please continue without surface detector by turning surfaceMap to False;'
+            'Or looking at extract_coordinates() & detect_tags_and_surfaces() in manual_detection.py')
+
     # Initialize variables
     frames = []
     tag_ids = defaultdict(int)
