@@ -3,7 +3,6 @@
 """
 Created on June 23 2020
 
-
 """
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import fixation_detector
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
@@ -81,8 +80,8 @@ def pl_data_fixation(data_lst):
 
 def fixationevent(data, surface):
     # define variables
-    base_data = list(data['base_data'])
-    norm_pos = np.mean([gp["norm_pos"] for gp in base_data], axis=0).tolist()
+    # base_data = list(data['base_data'])
+    # norm_pos = np.mean([gp["norm_pos"] for gp in base_data], axis=0).tolist()
     start_time = data['timestamp']
     duration = data['duration'] / 1000
     end_time = start_time + duration
@@ -91,8 +90,6 @@ def fixationevent(data, surface):
     fixation = {"start_time": start_time,
                 "duration": data['duration'],
                 "end_time": end_time,
-                "start_gx": norm_pos[0],
-                "start_gy": norm_pos[1],
                 "mean_gx": data['norm_pos'][0],
                 "mean_gy": data['norm_pos'][1],
                 "dispersion": data['dispersion'],

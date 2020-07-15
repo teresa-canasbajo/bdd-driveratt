@@ -1,20 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 20 11:41:34 2018
-
-@author: behinger
-"""
 import collections
 import collections.abc
-from .manual_detection import extract_frames, detect_tags_and_surfaces
-from .utils import print_progress_bar
-
 import numpy as np
 import pandas as pd
-
 from glob import glob
 import os
+from .manual_detection import extract_frames, detect_tags_and_surfaces
+from .utils import print_progress_bar
 
 
 # %%

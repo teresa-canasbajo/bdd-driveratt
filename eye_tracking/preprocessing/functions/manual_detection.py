@@ -1,6 +1,5 @@
-from pupil_apriltags import Detector, Detection
+from pupil_apriltags import Detector
 from collections import defaultdict
-from typing import List, Dict, Tuple, Any
 from glob import glob
 import os
 import logging
@@ -8,7 +7,7 @@ import time
 import numpy as np
 import cv2
 import pandas as pd
-from .utils import normalize, intersection, print_progress_bar
+from .utils import normalize, intersection, print_progress_bar, midpoint
 
 
 def extract_frames(video_path: str, frames_path: str) -> None:
@@ -32,26 +31,25 @@ def extract_frames(video_path: str, frames_path: str) -> None:
     print(f'Extracted {count} frames from {video_path}.')
 
 
-def detect_tags_and_surfaces(frames_path: str, tags=[0, 1, 2, 3, 5, 6, 7, 8, 9, 11], aperture=11, visualize=False) -> \
-        Tuple[List[List[Dict[str, Any]]], Dict[int, int], pd.DataFrame]:
+def detect_tags_and_surfaces(frames_path: str, tags=None, tags_corner_attribute=None):
     """Detect all tags (Apriltags3) & surfaces found in a folder of PNG files and return (1) a list of tag objects
     for preprocessing, (2) a dictionary containing the frequency that each tag ID appeared, (3) a dataframe
     consisting of all surface coordinates associated with each frame
     Args:
         frames_path (str): path to the directory containing PNG images
-        tags (int): ids from top-left corner, counter-clockwise - 1 surface, 10 tags
-        aperture (int):
-        visualize (bool):
+        tags (int): ids from bottom-left corner, counter-clockwise --> 1 surface
+        tags_corner_attribute (bool): order corresponds to tags, True is tag is corner
     Returns:
         frames (List[Dict[str, Any]]): list of objects containing id (int), centroid (np.array[int]) and corners (np.array[int])
         tag_ids (Dict[int, int]): dictionary mapping tag IDs to frequency of tag across all images
         coordinates_df (DataFrame): dataframe that lists the coordinates of the corners & center
     """
-    if len(tags) != 10:
-        logging.warning(
-            'Surface detection currently designed for 1 surface with 10 tags.'
-            'Please continue without surface detector by turning surfaceMap to False;'
-            'Or looking at extract_coordinates() & detect_tags_and_surfaces() in manual_detection.py')
+    if tags is None:
+        tags = [2, 3, 5, 6, 7, 8, 9, 11, 0, 1]
+    if tags_corner_attribute is None:
+        tags_corner_attribute = [True, False, False, True, False, True, False, False, True, False]
+    if len(tags) != len(tags_corner_attribute):
+        logging.warning('tags_corner_attribute variable should match tags to describe if corner')
 
     # Initialize variables
     frames = []
@@ -71,8 +69,6 @@ def detect_tags_and_surfaces(frames_path: str, tags=[0, 1, 2, 3, 5, 6, 7, 8, 9, 
     norm_bottom_left_corner_y = []
     norm_bottom_right_corner_y = []
     norm_center_y = []
-
-    bounding_box_frames_path = frames_path + "/bounding_box_frames"
 
     # Sort by index in.../frame<index>.png
     all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
@@ -106,8 +102,7 @@ def detect_tags_and_surfaces(frames_path: str, tags=[0, 1, 2, 3, 5, 6, 7, 8, 9, 
             img_n.append(int(''.join(list(filter(str.isdigit, tail)))))
 
             # define surface
-            norm_tl, norm_tr, norm_bl, norm_br, norm_c = norm_surface_coordinates(frames, img_path, tags,
-                                                                                  bounding_box_frames_path)
+            norm_tl, norm_tr, norm_bl, norm_br, norm_c = norm_surface_coordinates(frames, img_path, tags, tags_corner_attribute)
             norm_top_left_corner_x.append(norm_tl[0])
             norm_top_right_corner_x.append(norm_tr[0])
             norm_bottom_left_corner_x.append(norm_bl[0])
@@ -186,9 +181,8 @@ def attribute(frame, feature):
     return attributes
 
 
-def norm_surface_coordinates(frame, img_path, tag, bounding_box_frames_path):
-    top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left = extract_coordinates(
-        frame, tag)
+def norm_surface_coordinates(frame, img_path, tag, tags_corner_attribute):
+    bottom_left, bottom, bottom_right, right, top_right, top, top_left, left = extract_coordinates(frame, tag, tags_corner_attribute)
 
     tl = tuple(top_left.astype(int))
     tr = tuple(top_right.astype(int))
@@ -196,13 +190,9 @@ def norm_surface_coordinates(frame, img_path, tag, bounding_box_frames_path):
     bl = tuple(bottom_left.astype(int))
     l = tuple(left.astype(int))
     r = tuple(right.astype(int))
-
-    bottom_midpoint = (((bottom_center_right[0] + bottom_center_left[0]) / 2).astype(int),
-                       ((bottom_center_right[1] + bottom_center_left[1]) / 2).astype(int))
-    top_midpoint = (((top_center_right[0] + top_center_left[0]) / 2).astype(int),
-                    ((top_center_right[1] + top_center_left[1]) / 2).astype(int))
-
-    center = intersection([l, r], [bottom_midpoint, top_midpoint])
+    b = tuple(bottom.astype(int))
+    t = tuple(top.astype(int))
+    center = intersection([l, r], [b, t])
 
     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
 
@@ -219,20 +209,22 @@ def norm_surface_coordinates(frame, img_path, tag, bounding_box_frames_path):
     thickness = 2
     cv2.rectangle(img, tl, br, red, thickness)  # rectangle
     cv2.line(img, l, r, red, thickness)  # horizontal line
-    cv2.line(img, bottom_midpoint, top_midpoint, red, thickness)  # vertical line
+    cv2.line(img, b, t, red, thickness)  # vertical line
     cv2.circle(img, center, 2, (0, 255, 255), 8)  # point in the center of the screen
 
     head, tail = os.path.split(img_path)
+    bounding_box_frames_path = os.path.join(head, "bounding_box_frames")
     cv2.imwrite(bounding_box_frames_path + "/" + tail, img)
 
     return norm_tl, norm_tr, norm_bl, norm_br, norm_center
 
 
-def extract_coordinates(frame, tag):
+def extract_coordinates(frame, tag, tags_corner_attribute):
+    coord_to_tag = [None] * len(tag)
     for f in frame:
         id = attribute(f, 'id')
 
-        # extrapolate coordinates from prev coordinates if it doesn't exist
+        # extrapolate coordinates from prev coordinates if it doesn't exist from prev frame
         while len(id) < len(tag):
             id.append('None')
 
@@ -245,42 +237,44 @@ def extract_coordinates(frame, tag):
 
         centers = attribute(f, 'centroid')
 
-        # coordinates to create the rectangle
-        if tag[0] in id:
-            i = id.index(tag[0])
-            top_left = corners[i][3]
-        if tag[5] in id:
-            i = id.index(tag[5])
-            bottom_right = corners[i][1]
+        index = 0
+        corner_index = 0
+        for t in tag:
+            if t in id:
+                i = id.index(t)
+                if tags_corner_attribute[index]:
+                    # corner tag coordinates
+                    c = corners[i][corner_index]
+                    coord_to_tag[index] = c
+                    corner_index += 1
+                else:
+                    # side tag coordinates
+                    c = centers[i]
+                    coord_to_tag[index] = c
+            index += 1
 
-        # coordinates to create the horizontal line
-        if tag[1] in id:
-            i = id.index(tag[1])
-            left = centers[i]
-        if tag[6] in id:
-            i = id.index(tag[6])
-            right = centers[i]
+    # format output: coord = [bottom_left, bottom, bottom_right, right, top_right, top, top_left, left]
+    coord = []
+    side_lst = []
+    i = 1
+    for c in tags_corner_attribute[1:]:
+        if not c:
+            # to calculate sides
+            side_lst.append(coord_to_tag[i])
+        else:
+            # append bottom, right, top; if condition: no tags in between corners
+            side = (coord_to_tag[i - 1] + coord_to_tag[i]) / 2 if not side_lst else midpoint(side_lst)
+            coord.append(side)
+            side_lst = []
 
-        # coordinates to create the vertical line
-        if tag[3] in id:
-            i = id.index(tag[3])
-            bottom_center_left = centers[i]
-        if tag[4] in id:
-            i = id.index(tag[4])
-            bottom_center_right = centers[i]
-        if tag[8] in id:
-            i = id.index(tag[8])
-            top_center_right = centers[i]
-        if tag[9] in id:
-            i = id.index(tag[9])
-            top_center_left = centers[i]
+            # append bottom_right, top_right, top_left
+            coord.append(coord_to_tag[i])
+        i += 1
+    # append left to end; if condition: no tags in between corners
+    side = (coord_to_tag[i - 1] + coord_to_tag[0]) / 2 if c else midpoint(side_lst)
+    coord.append(side)
+    # insert bottom_left to front
+    coord = [coord_to_tag[0]] + coord
 
-        # other tags
-        if tag[2] in id:
-            i = id.index(tag[2])
-            bottom_left = corners[i][0]
-        if tag[7] in id:
-            i = id.index(tag[7])
-            top_right = corners[i][2]
+    return tuple(coord)
 
-    return top_left, left, bottom_center_left, bottom_left, bottom_center_right, bottom_right, right, top_right, top_center_right, top_center_left
