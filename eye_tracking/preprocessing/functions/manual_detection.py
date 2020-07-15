@@ -31,7 +31,8 @@ def extract_frames(video_path: str, frames_path: str) -> None:
     print(f'Extracted {count} frames from {video_path}.')
 
 
-def detect_tags_and_surfaces(frames_path: str, tags=None, tags_corner_attribute=None):
+def detect_tags_and_surfaces(frames_path: str, tags=[2, 3, 5, 6, 7, 8, 9, 11, 0, 1],
+                             tags_corner_attribute=[True, False, False, True, False, True, False, False, True, False]):
     """Detect all tags (Apriltags3) & surfaces found in a folder of PNG files and return (1) a list of tag objects
     for preprocessing, (2) a dictionary containing the frequency that each tag ID appeared, (3) a dataframe
     consisting of all surface coordinates associated with each frame
@@ -44,10 +45,6 @@ def detect_tags_and_surfaces(frames_path: str, tags=None, tags_corner_attribute=
         tag_ids (Dict[int, int]): dictionary mapping tag IDs to frequency of tag across all images
         coordinates_df (DataFrame): dataframe that lists the coordinates of the corners & center
     """
-    if tags is None:
-        tags = [2, 3, 5, 6, 7, 8, 9, 11, 0, 1]
-    if tags_corner_attribute is None:
-        tags_corner_attribute = [True, False, False, True, False, True, False, False, True, False]
     if len(tags) != len(tags_corner_attribute):
         logging.warning('tags_corner_attribute variable should match tags to describe if corner')
 

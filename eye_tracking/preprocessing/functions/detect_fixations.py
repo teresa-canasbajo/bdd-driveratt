@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on June 23 2020
 
-"""
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import fixation_detector
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules.camera_models import load_intrinsics
 from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods

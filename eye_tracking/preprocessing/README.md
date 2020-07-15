@@ -5,7 +5,7 @@
 1. Clone project and intialize submodules
 
    ```bash
-   git clone https://github.com/tere93/bdd-driveratt
+   git clone https://github.com/teresa-canasbajo/bdd-driveratt
    git submodule update --init
    ```
 
@@ -37,24 +37,26 @@
 
 ## Instructions of use
 
-We want to acknowledge once again the work of @behinger who put together a lot of the code used here in the preprocessing folder. Our main change is here that the code is now functional for Pupil Labs versions >1.17.
+We want to acknowledge the work of behinger/etcomp repository (https://github.com/behinger/etcomp) of which we based the organizational structure of the code & output along with a few functions.
 
 ```python
-import functions.et_preprocess
-from functions.detect_events import make_blinks,make_saccades,make_fixations
-data = preprocess_et(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt/demo', save=True, eventfunctions=(make_blinks, make_saccades, make_fixations))
+from eye_tracking.preprocessing.functions.et_preprocess import preprocess_et
+data = preprocess_et(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt/demo')
 ```
 
 preprocess_et outputs three dataframes: etsamples, etmsgs, etevents that are saved into your data directory /preprocessed
-(remember to turn save=True if you want it to be saved)
-
-## In progress
 
 ### Surface detector:
 
- We've created a new implementation of the April tags package. The main maker detector is in manual_detection.py, that runs using the april_tags package: https://github.com/pupil-labs/apriltags
+We've created a new implementation of the April tags package. The main maker detector is in manual_detection.py, that runs using the april_tags package: https://github.com/pupil-labs/apriltags
 
- To install: pip install pupil-apriltags
+To install: pip install pupil-apriltags
 
-This code has been built and modified using Pycharm. Please note that you'll need to add the eye_tracking/analysis/lib/pupil/pupil_src as source root for the paths to work. 
+Make sure to update (1) tags & (2) tags_corner_attribute parameters in detect_tags_and_surfaces() to detect surface.
+Current version detects 1 surface. 
+If there are multiple surfaces, turn off surface detector by making surfaceMap False in import_pl()
+
+Frames annotated with surfaces are saved into you data directory /frames/bounding_box_frames
+
+This code has been built and modified using Pycharm. Note the source root as bdd-driveratt for the paths to work. 
 Otherwise you may need to add the paths in another way.

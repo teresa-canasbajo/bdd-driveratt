@@ -22,8 +22,8 @@ import logging
 
 # %%
 
-def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', load=False, save=False,
-                  eventfunctions=(make_blinks, make_saccades, make_fixations), outputprefix='', **kwargs):
+def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', load=False, save=True,
+                  eventfunctions=(make_fixations, make_blinks, make_saccades), outputprefix='', **kwargs):
     # Output:     3 cleaned dfs: etsamples, etmsgs, etevents   
     # get a logger for the preprocess function    
     logger = logging.getLogger(__name__)
@@ -40,14 +40,11 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     # import pl data
     logger.debug("Importing et data")
     logger.debug('Caution: etevents might be empty')
-    etsamples, etmsgs, etevents, surfaceMap = import_pl(subject=subject, datapath=datapath, surfaceMap=True, parsemsg=True, **kwargs)
+    etsamples, etmsgs, etevents, surfaceMap = import_pl(subject=subject, datapath=datapath, surfaceMap=True)
 
     # Mark bad samples
     logger.debug('Marking bad et samples')
     etsamples = detect_bad_samples(etsamples)
-
-    if datapath == '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject1/001':
-        etsamples = etsamples[20:]
 
     # Detect events
     # by our default first blinks, then saccades, then fixations

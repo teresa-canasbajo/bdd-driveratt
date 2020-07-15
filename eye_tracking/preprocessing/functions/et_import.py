@@ -46,11 +46,10 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
     #           surfaceMap:
     # Output:   Returns 2 dfs (plsamples and plmsgs)
 
-    assert (not surfaceMap, 'If you want to continue without surface detector, please turn '
-                            'surfaceMap to False')
     if surfaceMap:
         logging.warning(
-            'If you want to continue without surface detector, please turn surfaceMap to False')
+            'Make sure tags and tags_corner_attribute is correctly assigned in manual_detection.py. If you want to '
+            'continue without surface detector, please turn surfaceMap to False.')
 
     # Get samples df
     # (is still a dictionary here)

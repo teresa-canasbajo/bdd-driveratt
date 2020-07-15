@@ -1,4 +1,6 @@
-from eye_tracking.preprocessing.functions.et_preprocess import *
+from eye_tracking.preprocessing.functions.et_preprocess import preprocess_et
+from eye_tracking.preprocessing.functions.detect_events import make_fixations, make_blinks, make_saccades
+
 
 demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
 manual_demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/manual_demo'
@@ -9,6 +11,6 @@ diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/003'
 # diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/003_modified'
 diff_demo = '/media/whitney/New Volume/Teresa/000'
 
-data = preprocess_et(subject='', datapath=diff_demo, save=True, eventfunctions=(make_fixations, make_blinks, make_saccades))
+data = preprocess_et(subject='', datapath=diff_demo)
 
 print('preprocessing complete!')

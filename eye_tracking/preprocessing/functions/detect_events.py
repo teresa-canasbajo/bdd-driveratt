@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue May 8 16:42:55 2018
 
-
-"""
 import pandas as pd
 import os
 from . import detect_fixations
