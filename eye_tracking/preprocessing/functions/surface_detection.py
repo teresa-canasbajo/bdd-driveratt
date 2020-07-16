@@ -30,25 +30,25 @@ def map_surface(folder):
 
     print('Finding markers & surfaces ...')
 
-    bounding_box_frames_path = frames_path + "/bounding_box_frames"
+    surfaces_path = os.path.join(frames_path, 'surface_coordinates.csv')
     try:
-        if not os.path.exists(bounding_box_frames_path):
-            os.mkdir(bounding_box_frames_path)
-            print("Successfully created the directory %s " % bounding_box_frames_path)
-
+        if not os.path.exists(surfaces_path):
             # detect surface coordinates
-            frame, tag_ids, surfaces_df = detect_tags_and_surfaces(frames_path)
+            tags = [2, 3, 5, 6, 7, 8, 9, 11, 0, 1]
+            tags_corner_attribute = [True, False, False, True, False, True, False, False, True, False]
+            frame, tag_ids, surfaces_df = detect_tags_and_surfaces(frames_path, createSurfaceFrame=False, tags=tags,
+                                                                   tags_corner_attribute=tags_corner_attribute)
             surfaces_df.to_csv(os.path.join(frames_path, 'surface_coordinates.csv'), index=False)
-            print('success!\n')
+            print('Success! Surfaces detected: %s ' % surfaces_path)
         else:
-            print("Directory %s already exists." % bounding_box_frames_path)
+            print("Surfaces already detected: %s " % surfaces_path)
 
             # create surfaces dataframe from existing csv file
             surfaces_df = pd.read_csv(frames_path + '/surface_coordinates.csv')
             surfaces_df = surfaces_df.apply(pd.to_numeric, errors='coerce')
 
     except OSError:
-        print("Creation of the directory %s failed" % bounding_box_frames_path)
+        print("Creation of the pathway %s failed" % surfaces_path)
 
     return surfaces_df
 

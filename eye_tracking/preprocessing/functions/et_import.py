@@ -23,8 +23,6 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
         filename = datapath
     else:
         filename = os.path.join(datapath, subject, postfix)
-    # with dict_keys(['annotations', 'pupil_positions', 'gaze_positions'])
-    # where each value is a list that contains a dictionary
 
     if os.path.exists(os.path.join(filename, 'pupil_data')):
         logging.warning('This code only works for data from pupil capture versions greater than 1.17. Please update '
@@ -34,6 +32,14 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
         original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
         annotations = pl_file_methods.load_pldata_file(datapath, 'annotation')
         gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
+
+    # 'annotation', 'pupil_positions', 'gaze_positions' with dict_keys(['data', 'timestamps', 'topics'])
+    # 'annotation' data_dict_keys(['topic', 'label', 'timestamp', 'duration'])
+    # 'pupil' data_dict_keys(['circle_3d', 'confidence', 'timestamp', 'diameter_3d', 'ellipse', 'location',
+    #                           'diameter', 'sphere', 'projected_sphere', 'model_confidence', 'model_id',
+    #                           'model_birth_timestamp', 'theta', 'phi', 'norm_pos', 'topic', 'id', 'method'])
+    # 'gaze' data_dict_keys(['topic', 'eye_centers_3d', 'gaze_normals_3d', 'gaze_point_3d', 'confidence',
+    #                           'timestamp', 'base_data', 'norm_pos'])
 
     return original_pldata, annotations, gaze
 

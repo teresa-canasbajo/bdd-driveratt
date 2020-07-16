@@ -63,8 +63,12 @@ Make sure to update (1) tags & (2) tags_corner_attribute parameters in detect_ta
 Current version detects 1 surface. 
 If there are multiple surfaces, turn off surface detector by making surfaceMap False in import_pl()
 
-Frames annotated with surfaces are saved into your data directory /frames/bounding_box_frames
+Frames from world are saved into your data directory /frames. Note that this may take some time.
 
+Make createSurfaceFrame True in detect_tags_and_surfaces() to save frames annotated with surfaces into your data directory /frames/surface_frames
+Note that this may take some time.
+
+### IDE
 This code has been built and modified using Pycharm.
 Mark the following directories as source root (1) bdd-driveratt & (2) bdd-driveratt/eye_tracking/analysis/lib/pupil/pupil_src/shared_modules for the paths to work. 
 Otherwise you may need to add the paths in another way.

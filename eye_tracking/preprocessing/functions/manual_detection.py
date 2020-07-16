@@ -32,13 +32,13 @@ def extract_frames(video_path: str, frames_path: str) -> None:
     print(f'Extracted {count} frames from {video_path}.')
 
 
-def detect_tags_and_surfaces(frames_path: str, tags=[2, 3, 5, 6, 7, 8, 9, 11, 0, 1],
-                             tags_corner_attribute=[True, False, False, True, False, True, False, False, True, False]):
+def detect_tags_and_surfaces(frames_path: str, createSurfaceFrame=False, tags=None, tags_corner_attribute=None):
     """Detect all tags (Apriltags3) & surfaces found in a folder of PNG files and return (1) a list of tag objects
     for preprocessing, (2) a dictionary containing the frequency that each tag ID appeared, (3) a dataframe
     consisting of all surface coordinates associated with each frame
     Args:
         frames_path (str): path to the directory containing PNG images
+        createSurfaceFrame (bool): True to create surface_frames directory with annotated frames
         tags (int): ids from bottom-left corner, counter-clockwise --> 1 surface
         tags_corner_attribute (bool): order corresponds to tags, True is tag is corner
     Returns:
@@ -46,6 +46,10 @@ def detect_tags_and_surfaces(frames_path: str, tags=[2, 3, 5, 6, 7, 8, 9, 11, 0,
         tag_ids (Dict[int, int]): dictionary mapping tag IDs to frequency of tag across all images
         coordinates_df (DataFrame): dataframe that lists the coordinates of the corners & center
     """
+    if tags_corner_attribute is None:
+        tags_corner_attribute = [True, False, False, True, False, True, False, False, True, False]
+    if tags is None:
+        tags = [2, 3, 5, 6, 7, 8, 9, 11, 0, 1]
     if len(tags) != len(tags_corner_attribute):
         logging.warning('tags_corner_attribute variable should match tags to describe if corner')
 
@@ -99,7 +103,7 @@ def detect_tags_and_surfaces(frames_path: str, tags=[2, 3, 5, 6, 7, 8, 9, 11, 0,
             img_n.append(int(''.join(list(filter(str.isdigit, tail)))))
 
             # define surface
-            norm_tl, norm_tr, norm_bl, norm_br, norm_c = norm_surface_coordinates(frames, img_path, tags, tags_corner_attribute)
+            norm_tl, norm_tr, norm_bl, norm_br, norm_c = norm_surface_coordinates(frames, img_path, tags, tags_corner_attribute, createSurfaceFrame)
             norm_top_left_corner_x.append(norm_tl[0])
             norm_top_right_corner_x.append(norm_tr[0])
             norm_bottom_left_corner_x.append(norm_bl[0])
@@ -178,7 +182,7 @@ def attribute(frame, feature):
     return attributes
 
 
-def norm_surface_coordinates(frame, img_path, tag, tags_corner_attribute):
+def norm_surface_coordinates(frame, img_path, tag, tags_corner_attribute, createSurfaceFrame):
     bottom_left, bottom, bottom_right, right, top_right, top, top_left, left = extract_coordinates(frame, tag, tags_corner_attribute)
 
     tl = tuple(top_left.astype(int))
@@ -202,6 +206,13 @@ def norm_surface_coordinates(frame, img_path, tag, tags_corner_attribute):
     norm_br = normalize(br, width, height)
     norm_center = normalize(center, width, height)
 
+    if createSurfaceFrame:
+        create_surface_frames(img, img_path, tl, br, l, r, b, t, center)
+
+    return norm_tl, norm_tr, norm_bl, norm_br, norm_center
+
+
+def create_surface_frames(img, img_path, tl, br, l, r, b, t, center):
     red = (0, 0, 255)
     thickness = 2
     cv2.rectangle(img, tl, br, red, thickness)  # rectangle
@@ -210,10 +221,10 @@ def norm_surface_coordinates(frame, img_path, tag, tags_corner_attribute):
     cv2.circle(img, center, 2, (0, 255, 255), 8)  # point in the center of the screen
 
     head, tail = os.path.split(img_path)
-    bounding_box_frames_path = os.path.join(head, "bounding_box_frames")
-    cv2.imwrite(bounding_box_frames_path + "/" + tail, img)
-
-    return norm_tl, norm_tr, norm_bl, norm_br, norm_center
+    surface_frames_path = os.path.join(head, "surface_frames")
+    if not os.path.exists(surface_frames_path):
+        os.mkdir(surface_frames_path)
+    cv2.imwrite(surface_frames_path + "/" + tail, img)
 
 
 def extract_coordinates(frame, tag, tags_corner_attribute):
