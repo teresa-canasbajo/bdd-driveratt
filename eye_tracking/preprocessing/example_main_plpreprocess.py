@@ -5,7 +5,6 @@ from eye_tracking.preprocessing.functions.detect_events import make_fixations, m
 demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/demo'
 manual_demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/manual_demo'
 auto_demo = '/media/whitney/New Volume/Teresa/bdd-driveratt/auto_demo'
-# diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Eye_Recordings/Subject4/000'
 naive_diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/Naive_Subjects/Subject_AS/000'
 diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/003'
 # diff_demo = '/media/whitney/New Volume/Teresa/SD_grant_EM/003_modified'

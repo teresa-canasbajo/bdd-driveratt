@@ -23,7 +23,6 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
         filename = datapath
     else:
         filename = os.path.join(datapath, subject, postfix)
-    print(os.path.join(filename, 'pupil_data'))
     # with dict_keys(['annotations', 'pupil_positions', 'gaze_positions'])
     # where each value is a list that contains a dictionary
 
@@ -35,7 +34,6 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
         original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
         annotations = pl_file_methods.load_pldata_file(datapath, 'annotation')
         gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
-        print('notifications_assigned')
 
     return original_pldata, annotations, gaze
 

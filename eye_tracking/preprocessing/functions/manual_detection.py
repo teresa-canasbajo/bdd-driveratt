@@ -21,6 +21,7 @@ def extract_frames(video_path: str, frames_path: str) -> None:
     count = 0
     success = 1
 
+    print("Extracting frames...")
     # Basically just using OpenCV's tools
     while success:
         success, frame = video.read()
@@ -71,7 +72,6 @@ def detect_tags_and_surfaces(frames_path: str, tags=[2, 3, 5, 6, 7, 8, 9, 11, 0,
     all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
 
     # Deleted last image after out of range error popped up
-    # TODO: but not analyzing last 2 frames?
     if len(all_images) > 1:
         all_images = all_images[:-1]
 

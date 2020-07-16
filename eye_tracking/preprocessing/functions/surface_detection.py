@@ -108,7 +108,7 @@ def surface_map_data(surface, gaze):
                 topics_gaze.append(topics[n])
         n = n + 1
         print_progress_bar(n, len(data), prefix='Progress:', suffix='Complete', length=50)
-    print('success!\n')
+    print('success!')
 
     gaze_on_srf = PLData(collections.deque(data_gaze), np.asarray(data_ts_gaze), collections.deque(topics_gaze))
     return gaze_on_srf
