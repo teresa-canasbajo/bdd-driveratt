@@ -1,0 +1,3 @@
+filename,observerId,drivingType
+pl_events_autonomous.csv,A,autonomous
+pl_events_manual.csv,A,manual
