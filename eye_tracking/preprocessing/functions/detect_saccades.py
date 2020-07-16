@@ -17,7 +17,7 @@ from scipy.interpolate import PchipInterpolator
 import pandas as pd
 import numpy.linalg as LA
 from .et_helper import append_eventtype_to_sample
-import eye_tracking.preprocessing.functions.et_make_df as make_df
+from . import et_make_df as make_df
 import logging
 
 

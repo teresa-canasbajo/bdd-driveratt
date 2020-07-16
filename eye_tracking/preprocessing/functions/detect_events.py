@@ -7,7 +7,7 @@ from . import detect_fixations
 from . import surface_detection as pl_surface
 from . import detect_saccades as saccades
 from . import detect_blinks
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods
+from eye_tracking.lib.pupil.pupil_src.shared_modules import file_methods
 
 
 # unnecessary et in parameter but linked to next function which also is unnecessary

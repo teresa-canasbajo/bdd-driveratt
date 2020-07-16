@@ -45,6 +45,7 @@ def intersection(L1, L2):
     else:
         return False
 
+
 def midpoint(lst):
     side = sum(lst) / len(lst) if not len(lst) % 2 else lst[int(len(lst) / 2)]
     return side

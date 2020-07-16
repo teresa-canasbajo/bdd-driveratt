@@ -18,7 +18,7 @@ Teresa Canas-Bajo
 1. Go to the relevant folder (recording, preprocessing or analysis) and follow the instructions there.
 2. The folder lib has three submodules needed for this code: 
 
-- pupil_API: Pupil labs API, under 'pupil_API': https://github.com/pupil-labs/pupil
+- pupil: Pupil labs API, under 'pupil': https://github.com/pupil-labs/pupil (commit: ec6171834129189d6e79eacc46ee2c39eb4d97e1)
 - Pyuvc: Python bindings for the Pupil Labs fork of libuvc with super fast jpeg decompression using libjpegturbo (utilizing the tubojpeg api): https://github.com/pupil-labs/pyuvc
 - nslr_hmm: Python implementation of the NSLR-HMM eye movement identification algorithm: https://github.com/pupil-labs/nslr-hmm
 

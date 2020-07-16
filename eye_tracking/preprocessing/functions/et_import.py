@@ -11,7 +11,7 @@ from . import et_make_df as make_df
 from . import et_parse as parse
 from . import surface_detection as pl_surface
 from .et_helper import gaze_to_pandas
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as pl_file_methods
+from eye_tracking.lib.pupil.pupil_src.shared_modules import file_methods as pl_file_methods
 
 ########
 

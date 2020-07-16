@@ -23,13 +23,13 @@ from pyglui import ui
 from pyglui.pyfontstash import fontstash as fs
 from scipy.signal import fftconvolve
 
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules import csv_utils
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules import data_changed
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules import file_methods as fm
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules import gl_utils
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules import player_methods as pm
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules.observable import Observable
-from eye_tracking.lib.pupil_API.pupil_src.shared_modules.plugin import Analysis_Plugin_Base
+from eye_tracking.lib.pupil.pupil_src.shared_modules import csv_utils
+from eye_tracking.lib.pupil.pupil_src.shared_modules import data_changed
+from eye_tracking.lib.pupil.pupil_src.shared_modules import file_methods as fm
+from eye_tracking.lib.pupil.pupil_src.shared_modules import gl_utils
+from eye_tracking.lib.pupil.pupil_src.shared_modules import player_methods as pm
+from eye_tracking.lib.pupil.pupil_src.shared_modules.observable import Observable
+from eye_tracking.lib.pupil.pupil_src.shared_modules.plugin import Analysis_Plugin_Base
 
 logger = logging.getLogger(__name__)
 
