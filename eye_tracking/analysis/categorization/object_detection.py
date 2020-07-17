@@ -19,6 +19,7 @@ from PIL import ImageOps
 
 # For extracting frames
 from eye_tracking.analysis.categorization.manual_detection import extract_frames, print_progress_bar
+# from manual_detection import extract_frames, print_progress_bar
 from glob import glob
 import os
 import json
@@ -27,17 +28,26 @@ import cv2
 # For measuring the inference time.
 import time
 
+# For runtime arguments
+import sys
+
 # Check available GPU devices.
 print("The following GPU devices are available: %s" % tf.test.gpu_device_name())
 
+################################################################################################################
+#                                     Visualizing Images and Bounding Boxes                                    #
+################################################################################################################
+
 def display_image(image):
+	"""Displays an image using matplotlib."""
 	fig = plt.figure(figsize=(20, 15))
 	plt.grid(False)
 	plt.imshow(image)
 
 
-def download_and_resize_image(url, new_width=256, new_height=256,
-															display=False):
+def download_and_resize_image(url, new_width=256, new_height=256, display=False):
+	"""Downloads an image from the web and rescales it to the specified size"""
+
 	_, filename = tempfile.mkstemp(suffix=".jpg")
 	response = urlopen(url)
 	image_data = response.read()
@@ -54,6 +64,7 @@ def download_and_resize_image(url, new_width=256, new_height=256,
 
 def draw_bounding_box_on_image(image, ymin, xmin, ymax, xmax, color, font, thickness=4, display_str_list=()):
 	"""Adds a bounding box to an image."""
+
 	draw = ImageDraw.Draw(image)
 	im_width, im_height = image.size
 	(left, right, top, bottom) = (xmin * im_width, xmax * im_width,
@@ -90,6 +101,7 @@ def draw_bounding_box_on_image(image, ymin, xmin, ymax, xmax, color, font, thick
 
 def draw_boxes(image, boxes, class_names, scores, max_boxes=10, min_score=0.1):
 	"""Overlay labeled boxes on an image with formatted scores and label names."""
+
 	colors = list(ImageColor.colormap.values())
 
 	try:
@@ -119,11 +131,81 @@ def draw_boxes(image, boxes, class_names, scores, max_boxes=10, min_score=0.1):
 	return image
 
 def load_img(path):
+	"""Loads an image as a TF tensor."""
 	img = tf.io.read_file(path)
 	img = tf.image.decode_jpeg(img, channels=3)
 	return img
 
+def draw_frame(result, img):
+	"""Overlays all object detections onto the image."""
+	image_with_boxes = draw_boxes(
+			img.numpy(), result["detection_boxes"],
+			result["detection_class_entities"], result["detection_scores"])
+
+	display_image(image_with_boxes)
+
+################################################################################################################
+#                                                 Processing Frames                                            #
+################################################################################################################
+
+def main(frames_path, output_path, to_extract=""):
+	"""Uses a pre-trained object detector from TensorflowHub to detect all occuring objects
+	in a subject video and saves all detections to a json file.
+
+	frames_path -- path to directory containing raw video frames
+	output_path -- savepath for generated json
+	to_extract -- path to raw video file; if specified will extract single frames into frames_path (default "")
+	"""
+
+	print('Loading detector.')
+	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"#@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
+	detector = hub.load(module_handle).signatures['default']
+
+	print('Loaded.')
+
+	if to_extract:
+		extract_frames(to_extract, frames_path)
+
+	frames = detect_objects(frames_path, detector)
+	with open(output_path, 'w') as f:
+		json.dump(frames, f, ensure_ascii=False, indent=4)
+
+def detect_objects(frames_path, detector):
+	"""Loops through all images in the directory and compiles the results of object detection
+	in a list.
+
+	frames_path -- path to directory containing raw video frames
+	detector -- TensorflowHub detector object
+	"""
+
+	frames = []
+	all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
+	# all_images = all_images[:-1] #whats wrong with the last frame?
+
+	num_images = len(all_images)
+	if num_images <= 0:
+		print("No frames found in frames path.")
+		return []
+
+	print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
+
+	# Iterate thru all PNG images in frames_path
+	for i, img_path in enumerate(all_images):
+		# Create a grayscale 2D NumPy array for Detector.detect()
+		result, img = run_detector(detector, img_path)
+		process_result(result)
+		frames.append(result)
+		time.sleep(0.01)
+		print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
+
+	return frames
+
 def run_detector(detector, path):
+	"""Detects all objects in the image and returns a list of results. 
+
+	detector -- TensorflowHub detector object 
+	path -- path to image
+	"""
 	img = load_img(path)
 
 	converted_img  = tf.image.convert_image_dtype(img, tf.float32)[tf.newaxis, ...]
@@ -138,60 +220,11 @@ def run_detector(detector, path):
 
 	return result, img
 
-def draw_frame(result, img):
-	image_with_boxes = draw_boxes(
-			img.numpy(), result["detection_boxes"],
-			result["detection_class_entities"], result["detection_scores"])
-
-	display_image(image_with_boxes)
-
-def main():
-	print('Loading detector.')
-	module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"#@param ["https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1", "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"]
-	detector = hub.load(module_handle).signatures['default']
-
-	print('Loaded.')
-
-	image_urls = [
-		"https://i.ibb.co/S0K9ggp/dis1.png",
-		"https://i.ibb.co/vsMpZkX/Screen-Shot-2019-11-11-at-5-50-48-PM.png",
-		"https://i.ibb.co/brb06wy/Screen-Shot-2019-11-11-at-5-52-42-PM.png"
-	]
-	frames_path = './billboard_frames_cut'
-	# extract_frames('/home/whitney/Downloads/bin_recording.mkv', frames_path)
-	frames = detect_objects(frames_path, detector)
-	with open('./frames.json', 'w') as f:
-		json.dump(frames, f, ensure_ascii=False, indent=4)
-	# for image_url in image_urls:
-	# 	start_time = time.time()
-	# 	image_path = download_and_resize_image(image_url, 640, 480)
-	# 	result, img = run_detector(detector, image_path)
-	# 	draw_frame(result, img)
-	# 	end_time = time.time()
-
-
-def detect_objects(frames_path, detector):
-	frames = []
-	all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
-	all_images = all_images[:-1]
-
-	num_images = len(all_images)
-	print_progress_bar(0, num_images, prefix='Progress:', suffix='Complete', length=50)
-
-	# Iterate thru all PNG images in frames_path
-	for i, img_path in enumerate(all_images):
-		# Create a grayscale 2D NumPy array for Detector.detect()
-		result, img = run_detector(detector, img_path)
-		process_result(result)
-		frames.append(result)
-		time.sleep(0.01)
-		print_progress_bar(i + 1, num_images, prefix='Progress:', suffix='Complete', length=50)
-
-	return frames
-
-
-
 def process_result(result):
+	"""Properly encodes all detection results.
+
+	result -- TensorflowHub detection result dictionary
+	"""
 	encoding = 'utf-8'
 
 	def process_element(e):
@@ -207,4 +240,6 @@ def process_result(result):
 
 
 if __name__ == '__main__':
-	main()
+	args = sys.argv[1:]
+	assert(len(args) >= 2)
+	main(*args)
