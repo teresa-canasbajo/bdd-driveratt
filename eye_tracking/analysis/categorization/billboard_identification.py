@@ -6,69 +6,6 @@ import numpy as np
 
 from bisect import bisect_left
 
-#----------------------------------------------------------------------------------------
-# PLEASE IGNORE; old experimental version
-
-# def main(json_filepath, output_filepath, detection_threshold, smoothing_threshold, fps):
-#     fps = int(fps)
-#     detection_threshold = float(detection_threshold)
-#     smoothing_threshold = float(smoothing_threshold)
-#     with open(json_filepath, 'r') as f:
-#         frames = json.load(f)
-#         avg_conf, max_conf, min_conf = billboard_confidence_stats(frames)
-#         print("Average billboard confidence: %f" % avg_conf)
-#         print("Max billboard confidence: %f" % max_conf)
-#         print("Min billboard confidence: %f" % min_conf)
-
-#         smoothed = []
-#         original = []
-#         frame_num = []
-#         n = len(frames)
-#         last_billboard_detection = 0
-#         for i, frame in enumerate(frames):
-#             original_boxes = []
-#             smoothed_boxes = []
-#             for j in range(len(frame['detection_class_labels'])):
-#                 if (frame['detection_class_labels'][j] == '87' and float(frame['detection_scores'][j]) >= detection_threshold and 
-#                   float(frame['detection_boxes'][j][2]) - float(frame['detection_boxes'][j][0]) < 0.5 and 
-#                   float(frame['detection_boxes'][j][3]) - float(frame['detection_boxes'][j][1]) < 0.5):
-#                     box = frame['detection_boxes'][j]
-#                     n = i-last_billboard_detection
-
-#                     # try to interpolate if this next detection is within a specified window
-#                     if n > 1 and n/fps <= smoothing_threshold:
-#                         best_metric = 0
-#                         most_likely_correspondence = None
-#                         for prev_bb in smoothed[last_billboard_detection]:
-#                             metric = iou(prev_bb, box)
-#                             if metric > best_metric:
-#                                 best_metric = metric
-#                                 most_likely_correspondence = prev_bb
-
-#                         # smooth if best IoU is at least 0.5
-#                         if best_metric >= 0.5:
-#                             print(best_metric)
-#                             for j in range(1, n):
-#                                 t = j/n
-#                                 inter_ymin = (1-t)*float(most_likely_correspondence[0]) + t*float(box[0])
-#                                 inter_xmin = (1-t)*float(most_likely_correspondence[1]) + t*float(box[1])
-#                                 inter_ymax = (1-t)*float(most_likely_correspondence[2]) + t*float(box[2])
-#                                 inter_xmax = (1-t)*float(most_likely_correspondence[3]) + t*float(box[3])
-#                                 # if len(smoothed[-(n-j)]) > 0:
-#                                 #     print("oops")
-#                                 #     return
-#                                 smoothed[-(n-j)].append([str(inter_ymin), str(inter_xmin), str(inter_ymax), str(inter_xmax)])
-#                     original_boxes.append(box)
-#                     smoothed_boxes.append(box)
-#                     last_billboard_detection = i
-#             original.append(original_boxes)
-#             smoothed.append(smoothed_boxes)
-#             frame_num.append(i)
-#         columns = ['Frame', 'Original', 'Smoothed']
-#         df = pd.DataFrame(zip(frame_num, original, smoothed), columns=columns)
-#         df.to_csv(output_filepath)
-# -----------------------------------------------------------------------------------------
-
 def main(json_filepath, output_filepath, detection_threshold, smoothing_threshold, fps):
     """Generate a csv file containing all billboard detections per video frame,
     with gaps in the detections smoothed via linear interpolation.

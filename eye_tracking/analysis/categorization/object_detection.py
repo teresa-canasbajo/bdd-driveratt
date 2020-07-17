@@ -18,8 +18,8 @@ from PIL import ImageFont
 from PIL import ImageOps
 
 # For extracting frames
-# from eye_tracking.analysis.categorization.manual_detection import extract_frames, print_progress_bar
-from manual_detection import extract_frames, print_progress_bar
+from eye_tracking.analysis.categorization.manual_detection import extract_frames, print_progress_bar
+# from manual_detection import extract_frames, print_progress_bar
 from glob import glob
 import os
 import json

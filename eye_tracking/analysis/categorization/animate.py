@@ -133,40 +133,6 @@ def animate_tf_compare(path_to_frames, output_filename):
 
     plt.show()
 
-# --------------------------------------------------------------------------------------
-# PLEASE IGNORE: old method used for animating results from Google Vision API
-
-# def animate_google(input_dir_path, output_dir_path, csv_path, animation_filename):
-#     frames = sorted(glob.glob(input_dir_path + '*.png'), key=lambda x: int(x.split('/')[-1].split('.')[0][5:]))
-
-#     csv = pd.read_csv(csv_path)
-#     frames_with_box = {}
-#     for row_t in csv.iterrows():
-#         row = row_t[1]
-#         norm_bb = row['norm_bb']
-#         confidence = row['confidence']
-#         frame_num = row['frame']
-
-#         if confidence > 0.2:
-#             frames_with_box[frame_num] = ast.literal_eval(norm_bb)
-#     total = len(frames)
-#     print_progress_bar(0, total, prefix='Progress:', suffix='Complete', length=50)
-#     for i in range(total):
-#         print_progress_bar(i, total, prefix='Progress:', suffix='Complete', length=50)
-#         fig, ax = plt.subplots(1)
-#         img = plt.imread(frames[i])
-#         ax.imshow(img)
-#         if i in frames_with_box:
-#             # print(frames[i], frames_with_box[i])
-#             # expanded_box = expand_logo_bb(frames[i], frames_with_box[i])
-#             # bounding_box = draw_box(*expanded_box, img.shape[0], img.shape[1])
-#             bounding_box = draw_box(*frames_with_box[i], img.shape[0], img.shape[1])
-#             ax.add_patch(bounding_box)
-#         plt.savefig(output_dir_path + frames[i].split("/")[-1])
-#         plt.close()
-#     print_progress_bar(1, total, prefix='Progress:', suffix='Complete', length=50)
-#     animate(output_dir_path, animation_filename)
-# ------------------------------------------------------------------------------------
 def animate(frame_path, output_filename):
     """Produces a matplotlib animation using the images in the specified directory.
 
