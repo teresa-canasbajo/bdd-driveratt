@@ -1,3 +1,0 @@
-numpy
-scipy
--e git+https://github.com/pupil-labs/nslr.git
