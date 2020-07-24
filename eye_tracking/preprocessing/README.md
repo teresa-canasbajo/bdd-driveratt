@@ -17,6 +17,8 @@
 
 3. You may need to install the following packages with sudo/root privileges:
 
+   `cysignals`
+
    `pkg-config`
 
    `automake`
@@ -72,3 +74,26 @@ Note that it may take some time to create.
 This code has been built and modified using Pycharm.
 Mark the following directories as source root (1) bdd-driveratt & (2) bdd-driveratt/eye_tracking/analysis/lib/pupil/pupil_src/shared_modules for the paths to work. 
 Otherwise you may need to add the paths in another way.
+
+### Installing Cysignals in Ubuntu
+The code to install cysignals has been removed from the Makefile to make it accessible by Ubuntu/Mac/Windows. 
+To install in Ubuntu: 
+1. Add cysignals in line 30.
+
+2. Add the following code to makefile:
+```
+cysignalssrc = ${installfolder}/build/src_cysignals
+
+${cysignalssrc}:
+		git clone https://github.com/sagemath/cysignals ${cysignalssrc}
+
+cysignals: ${VENV} ${cysignalssrc}
+		echo 'trying to install cysignals..' 
+		cd ${cysignalssrc} && \
+		sudo apt-get install python3-sphinx && \
+		make configure && \
+		make && \
+		make install && \
+		echo 'installed cysignals' 
+
+``
