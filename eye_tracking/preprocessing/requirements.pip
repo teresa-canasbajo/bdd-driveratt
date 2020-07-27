@@ -19,4 +19,4 @@ nslr
 python-dateutil
 av
 opencv-python
-pyrealsense2
+pupil-apriltags

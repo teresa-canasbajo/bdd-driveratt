@@ -24,5 +24,5 @@ Teresa Canas-Bajo
 
 ## To do:
 - Add simulator environment scenarios (coded on Prescan/simulink) for driving experiments.
-- Finalize makefile
+
 

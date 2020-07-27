@@ -18,24 +18,11 @@
 3. You may need to install the following packages with sudo/root privileges:
 
    `cysignals`
+   
+   `pyglui` <-- for Mac users, make sure you have XCODE installed and set up.
+   
+   `glfw3` <-- for Mac users, they might need to install this through brew: `brew install glfw3`. Ubuntu OK. 
 
-   `pkg-config`
-
-   `automake`
-
-   `cmake`
-
-   `python3-dev`
-
-   `libglew-dev`
-
-   `xorg-dev libglu1-mesa-dev` <-- needed for libglew
-
-   `libportaudio2` <-- for pyaudio
-
-   `portaudio19-dev` <-- for pyaudio
-
-   `pyaudio`
 
 ## Instructions of use
 
@@ -96,4 +83,25 @@ cysignals: ${VENV} ${cysignalssrc}
 		make install && \
 		echo 'installed cysignals' 
 
-``
+```
+
+### Old Packages needed
+ I believe you don't necessarily need to install these anymore, but just in case, I'm leaving them down here:
+
+   `pkg-config`
+
+   `automake`
+
+   `cmake`
+
+   `python3-dev`
+
+   `libglew-dev`
+
+   `xorg-dev libglu1-mesa-dev` <-- needed for libglew
+
+   `libportaudio2` <-- for pyaudio
+
+   `portaudio19-dev` <-- for pyaudio
+
+   `pyaudio`
