@@ -1,6 +1,7 @@
 
 # Preprocessing pipeline
 ## Installation
+The preprocessing pipeline is optimized for Ubuntu and MacOS.
 
 1. Clone project and intialize submodules
 
