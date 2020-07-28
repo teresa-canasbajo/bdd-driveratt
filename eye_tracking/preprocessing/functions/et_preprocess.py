@@ -22,8 +22,8 @@ import logging
 
 # %%
 
-def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', load=False, save=True,
-                  eventfunctions=(make_fixations, make_blinks, make_saccades), outputprefix='', **kwargs):
+def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=True, load=False,
+                  save=True, eventfunctions=(make_fixations, make_blinks, make_saccades), outputprefix='', **kwargs):
     # Output:     3 cleaned dfs: etsamples, etmsgs, etevents   
     # get a logger for the preprocess function    
     logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ def preprocess_et(subject, datapath='/media/whitney/New Volume/Teresa/bdd-driver
     # import pl data
     logger.debug("Importing et data")
     logger.debug('Caution: etevents might be empty')
-    etsamples, etmsgs, etevents, surfaceMap = import_pl(subject=subject, datapath=datapath, surfaceMap=True)
+    etsamples, etmsgs, etevents = import_pl(subject=subject, datapath=datapath, surfaceMap=surfaceMap)
 
     # Mark bad samples
     logger.debug('Marking bad et samples')

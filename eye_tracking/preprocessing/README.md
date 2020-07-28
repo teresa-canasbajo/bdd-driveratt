@@ -31,7 +31,7 @@ We want to acknowledge the work of behinger/etcomp repository (https://github.co
 
 ```python
 from eye_tracking.preprocessing.functions.et_preprocess import preprocess_et
-data = preprocess_et(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt/demo')
+data = preprocess_et(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt/demo', surfaceMap=False)
 ```
 
 preprocess_et outputs three dataframes: etsamples, etmsgs, etevents that are saved into your data directory /preprocessed
@@ -49,13 +49,13 @@ We've created a new implementation of the April tags package. The main maker det
 
 To install: pip install pupil-apriltags
 
-Make sure to update (1) tags & (2) tags_corner_attribute parameters in detect_tags_and_surfaces() to detect surface.
+Make sure to update detect_tags_and_surfaces() arguments, (1) tags & (2) tags_corner_attribute, called in surface_detection.py, with your tag ids.
 Current version detects 1 surface. 
-If there are multiple surfaces, turn off surface detector by making surfaceMap False in import_pl()
+If there are multiple surfaces, turn off surface detector by making surfaceMap False in preprocess_et()
 
 Frames from world recording are saved into your data directory /frames. Note that it may take some time to create.
 
-Make createSurfaceFrame True in detect_tags_and_surfaces() to save frames annotated with surfaces into your data directory /frames/surface_frames.
+Make the argument createSurfaceFrame True in detect_tags_and_surfaces(), called in surface_detection.py, to save frames annotated with surfaces into your data directory /frames/surface_frames.
 Note that it may take some time to create.
 
 ### IDE:

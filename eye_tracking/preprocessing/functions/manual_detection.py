@@ -39,8 +39,8 @@ def detect_tags_and_surfaces(frames_path: str, createSurfaceFrame=False, tags=No
     Args:
         frames_path (str): path to the directory containing PNG images
         createSurfaceFrame (bool): True to create surface_frames directory with annotated frames
-        tags (int): ids from bottom-left corner, counter-clockwise --> 1 surface
-        tags_corner_attribute (bool): order corresponds to tags, True is tag is corner
+        tags(List[int]): ids from bottom-left corner, counter-clockwise --> 1 surface
+        tags_corner_attribute (List[bool]): order corresponds to tags, True if tag is corner
     Returns:
         frames (List[Dict[str, Any]]): list of objects containing id (int), centroid (np.array[int]) and corners (np.array[int])
         tag_ids (Dict[int, int]): dictionary mapping tag IDs to frequency of tag across all images

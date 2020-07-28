@@ -52,8 +52,9 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
     if surfaceMap:
         logging.warning(
-            'Make sure tags and tags_corner_attribute is correctly assigned in manual_detection.py. If you want to '
-            'continue without surface detector, please turn surfaceMap to False.')
+            'Make sure detect_tags_and_surfaces() arguments, (1) tags and (2) tags_corner_attribute, are correctly '
+            'defined in surface_detection.py. If you want to continue without surface detector, please turn '
+            'surfaceMap to False.')
 
     # Get samples df
     # (is still a dictionary here)
@@ -96,4 +97,4 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
         plmsgs = annotations['data']
 
     plevents = pd.DataFrame()
-    return plsamples, plmsgs, plevents, surfaceMap
+    return plsamples, plmsgs, plevents
