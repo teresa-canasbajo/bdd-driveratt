@@ -44,8 +44,8 @@ def make_fixations(etsamples, etevents, subject, datapath, surfaceMap):
 
     if surfaceMap:
         # create surfaces dataframe from existing csv file
-        frames_path = os.path.join(datapath, subject, 'frames')
-        surfaces_df = pd.read_csv(frames_path + '/surface_coordinates.csv')
+        preprocessed_path = os.path.join(datapath, subject, 'preprocessed')
+        surfaces_df = pd.read_csv(preprocessed_path + '/surface_coordinates.csv')
         surfaces_df = surfaces_df.apply(pd.to_numeric, errors='coerce')
 
         # extract fixation data that falls within surface

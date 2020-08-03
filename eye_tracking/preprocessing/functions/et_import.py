@@ -47,7 +47,8 @@ def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drive
 def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', surfaceMap=True, parsemsg=True):
     # Input:    subject:         (str) name
     #           datapath:        (str) location where data is stored
-    #           surfaceMap:
+    #           surfaceMap:      (boolean) extract surface info for mapping purposes
+    #           parsemsg:        (boolean)
     # Output:   Returns 2 dfs (plsamples and plmsgs)
 
     if surfaceMap:
@@ -75,8 +76,6 @@ def import_pl(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-drivera
 
         # mark which samples fall within the surface
         pldata = pl_surface.annotate_surface(pldata, gaze_on_srf)
-
-    print('pldata', pldata)
 
     # sort according to smpl_time
     pldata.sort_values('smpl_time', inplace=True)

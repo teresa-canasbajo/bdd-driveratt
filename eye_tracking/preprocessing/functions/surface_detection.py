@@ -2,49 +2,58 @@ import collections
 import collections.abc
 import numpy as np
 import pandas as pd
-from glob import glob
 import os
+import shutil
 from .manual_detection import extract_frames, detect_tags_and_surfaces
 from .utils import print_progress_bar
 
 
 # %%
-def map_surface(folder):
-    if True:
-        video_path = folder + "/world.mp4"
-        # Create frame path using OS package
-        # Define the name of the directory to be created
-        frames_path = folder + "/frames"
-        try:
-            if not os.path.exists(frames_path):
-                os.mkdir(frames_path)
-                print("Successfully created the directory %s " % frames_path)
-                extract_frames(video_path, frames_path)
-            else:
-                print("Directory %s already exists." % frames_path)
-        except OSError:
-            print("Creation of the directory %s failed" % frames_path)
-    # Sort by index in.../frame<index>.png
-    all_images = sorted(glob(f'{frames_path}/*.png'), key=lambda f: int(os.path.basename(f)[5:-4]))
-    all_images = all_images[:-1]
+def map_surface(folder, deleteFrames=False):
+    # Input:    folder:       (str) datapath & subject pathway where data is stored
+    #           deleteFrames: (boolean) True to delete frames directory once surface coordinates extracted (save memory)
+    # Output:   Returns surface coordinates dataframes
+
+    # create paths
+    video_path = os.path.join(folder, 'world.mp4')
+    preprocessed_path = os.path.join(folder, 'preprocessed')
+    if not os.path.exists(preprocessed_path):
+        os.makedirs(preprocessed_path)
 
     print('Finding markers & surfaces ...')
 
-    surfaces_path = os.path.join(frames_path, 'surface_coordinates.csv')
+    surfaces_path = os.path.join(preprocessed_path, 'surface_coordinates.csv')
     try:
         if not os.path.exists(surfaces_path):
+            # create frames directory if none exists
+            frames_path = os.path.join(folder, 'frames')
+            try:
+                if not os.path.exists(frames_path):
+                    os.mkdir(frames_path)
+                    print("Successfully created the directory %s " % frames_path)
+                    extract_frames(video_path, frames_path)
+                else:
+                    print("Directory %s already exists." % frames_path)
+            except OSError:
+                print("Creation of the directory %s failed" % frames_path)
+
             # detect surface coordinates
             tags = [2, 3, 5, 6, 7, 8, 9, 11, 0, 1]
             tags_corner_attribute = [True, False, False, True, False, True, False, False, True, False]
             frame, tag_ids, surfaces_df = detect_tags_and_surfaces(frames_path, createSurfaceFrame=False, tags=tags,
                                                                    tags_corner_attribute=tags_corner_attribute)
-            surfaces_df.to_csv(os.path.join(frames_path, 'surface_coordinates.csv'), index=False)
+            surfaces_df.to_csv(os.path.join(preprocessed_path, 'surface_coordinates.csv'), index=False)
             print('Success! Surfaces detected: %s ' % surfaces_path)
+
+            # delete frames directory if True
+            if deleteFrames:
+                shutil.rmtree(frames_path)
+                print("Directory %s successfully deleted." % frames_path)
         else:
             print("Surfaces already detected: %s " % surfaces_path)
 
             # create surfaces dataframe from existing csv file
-            surfaces_df = pd.read_csv(frames_path + '/surface_coordinates.csv')
+            surfaces_df = pd.read_csv(surfaces_path)
             surfaces_df = surfaces_df.apply(pd.to_numeric, errors='coerce')
 
     except OSError:

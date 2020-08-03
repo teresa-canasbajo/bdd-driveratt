@@ -53,10 +53,10 @@ Make sure to update detect_tags_and_surfaces() arguments, (1) tags & (2) tags_co
 Current version detects 1 surface. 
 If there are multiple surfaces, turn off surface detector by making surfaceMap False in preprocess_et()
 
-Frames from world recording are saved into your data directory /frames. Note that it may take some time to create.
-
-Make the argument createSurfaceFrame True in detect_tags_and_surfaces(), called in surface_detection.py, to save frames annotated with surfaces into your data directory /frames/surface_frames.
-Note that it may take some time to create.
+Frames directory:
+- Frames from world recording are saved into your data directory /frames. Note that it may take some time to create.
+- Make the argument createSurfaceFrame True in detect_tags_and_surfaces(), called in surface_detection.py, to save frames annotated with surfaces into your data directory /frames/surface_frames. Note that it may take some time to create.
+- If you would like to delete the entire frames directory once the surface coordinates have been extracted and saved in the preprocessed directory (to save memory), set the argument deleteFrames to true when calling map_surface() in et_import.py.
 
 ### IDE:
 This code has been built and modified using Pycharm.
