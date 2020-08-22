@@ -15,23 +15,18 @@ from eye_tracking.lib.pupil.pupil_src.shared_modules import file_methods as pl_f
 
 ########
 
-def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt', postfix='raw'):
+def raw_pl_data(subject='', datapath='/media/whitney/New Volume/Teresa/bdd-driveratt'):
     # Input:    subjectname, datapath
     # Output:   Returns pupillabs dictionary
 
     if subject == '':
-        filename = datapath
+        datapath = datapath
     else:
-        filename = os.path.join(datapath, subject, postfix)
+        datapath = os.path.join(datapath, subject)
 
-    if os.path.exists(os.path.join(filename, 'pupil_data')):
-        logging.warning('This code only works for data from pupil capture versions greater than 1.17. Please update '
-                        'your pupil capture & try again with new data.')
-
-    elif os.path.exists(os.path.join(filename, 'pupil.pldata')):
-        original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
-        annotations = pl_file_methods.load_pldata_file(datapath, 'annotation')
-        gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
+    original_pldata = pl_file_methods.load_pldata_file(datapath, 'pupil')
+    annotations = pl_file_methods.load_pldata_file(datapath, 'annotation')
+    gaze = pl_file_methods.load_pldata_file(datapath, 'gaze')
 
     # 'annotation', 'pupil_positions', 'gaze_positions' with dict_keys(['data', 'timestamps', 'topics'])
     # 'annotation' data_dict_keys(['topic', 'label', 'timestamp', 'duration'])
