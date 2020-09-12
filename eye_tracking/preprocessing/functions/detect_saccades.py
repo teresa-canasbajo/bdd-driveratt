@@ -301,6 +301,19 @@ def interpolate_gaze(etsamples, fs=None):
     etsamples['gx'].fillna(0, inplace=True)
     etsamples['gy'].fillna(0, inplace=True)
 
+    # dhakshi added this because huge time range in np.linspace fn below causing memory error for bad data samples
+    toT = etsamples.smpl_time.iloc[-1]  # find the last sample
+    # determining which timestamps are 'outliers'
+    time_ndigits = [len(str(int(t))) for t in etsamples.smpl_time]
+    ix_gap_time = [True if t < len(str(int(toT))) - 2 else False for t in time_ndigits]
+    # create df to store index of marked samples
+    marked_samples = pd.DataFrame()
+    marked_samples['gap_time'] = ix_gap_time
+    # concatenate bad sample column(s) & update etsamples
+    marked_samples.index = etsamples.index
+    annotated_samples = pd.concat([etsamples, marked_samples], axis=1)
+    etsamples = annotated_samples[annotated_samples['gap_time'] == False]
+
     # find the time range
     fromT = etsamples.smpl_time.iloc[0]  # find the first sample
     toT = etsamples.smpl_time.iloc[-1]  # find the last sample
